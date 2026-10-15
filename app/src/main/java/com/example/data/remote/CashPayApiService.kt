@@ -460,4 +460,29 @@ interface CashPayApiService {
     suspend fun getScanPayData(
         @Query("data") data: String
     ): Response<com.example.data.model.ScanPayInterpretResponse>
+
+    // --- STARLINK MANAGER API ---
+    @POST("api/v1/starlink/client/link")
+    suspend fun starlinkClientLink(@Body request: Map<String, String>): Response<okhttp3.ResponseBody>
+
+    @POST("api/v1/starlink/sub-customer")
+    suspend fun starlinkSaveSubCustomer(@Body request: Map<String, Any>): Response<okhttp3.ResponseBody>
+
+    @POST("api/v1/starlink/billing/pay")
+    suspend fun starlinkBillingPay(@Body request: Map<String, String>): Response<okhttp3.ResponseBody>
+
+    @GET("api/v1/starlink/reseller/config")
+    suspend fun starlinkGetResellerConfig(): Response<okhttp3.ResponseBody>
+
+    @GET("api/v1/starlink/reseller/terminals")
+    suspend fun starlinkGetTerminals(): Response<okhttp3.ResponseBody>
+
+    @POST("api/v1/starlink/terminal/register")
+    suspend fun starlinkRegisterTerminal(@Body request: Map<String, String>): Response<okhttp3.ResponseBody>
+
+    @GET("api/v1/starlink/terminal/{id}/status")
+    suspend fun starlinkGetTerminalStatus(@Path("id") terminalId: String): Response<okhttp3.ResponseBody>
+
+    @POST("api/v1/starlink/terminal/{id}/reboot")
+    suspend fun starlinkRebootTerminal(@Path("id") terminalId: String): Response<okhttp3.ResponseBody>
 }

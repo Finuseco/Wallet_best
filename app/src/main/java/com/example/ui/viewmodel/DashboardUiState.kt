@@ -295,6 +295,71 @@ data class PayScanUiState(
     val showApparelTreatmentSheet: Boolean = false
 )
 
+data class StarlinkTerminalDto(
+    val id: String,
+    val name: String,
+    val serialNumber: String,
+    val status: String,
+    val signalQuality: String,
+    val planName: String,
+    val expiryDate: String,
+    val ipAddress: String,
+    val firmwareVersion: String
+)
+
+data class StarlinkPlanDto(
+    val id: String,
+    val name: String,
+    val price: Double,
+    val currency: String,
+    val description: String,
+    val speed: String
+)
+
+data class StarlinkUiState(
+    val isStarlinkManagerOpen: Boolean = false,
+    val activeTab: Int = 0,
+    val terminals: List<StarlinkTerminalDto> = listOf(
+        StarlinkTerminalDto(
+            id = "SL-TERM-884102",
+            name = "Starlink Principal Bureau",
+            serialNumber = "KIT2026-998231",
+            status = "ONLINE",
+            signalQuality = "Excellent (98%)",
+            planName = "Starlink Standard illimité",
+            expiryDate = "2026-11-30",
+            ipAddress = "192.168.1.100",
+            firmwareVersion = "2026.08.4.s"
+        ),
+        StarlinkTerminalDto(
+            id = "SL-TERM-884103",
+            name = "Starlink Entrepôt Logistique",
+            serialNumber = "KIT2026-554109",
+            status = "ONLINE",
+            signalQuality = "Bon (85%)",
+            planName = "Starlink Priority 1TB",
+            expiryDate = "2026-12-15",
+            ipAddress = "192.168.2.50",
+            firmwareVersion = "2026.08.4.s"
+        )
+    ),
+    val plans: List<StarlinkPlanDto> = listOf(
+        StarlinkPlanDto("plan_std", "Starlink Standard", 99.0, "USD", "Idéal pour les foyers et petites entreprises (illimité)", "150-250 Mbps"),
+        StarlinkPlanDto("plan_pri", "Starlink Priority 1TB", 250.0, "USD", "Priorité réseau élevée pour entreprises et commerces POS", "220-350 Mbps"),
+        StarlinkPlanDto("plan_mob", "Starlink Mobile / Roam", 150.0, "USD", "Pour les déplacements et équipes terrain en mouvement", "130-220 Mbps")
+    ),
+    val selectedTerminal: StarlinkTerminalDto? = null,
+    val isTerminalDetailOpen: Boolean = false,
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val successMessage: String? = null,
+    val pinInput: String = "",
+    val showPinDialog: Boolean = false,
+    val pendingActionPlan: StarlinkPlanDto? = null,
+    val linkKitSerialNumberInput: String = "",
+    val showLinkKitDialog: Boolean = false
+)
+
 data class ExchangeUiState(
     val isExchangeDialogOpen: Boolean = false,
     val exchangeAmount: String = "",
@@ -464,7 +529,8 @@ data class DashboardUiState(
     val tv: TvSubscriptionUiState = TvSubscriptionUiState(),
     val regideso: RegidesoUiState = RegidesoUiState(),
     val cpk: CpkUiState = CpkUiState(),
-    val payscan: PayScanUiState = PayScanUiState()
+    val payscan: PayScanUiState = PayScanUiState(),
+    val starlink: StarlinkUiState = StarlinkUiState()
 ) {
     // --- MAIN IMMUTABLE FIELDS ---
     val selectedTab: Int = main.selectedTab
@@ -823,5 +889,21 @@ data class DashboardUiState(
     val cpkLastCloudSyncTime: String = cpk.lastCloudSyncTime
     val isCpkRestoringFromCloud: Boolean = cpk.isRestoringFromCloud
     val isCpkLinkingDriveDialogOpen: Boolean = cpk.isLinkingDriveDialogOpen
+
+    // --- STARLINK MANAGER IMMUTABLE FIELDS ---
+    val isStarlinkManagerOpen: Boolean = starlink.isStarlinkManagerOpen
+    val starlinkActiveTab: Int = starlink.activeTab
+    val starlinkTerminals: List<StarlinkTerminalDto> = starlink.terminals
+    val starlinkPlans: List<StarlinkPlanDto> = starlink.plans
+    val selectedStarlinkTerminal: StarlinkTerminalDto? = starlink.selectedTerminal
+    val isStarlinkTerminalDetailOpen: Boolean = starlink.isTerminalDetailOpen
+    val isStarlinkLoading: Boolean = starlink.isLoading
+    val starlinkError: String? = starlink.error
+    val starlinkSuccessMessage: String? = starlink.successMessage
+    val starlinkPinInput: String = starlink.pinInput
+    val showStarlinkPinDialog: Boolean = starlink.showPinDialog
+    val pendingStarlinkPlan: StarlinkPlanDto? = starlink.pendingActionPlan
+    val linkKitSerialNumberInput: String = starlink.linkKitSerialNumberInput
+    val showStarlinkLinkKitDialog: Boolean = starlink.showLinkKitDialog
 }
 

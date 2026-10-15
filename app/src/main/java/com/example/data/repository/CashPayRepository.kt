@@ -3275,5 +3275,52 @@ class CashPayRepository(
             }
         }
     }
+
+    // --- STARLINK MANAGER REPOSITORY METHODS ---
+    suspend fun starlinkClientLink(kitSerialNumber: String): Result<Boolean> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val resp = apiService.starlinkClientLink(mapOf("kitSerialNumber" to kitSerialNumber))
+                if (resp.isSuccessful) {
+                    Result.success(true)
+                } else {
+                    Result.failure(Exception("Échec de l'association du kit Starlink."))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkBillingPay(terminalId: String, planName: String, pin: String): Result<Boolean> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val resp = apiService.starlinkBillingPay(mapOf("terminalId" to terminalId, "planName" to planName, "pin" to pin))
+                if (resp.isSuccessful) {
+                    Result.success(true)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Paiement abonnement Starlink refusé.")))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkRebootTerminal(terminalId: String): Result<Boolean> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val resp = apiService.starlinkRebootTerminal(terminalId)
+                if (resp.isSuccessful) {
+                    Result.success(true)
+                } else {
+                    Result.failure(Exception("Échec du redémarrage du terminal Starlink."))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }
 

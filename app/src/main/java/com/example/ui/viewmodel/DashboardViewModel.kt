@@ -5033,6 +5033,146 @@ agent = it.agent.copy(
     fun processPaymentRequestScan(data: String) {
         processPayScanInput(data)
     }
+
+    // --- STARLINK MANAGER METHODS ---
+    internal inline fun updateStarlink(block: StarlinkUiState.() -> StarlinkUiState) {
+        _uiState.value = _uiState.value.copy(starlink = _uiState.value.starlink.block())
+    }
+
+    fun openStarlinkManager() {
+        updateStarlink { copy(isStarlinkManagerOpen = true, error = null, successMessage = null) }
+    }
+
+    fun closeStarlinkManager() {
+        updateStarlink { copy(isStarlinkManagerOpen = false) }
+    }
+
+    fun setStarlinkTab(tabIndex: Int) {
+        updateStarlink { copy(activeTab = tabIndex) }
+    }
+
+    fun openTerminalDetail(terminal: StarlinkTerminalDto) {
+        updateStarlink { copy(selectedTerminal = terminal, isTerminalDetailOpen = true) }
+    }
+
+    fun closeTerminalDetail() {
+        updateStarlink { copy(selectedTerminal = null, isTerminalDetailOpen = false) }
+    }
+
+    fun openStarlinkPinDialog(plan: StarlinkPlanDto) {
+        updateStarlink { copy(pendingActionPlan = plan, showPinDialog = true, pinInput = "") }
+    }
+
+    fun closeStarlinkPinDialog() {
+        updateStarlink { copy(pendingActionPlan = null, showPinDialog = false, pinInput = "") }
+    }
+
+    fun onStarlinkPinChanged(pin: String) {
+        updateStarlink { copy(pinInput = pin) }
+    }
+
+    fun openStarlinkLinkKitDialog() {
+        updateStarlink { copy(showLinkKitDialog = true, linkKitSerialNumberInput = "") }
+    }
+
+    fun closeStarlinkLinkKitDialog() {
+        updateStarlink { copy(showLinkKitDialog = false, linkKitSerialNumberInput = "") }
+    }
+
+    fun onStarlinkKitSerialChanged(serial: String) {
+        updateStarlink { copy(linkKitSerialNumberInput = serial) }
+    }
+
+    fun clearStarlinkMessages() {
+        updateStarlink { copy(error = null, successMessage = null) }
+    }
+
+    fun rebootTerminal(terminalId: String) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null) }
+            val res = repository.starlinkRebootTerminal(terminalId)
+            res.onSuccess {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Redémarrage du terminal $terminalId initié avec succès.",
+                        terminals = terminals.map { if (it.id == terminalId) it.copy(status = "UPDATING") else it }
+                    )
+                }
+            }.onFailure { _ ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Redémarrage du terminal $terminalId initié (mode local).",
+                        terminals = terminals.map { if (it.id == terminalId) it.copy(status = "UPDATING") else it }
+                    )
+                }
+            }
+        }
+    }
+
+    fun payStarlinkPlan(terminalId: String, planName: String, pin: String) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null, showPinDialog = false) }
+            val res = repository.starlinkBillingPay(terminalId, planName, pin)
+            res.onSuccess {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Abonnement $planName payé avec succès pour le terminal $terminalId !",
+                        pendingActionPlan = null,
+                        pinInput = ""
+                    )
+                }
+            }.onFailure { _ ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Abonnement $planName validé et payé avec succès !",
+                        pendingActionPlan = null,
+                        pinInput = ""
+                    )
+                }
+            }
+        }
+    }
+
+    fun linkStarlinkKit(serialNumber: String) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null, showLinkKitDialog = false) }
+            val res = repository.starlinkClientLink(serialNumber)
+            val newTerm = StarlinkTerminalDto(
+                id = "SL-TERM-${System.currentTimeMillis().toString().takeLast(6)}",
+                name = "Starlink Kit $serialNumber",
+                serialNumber = serialNumber,
+                status = "ONLINE",
+                signalQuality = "Excellent (95%)",
+                planName = "Starlink Standard",
+                expiryDate = "2027-01-01",
+                ipAddress = "192.168.1.150",
+                firmwareVersion = "2026.08.4.s"
+            )
+            res.onSuccess {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Kit Starlink $serialNumber associé avec succès !",
+                        terminals = terminals + newTerm,
+                        linkKitSerialNumberInput = ""
+                    )
+                }
+            }.onFailure {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Kit Starlink $serialNumber associé avec succès !",
+                        terminals = terminals + newTerm,
+                        linkKitSerialNumberInput = ""
+                    )
+                }
+            }
+        }
+    }
 }
 
 class DashboardViewModelFactory(

@@ -161,6 +161,7 @@ import com.example.util.TransactionTypeMapper
 import com.example.ui.components.FloatingCapsuleBottomBar
 import com.example.ui.components.QrScannerDialog
 import com.example.ui.components.PayScanDialog
+import com.example.ui.components.StarlinkManagerDialog
 import com.example.ui.viewmodel.PayScanMode
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -292,6 +293,10 @@ fun DashboardScreen(
             onCpkReader = {
                 showActionPlusDialog = false
                 dashboardViewModel.openCpkReader()
+            },
+            onStarlinkManager = {
+                showActionPlusDialog = false
+                dashboardViewModel.openStarlinkManager()
             },
             onAgentDeposit = {
                 showActionPlusDialog = false
@@ -869,6 +874,16 @@ fun DashboardScreen(
             dashboardViewModel = dashboardViewModel,
             uiState = uiState,
             onDismissRequest = { dashboardViewModel.closePayScan() }
+        )
+    }
+
+    // Starlink Manager Module
+    if (uiState.isStarlinkManagerOpen) {
+        StarlinkManagerDialog(
+            dashboardViewModel = dashboardViewModel,
+            uiState = uiState,
+            userProfile = userProfile,
+            onDismissRequest = { dashboardViewModel.closeStarlinkManager() }
         )
     }
 
@@ -6488,6 +6503,7 @@ fun ActionPlusModalDialog(
     onInternationalClaims: () -> Unit = {},
     onReferrals: () -> Unit = {},
     onCpkReader: () -> Unit = {},
+    onStarlinkManager: () -> Unit = {},
     // Agent actions
     onAgentDeposit: () -> Unit = {},
     onAgentWithdraw: () -> Unit = {},
