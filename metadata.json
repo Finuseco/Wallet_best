@@ -1,0 +1,6 @@
+{
+  "name": "CashPay All",
+  "description": "CashPay All - Authentification sécurisée, sélection pays & installation profil",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
