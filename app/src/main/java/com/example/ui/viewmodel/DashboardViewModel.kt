@@ -4910,17 +4910,13 @@ agent = it.agent.copy(
                     isApparel = isClothing
                 )
             }.onFailure {
-                val isClothing = isApparelKeyword(barcodeOrId)
-                val defaultName = if (isClothing) "Vêtement #$barcodeOrId" else "Article Scanné #$barcodeOrId"
-                addCartItem(
-                    barcode = barcodeOrId,
-                    name = defaultName,
-                    price = if (isClothing) 15.0 else 2.50,
-                    currency = "USD",
-                    categoryId = if (isClothing) "cat-vetements" else "cat-divers",
-                    categoryName = if (isClothing) "Vêtements & Mode" else "Article Scanné",
-                    isApparel = isClothing
-                )
+                // Reject unknown products rather than defaulting to hardcoded prices
+                updatePayScan {
+                    copy(
+                        isInterpreting = false,
+                        scanError = "Produit non reconnu dans le catalogue."
+                    )
+                }
             }
         }
     }

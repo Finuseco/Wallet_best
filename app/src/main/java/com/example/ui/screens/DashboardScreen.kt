@@ -186,6 +186,7 @@ fun DashboardScreen(
     var selectedContactForProfile by remember { mutableStateOf<com.example.data.model.PhoneContact?>(null) }
 
     var showServicesDialog by remember { mutableStateOf(false) }
+    var showStarlinkManager by remember { mutableStateOf(false) }
     var showDigitalServicesComingSoonDialog by remember { mutableStateOf(false) }
     var isAgentCustomerListOpen by remember { mutableStateOf(false) }
 
@@ -521,6 +522,9 @@ fun DashboardScreen(
                     "Factures Publiques" -> {
                         dashboardViewModel.openRegidesoDialog("KIN")
                     }
+                    "Starlink Manager" -> {
+                        showStarlinkManager = true
+                    }
                     "Clés FINUSECO CPK" -> {
                         dashboardViewModel.openCpkReader()
                     }
@@ -574,6 +578,10 @@ fun DashboardScreen(
                 }
             }
         )
+    }
+
+    if (showStarlinkManager) {
+        StarlinkManagerScreen(onBack = { showStarlinkManager = false })
     }
 
     // Loans / Crédit Dialog
@@ -6439,6 +6447,7 @@ fun ServicesDialog(
                     Triple("Mobile Money", "M-Pesa, Orange Money, Airtel, MTN", Color(0xFFF59E0B)),
                     Triple("Abonnements TV", "Canal+ RDC, EasyTV, BLUS", Color(0xFF2563EB)),
                     Triple("Factures Publiques", "SNEL (Électricité), REGIDESO (Eau)", Color(0xFF00C48C)),
+                    Triple("Starlink Manager", "Gestion des équipements Starlink", Color(0xFF1E293B)),
                     Triple("Clés FINUSECO CPK", "Lecteur .cpk, Clés USB & Cloud Google Drive", Color(0xFF38BDF8)),
                     Triple("Services Digitaux", "Netflix, Spotify, Apple Music, PlayStation", Color(0xFF8B5CF6))
                 )
