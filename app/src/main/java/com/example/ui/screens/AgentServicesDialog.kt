@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Verified
@@ -149,7 +150,8 @@ fun AgentServicesDialog(
     onResetLoanRepay: () -> Unit,
     onOpenRegisterCustomer: () -> Unit = {},
     onOpenCustomerList: () -> Unit = {},
-    onOpenShopping: (Int) -> Unit = {}
+    onOpenShopping: (Int) -> Unit = {},
+    onOpenStarlink: () -> Unit = {}
 ) {
     if (!isOpen) return
 
@@ -265,6 +267,7 @@ fun AgentServicesDialog(
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             AgentActionSquare("Scanner", "QR Code", Icons.Default.QrCodeScanner, Color(0xFF000E38), Modifier.weight(1f)) { onOpenQrScanner("agent_withdraw") }
                             AgentActionSquare("Prêt", "Loan Me", Icons.Default.Payments, Color(0xFF7C3AED), Modifier.weight(1f)) { activeModal = "loan" }
+                            AgentActionSquare("Starlink", "Manager", Icons.Default.Public, Color(0xFF0284C7), Modifier.weight(1f)) { onOpenStarlink() }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             AgentActionSquare("Historique", "Opérations", Icons.Default.Receipt, Color(0xFF0066FF), Modifier.weight(1f)) { activeModal = "history" }

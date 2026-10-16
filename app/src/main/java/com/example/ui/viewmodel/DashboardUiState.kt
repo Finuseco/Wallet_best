@@ -52,7 +52,8 @@ data class MainUiState(
     val currentUserId: Long? = null,
     val transferSearchMode: String = "wallet", // "wallet" or "phone"
     val isSearchingTransferRecipient: Boolean = false,
-    val isReceiveBtcDialogOpen: Boolean = false
+    val isReceiveBtcDialogOpen: Boolean = false,
+    val isLoansScreenOpen: Boolean = false
 )
 
 data class CardsUiState(
@@ -316,6 +317,15 @@ data class StarlinkPlanDto(
     val speed: String
 )
 
+data class StarlinkSubCustomerDto(
+    val terminalId: String,
+    val name: String,
+    val walletId: String,
+    val macAddress: String,
+    val expiryDate: String,
+    val dataLimitGb: Int
+)
+
 data class StarlinkUiState(
     val isStarlinkManagerOpen: Boolean = false,
     val activeTab: Int = 0,
@@ -357,7 +367,13 @@ data class StarlinkUiState(
     val showPinDialog: Boolean = false,
     val pendingActionPlan: StarlinkPlanDto? = null,
     val linkKitSerialNumberInput: String = "",
-    val showLinkKitDialog: Boolean = false
+    val showLinkKitDialog: Boolean = false,
+    val subCustomers: List<StarlinkSubCustomerDto> = emptyList(),
+    val showAddSubCustomerDialog: Boolean = false,
+    val showRegisterTerminalDialog: Boolean = false,
+    val showResellerConfigDialog: Boolean = false,
+    val isResellerConfigured: Boolean = false,
+    val terminalLiveStatus: com.example.data.model.StarlinkTerminalStatusData? = null
 )
 
 data class ExchangeUiState(
@@ -581,6 +597,7 @@ data class DashboardUiState(
     val transferSearchMode: String = main.transferSearchMode
     val isSearchingTransferRecipient: Boolean = main.isSearchingTransferRecipient
     val isReceiveBtcDialogOpen: Boolean get() = main.isReceiveBtcDialogOpen
+    val isLoansScreenOpen: Boolean get() = main.isLoansScreenOpen
 
     // --- CARDS IMMUTABLE FIELDS ---
     val userCards: List<CardInfoDto> = cards.userCards

@@ -3276,15 +3276,51 @@ class CashPayRepository(
         }
     }
 
-    // --- STARLINK MANAGER REPOSITORY METHODS ---
+    // --- STARLINK MANAGER REPOSITORY METHODS (Full 10 Endpoints) ---
     suspend fun starlinkClientLink(kitSerialNumber: String): Result<Boolean> {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val resp = apiService.starlinkClientLink(mapOf("kitSerialNumber" to kitSerialNumber))
-                if (resp.isSuccessful) {
+                ensureSessionToken()
+                val resp = apiService.starlinkClientLink(com.example.data.model.StarlinkClientLinkRequest(kitSerialNumber.trim()))
+                if (resp.isSuccessful && resp.body()?.success == true) {
                     Result.success(true)
                 } else {
-                    Result.failure(Exception("Échec de l'association du kit Starlink."))
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Échec de l'association du kit Starlink.")))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkSaveSubCustomer(
+        terminalId: String,
+        name: String,
+        walletId: String,
+        pinCode: String,
+        macAddress: String,
+        expiryDate: String,
+        dataLimitGb: Int
+    ): Result<Boolean> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val req = com.example.data.model.StarlinkSubCustomerRequest(
+                    terminalId = terminalId.trim(),
+                    name = name.trim(),
+                    walletId = walletId.trim(),
+                    pinCode = pinCode.trim(),
+                    macAddress = macAddress.trim(),
+                    expiryDate = expiryDate.trim(),
+                    dataLimitGb = dataLimitGb
+                )
+                val resp = apiService.starlinkSaveSubCustomer(req)
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Result.success(true)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Échec de l'enregistrement du client secondaire.")))
                 }
             } catch (e: Exception) {
                 Result.failure(e)
@@ -3295,12 +3331,24 @@ class CashPayRepository(
     suspend fun starlinkBillingPay(terminalId: String, planName: String, pin: String): Result<Boolean> {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val resp = apiService.starlinkBillingPay(mapOf("terminalId" to terminalId, "planName" to planName, "pin" to pin))
-                if (resp.isSuccessful) {
+                ensureSessionToken()
+                val req = com.example.data.model.StarlinkBillingPayRequest(
+                    terminalId = terminalId.trim(),
+                    planName = planName.trim(),
+                    pin = pin.trim()
+                )
+                val resp = apiService.starlinkBillingPay(req)
+                if (resp.isSuccessful && resp.body()?.success == true) {
                     Result.success(true)
                 } else {
                     val rawErr = resp.errorBody()?.string()
-                    Result.failure(Exception(extractErrorMessage(rawErr, "Paiement abonnement Starlink refusé.")))
+                    val msg = when (resp.code()) {
+                        400 -> extractErrorMessage(rawErr, "Champs obligatoires manquants ou erreur de paiement.")
+                        401 -> "Signature invalide ou session non valide."
+                        402 -> extractErrorMessage(rawErr, "Solde insuffisant ou paiement refusé.")
+                        else -> extractErrorMessage(rawErr, "Échec du paiement abonnement Starlink.")
+                    }
+                    Result.failure(Exception(msg))
                 }
             } catch (e: Exception) {
                 Result.failure(e)
@@ -3308,14 +3356,153 @@ class CashPayRepository(
         }
     }
 
-    suspend fun starlinkRebootTerminal(terminalId: String): Result<Boolean> {
+    suspend fun starlinkResellerLink(config: Map<String, Any> = emptyMap()): Result<com.example.data.model.StarlinkResellerLinkResponse> {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val resp = apiService.starlinkRebootTerminal(terminalId)
-                if (resp.isSuccessful) {
+                ensureSessionToken()
+                val resp = apiService.starlinkResellerLink(config)
+                if (resp.isSuccessful && resp.body() != null) {
+                    Result.success(resp.body()!!)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    val msg = when (resp.code()) {
+                        401 -> "Signature invalide ou utilisateur non authentifié."
+                        403 -> "Accès réservé aux rôles Agent ou Admin."
+                        else -> extractErrorMessage(rawErr, "Erreur lors de la liaison du compte revendeur.")
+                    }
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkGetResellerConfig(): Result<com.example.data.model.StarlinkResellerConfigResponse> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val resp = apiService.starlinkGetResellerConfig()
+                if (resp.isSuccessful && resp.body() != null) {
+                    Result.success(resp.body()!!)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Impossible de charger la configuration revendeur.")))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkSaveResellerConfig(
+        companyName: String,
+        merchantWalletId: String,
+        starlinkClientId: String,
+        starlinkClientSecret: String
+    ): Result<Boolean> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val req = com.example.data.model.StarlinkSaveResellerConfigRequest(
+                    companyName = companyName.trim(),
+                    merchantWalletId = merchantWalletId.trim(),
+                    starlinkClientId = starlinkClientId.trim(),
+                    starlinkClientSecret = starlinkClientSecret.trim()
+                )
+                val resp = apiService.starlinkSaveResellerConfig(req)
+                if (resp.isSuccessful && resp.body()?.success == true) {
                     Result.success(true)
                 } else {
-                    Result.failure(Exception("Échec du redémarrage du terminal Starlink."))
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Échec de l'enregistrement de la configuration revendeur.")))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkGetTerminals(): Result<List<com.example.data.model.StarlinkTerminalDetailDto>> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val resp = apiService.starlinkGetTerminals()
+                if (resp.isSuccessful && resp.body() != null) {
+                    Result.success(resp.body()!!.data)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Impossible de récupérer les terminaux revendeur.")))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkRegisterTerminal(
+        resellerId: String,
+        deviceId: String,
+        nickname: String,
+        ownerWalletId: String,
+        serialNumber: String
+    ): Result<Boolean> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val req = com.example.data.model.StarlinkRegisterTerminalRequest(
+                    resellerId = resellerId.trim(),
+                    deviceId = deviceId.trim(),
+                    nickname = nickname.trim(),
+                    ownerWalletId = ownerWalletId.trim(),
+                    serialNumber = serialNumber.trim()
+                )
+                val resp = apiService.starlinkRegisterTerminal(req)
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Result.success(true)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    Result.failure(Exception(extractErrorMessage(rawErr, "Échec de l'enregistrement du terminal.")))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkGetTerminalStatus(terminalId: String): Result<com.example.data.model.StarlinkTerminalStatusData> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val resp = apiService.starlinkGetTerminalStatus(terminalId.trim())
+                if (resp.isSuccessful && resp.body()?.success == true && resp.body()?.data != null) {
+                    Result.success(resp.body()!!.data!!)
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    val msg = if (resp.code() == 404) "Terminal introuvable." else extractErrorMessage(rawErr, "Erreur de consultation du terminal.")
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun starlinkRebootTerminal(terminalId: String): Result<String> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val resp = apiService.starlinkRebootTerminal(terminalId.trim())
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Result.success(resp.body()?.message ?: "Reboot initiated")
+                } else {
+                    val rawErr = resp.errorBody()?.string()
+                    val msg = when (resp.code()) {
+                        400 -> "Compte revendeur non lié."
+                        401 -> "Signature invalide ou utilisateur non authentifié."
+                        else -> extractErrorMessage(rawErr, "Échec du redémarrage du terminal Starlink.")
+                    }
+                    Result.failure(Exception(msg))
                 }
             } catch (e: Exception) {
                 Result.failure(e)

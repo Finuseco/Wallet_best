@@ -52,6 +52,8 @@ class DashboardViewModel(
     fun updateRegideso(transform: RegidesoUiState.() -> RegidesoUiState) = _uiState.update { it.copy(regideso = it.regideso.transform()) }
     fun updateCpk(transform: CpkUiState.() -> CpkUiState) = _uiState.update { it.copy(cpk = it.cpk.transform()) }
     fun updatePayScan(transform: PayScanUiState.() -> PayScanUiState) = _uiState.update { it.copy(payscan = it.payscan.transform()) }
+    fun openLoansScreen() = updateMain { copy(isLoansScreenOpen = true) }
+    fun closeLoansScreen() = updateMain { copy(isLoansScreenOpen = false) }
 
 
     val userProfile: StateFlow<UserProfileEntity?> = repository.userProfile
@@ -4498,7 +4500,7 @@ agent = it.agent.copy(
                 id = id,
                 barcode = barcodeOrName,
                 name = barcodeOrName,
-                unitPrice = if (price > 0.0) price else 5.0,
+                unitPrice = if (price > 0.0) price else -1.0,
                 currency = currency,
                 quantity = 1,
                 boutiqueName = _uiState.value.payscan.defaultBoutiqueName,
@@ -4897,7 +4899,7 @@ agent = it.agent.copy(
             lookupRes.onSuccess { resp ->
                 val lk = resp.lookup
                 val name = lk?.name ?: "Article #$barcodeOrId"
-                val price = lk?.sellingPrice ?: 5.0
+                val price = lk?.sellingPrice ?: -1.0
                 val curr = lk?.currency ?: "USD"
                 val isClothing = isApparelKeyword(name)
                 addCartItem(
@@ -5164,6 +5166,178 @@ agent = it.agent.copy(
                         successMessage = "Kit Starlink $serialNumber associé avec succès !",
                         terminals = terminals + newTerm,
                         linkKitSerialNumberInput = ""
+                    )
+                }
+            }
+        }
+    }
+
+    fun openAddSubCustomerDialog() {
+        updateStarlink { copy(showAddSubCustomerDialog = true) }
+    }
+
+    fun closeAddSubCustomerDialog() {
+        updateStarlink { copy(showAddSubCustomerDialog = false) }
+    }
+
+    fun openRegisterTerminalDialog() {
+        updateStarlink { copy(showRegisterTerminalDialog = true) }
+    }
+
+    fun closeRegisterTerminalDialog() {
+        updateStarlink { copy(showRegisterTerminalDialog = false) }
+    }
+
+    fun openResellerConfigDialog() {
+        updateStarlink { copy(showResellerConfigDialog = true) }
+    }
+
+    fun closeResellerConfigDialog() {
+        updateStarlink { copy(showResellerConfigDialog = false) }
+    }
+
+    fun saveSubCustomer(
+        terminalId: String,
+        name: String,
+        walletId: String,
+        pinCode: String,
+        macAddress: String,
+        expiryDate: String,
+        dataLimitGb: Int
+    ) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null, showAddSubCustomerDialog = false) }
+            val res = repository.starlinkSaveSubCustomer(
+                terminalId = terminalId,
+                name = name,
+                walletId = walletId,
+                pinCode = pinCode,
+                macAddress = macAddress,
+                expiryDate = expiryDate,
+                dataLimitGb = dataLimitGb
+            )
+            val newSub = StarlinkSubCustomerDto(
+                terminalId = terminalId,
+                name = name,
+                walletId = walletId,
+                macAddress = macAddress,
+                expiryDate = expiryDate,
+                dataLimitGb = dataLimitGb
+            )
+            res.onSuccess {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Client secondaire $name enregistré avec succès !",
+                        subCustomers = subCustomers + newSub
+                    )
+                }
+            }.onFailure { err ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        error = err.message ?: "Erreur lors de l'enregistrement du client secondaire."
+                    )
+                }
+            }
+        }
+    }
+
+    fun registerStarlinkTerminal(
+        resellerId: String,
+        deviceId: String,
+        nickname: String,
+        ownerWalletId: String,
+        serialNumber: String
+    ) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null, showRegisterTerminalDialog = false) }
+            val res = repository.starlinkRegisterTerminal(
+                resellerId = resellerId,
+                deviceId = deviceId,
+                nickname = nickname,
+                ownerWalletId = ownerWalletId,
+                serialNumber = serialNumber
+            )
+            val term = StarlinkTerminalDto(
+                id = deviceId,
+                name = nickname.ifBlank { "Starlink $deviceId" },
+                serialNumber = serialNumber,
+                status = "ONLINE",
+                signalQuality = "90%",
+                planName = "Standard",
+                expiryDate = "2026-12-31",
+                ipAddress = "192.168.1.1",
+                firmwareVersion = "2026.08.1"
+            )
+            res.onSuccess {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        successMessage = "Terminal $nickname enregistré avec succès !",
+                        terminals = terminals + term
+                    )
+                }
+            }.onFailure { err ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        error = err.message ?: "Échec de l'enregistrement du terminal."
+                    )
+                }
+            }
+        }
+    }
+
+    fun fetchTerminalStatus(terminalId: String) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null) }
+            val res = repository.starlinkGetTerminalStatus(terminalId)
+            res.onSuccess { statusData ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        terminalLiveStatus = statusData,
+                        successMessage = "Télémétrie reçue pour $terminalId"
+                    )
+                }
+            }.onFailure { err ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        error = err.message ?: "Impossible de récupérer l'état du terminal."
+                    )
+                }
+            }
+        }
+    }
+
+    fun fetchResellerConfig() {
+        viewModelScope.launch {
+            val res = repository.starlinkGetResellerConfig()
+            res.onSuccess { resp ->
+                updateStarlink { copy(isResellerConfigured = resp.configured) }
+            }
+        }
+    }
+
+    fun saveResellerConfig(companyName: String, merchantWalletId: String, clientId: String, clientSecret: String) {
+        viewModelScope.launch {
+            updateStarlink { copy(isLoading = true, error = null, showResellerConfigDialog = false) }
+            val res = repository.starlinkSaveResellerConfig(companyName, merchantWalletId, clientId, clientSecret)
+            res.onSuccess {
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        isResellerConfigured = true,
+                        successMessage = "Configuration revendeur $companyName enregistrée avec succès !"
+                    )
+                }
+            }.onFailure { err ->
+                updateStarlink {
+                    copy(
+                        isLoading = false,
+                        error = err.message ?: "Échec de la sauvegarde de la configuration."
                     )
                 }
             }

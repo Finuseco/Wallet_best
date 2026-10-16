@@ -461,28 +461,50 @@ interface CashPayApiService {
         @Query("data") data: String
     ): Response<com.example.data.model.ScanPayInterpretResponse>
 
-    // --- STARLINK MANAGER API ---
+    // --- STARLINK MANAGER API (Official Documentation) ---
     @POST("api/v1/starlink/client/link")
-    suspend fun starlinkClientLink(@Body request: Map<String, String>): Response<okhttp3.ResponseBody>
+    suspend fun starlinkClientLink(
+        @Body request: com.example.data.model.StarlinkClientLinkRequest
+    ): Response<com.example.data.model.StarlinkBaseResponse>
 
     @POST("api/v1/starlink/sub-customer")
-    suspend fun starlinkSaveSubCustomer(@Body request: Map<String, Any>): Response<okhttp3.ResponseBody>
+    suspend fun starlinkSaveSubCustomer(
+        @Body request: com.example.data.model.StarlinkSubCustomerRequest
+    ): Response<com.example.data.model.StarlinkBaseResponse>
 
     @POST("api/v1/starlink/billing/pay")
-    suspend fun starlinkBillingPay(@Body request: Map<String, String>): Response<okhttp3.ResponseBody>
+    suspend fun starlinkBillingPay(
+        @Body request: com.example.data.model.StarlinkBillingPayRequest
+    ): Response<com.example.data.model.StarlinkBaseResponse>
+
+    @POST("api/v1/starlink/reseller/link")
+    suspend fun starlinkResellerLink(
+        @Body request: Map<String, Any>
+    ): Response<com.example.data.model.StarlinkResellerLinkResponse>
 
     @GET("api/v1/starlink/reseller/config")
-    suspend fun starlinkGetResellerConfig(): Response<okhttp3.ResponseBody>
+    suspend fun starlinkGetResellerConfig(): Response<com.example.data.model.StarlinkResellerConfigResponse>
+
+    @POST("api/v1/starlink/reseller/config")
+    suspend fun starlinkSaveResellerConfig(
+        @Body request: com.example.data.model.StarlinkSaveResellerConfigRequest
+    ): Response<com.example.data.model.StarlinkBaseResponse>
 
     @GET("api/v1/starlink/reseller/terminals")
-    suspend fun starlinkGetTerminals(): Response<okhttp3.ResponseBody>
+    suspend fun starlinkGetTerminals(): Response<com.example.data.model.StarlinkResellerTerminalsResponse>
 
     @POST("api/v1/starlink/terminal/register")
-    suspend fun starlinkRegisterTerminal(@Body request: Map<String, String>): Response<okhttp3.ResponseBody>
+    suspend fun starlinkRegisterTerminal(
+        @Body request: com.example.data.model.StarlinkRegisterTerminalRequest
+    ): Response<com.example.data.model.StarlinkBaseResponse>
 
     @GET("api/v1/starlink/terminal/{id}/status")
-    suspend fun starlinkGetTerminalStatus(@Path("id") terminalId: String): Response<okhttp3.ResponseBody>
+    suspend fun starlinkGetTerminalStatus(
+        @Path("id") terminalId: String
+    ): Response<com.example.data.model.StarlinkTerminalStatusResponse>
 
     @POST("api/v1/starlink/terminal/{id}/reboot")
-    suspend fun starlinkRebootTerminal(@Path("id") terminalId: String): Response<okhttp3.ResponseBody>
+    suspend fun starlinkRebootTerminal(
+        @Path("id") terminalId: String
+    ): Response<com.example.data.model.StarlinkBaseResponse>
 }

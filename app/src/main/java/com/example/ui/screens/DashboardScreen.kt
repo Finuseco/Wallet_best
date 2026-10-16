@@ -442,6 +442,10 @@ fun DashboardScreen(
         },
         onOpenShopping = { tab ->
             dashboardViewModel.openAgentShoppingDialog(tab)
+        },
+        onOpenStarlink = {
+            dashboardViewModel.closeAgentServicesScreen()
+            showStarlinkManager = true
         }
     )
 
@@ -580,16 +584,24 @@ fun DashboardScreen(
         )
     }
 
-    if (showStarlinkManager) {
-        StarlinkManagerScreen(onBack = { showStarlinkManager = false })
+    if (showStarlinkManager || uiState.isStarlinkManagerOpen) {
+        StarlinkManagerScreen(
+            dashboardViewModel = dashboardViewModel,
+            uiState = uiState,
+            userProfile = userProfile,
+            onBack = {
+                showStarlinkManager = false
+                dashboardViewModel.closeStarlinkManager()
+            }
+        )
     }
 
-    // Loans / Crédit Dialog
-    if (uiState.isLoansDialogOpen) {
-        LoansDialog(
+    // Loans / Crédit Screen
+    if (uiState.isLoansScreenOpen) {
+        LoansScreen(
             uiState = uiState,
             viewModel = dashboardViewModel,
-            onDismiss = { dashboardViewModel.closeLoansDialog() }
+            onBack = { dashboardViewModel.closeLoansScreen() }
         )
     }
 
@@ -885,15 +897,7 @@ fun DashboardScreen(
         )
     }
 
-    // Starlink Manager Module
-    if (uiState.isStarlinkManagerOpen) {
-        StarlinkManagerDialog(
-            dashboardViewModel = dashboardViewModel,
-            uiState = uiState,
-            userProfile = userProfile,
-            onDismissRequest = { dashboardViewModel.closeStarlinkManager() }
-        )
-    }
+    // Starlink Manager Module is handled by StarlinkManagerScreen above
 
     // QR Code Dialog (Genuine ZXing scannable code + Scanner launch shortcut)
     if (showQrDialog) {
