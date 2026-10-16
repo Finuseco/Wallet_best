@@ -161,7 +161,6 @@ import com.example.util.TransactionTypeMapper
 import com.example.ui.components.FloatingCapsuleBottomBar
 import com.example.ui.components.QrScannerDialog
 import com.example.ui.components.PayScanDialog
-import com.example.ui.components.StarlinkManagerDialog
 import com.example.ui.viewmodel.PayScanMode
 
 @OptIn(ExperimentalMaterial3Api::class)

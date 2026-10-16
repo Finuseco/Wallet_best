@@ -81,8 +81,49 @@ data class StarlinkTerminalStatusData(
     @Json(name = "pingLatencyMs") val pingLatencyMs: Double? = null,
     @Json(name = "obstructionFraction") val obstructionFraction: Double? = null,
     @Json(name = "softwareVersion") val softwareVersion: String? = null,
-    @Json(name = "alerts") val alerts: List<String> = emptyList()
-)
+    @Json(name = "alerts") val alerts: List<String> = emptyList(),
+    @Json(name = "capacity") val capacity: String? = null,
+    @Json(name = "downloadSpeed") val downloadSpeed: String? = null,
+    @Json(name = "uploadSpeed") val uploadSpeed: String? = null
+) {
+    val formattedDownloadMbps: String
+        get() {
+            if (!downloadSpeed.isNullOrBlank()) return downloadSpeed
+            if (downlinkThroughputBps != null && downlinkThroughputBps > 0) {
+                val mbps = downlinkThroughputBps / 1_000_000.0
+                return String.format(java.util.Locale.US, "%.1f Mbps", mbps)
+            }
+            if (!capacity.isNullOrBlank()) return capacity
+            return "--"
+        }
+
+    val formattedUploadMbps: String
+        get() {
+            if (!uploadSpeed.isNullOrBlank()) return uploadSpeed
+            if (uplinkThroughputBps != null && uplinkThroughputBps > 0) {
+                val mbps = uplinkThroughputBps / 1_000_000.0
+                return String.format(java.util.Locale.US, "%.1f Mbps", mbps)
+            }
+            return "--"
+        }
+
+    val formattedLatency: String
+        get() {
+            if (pingLatencyMs != null && pingLatencyMs > 0) {
+                return "${pingLatencyMs.toInt()} ms"
+            }
+            return "--"
+        }
+
+    val formattedObstruction: String
+        get() {
+            if (obstructionFraction != null) {
+                val pct = (obstructionFraction * 100).toInt()
+                return if (pct == 0) "0% (Dégagé)" else "$pct% obstruction"
+            }
+            return "Normal"
+        }
+}
 
 data class StarlinkTerminalStatusResponse(
     @Json(name = "success") val success: Boolean = false,

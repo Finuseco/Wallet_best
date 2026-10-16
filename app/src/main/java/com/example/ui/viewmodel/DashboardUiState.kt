@@ -329,30 +329,7 @@ data class StarlinkSubCustomerDto(
 data class StarlinkUiState(
     val isStarlinkManagerOpen: Boolean = false,
     val activeTab: Int = 0,
-    val terminals: List<StarlinkTerminalDto> = listOf(
-        StarlinkTerminalDto(
-            id = "SL-TERM-884102",
-            name = "Starlink Principal Bureau",
-            serialNumber = "KIT2026-998231",
-            status = "ONLINE",
-            signalQuality = "Excellent (98%)",
-            planName = "Starlink Standard illimité",
-            expiryDate = "2026-11-30",
-            ipAddress = "192.168.1.100",
-            firmwareVersion = "2026.08.4.s"
-        ),
-        StarlinkTerminalDto(
-            id = "SL-TERM-884103",
-            name = "Starlink Entrepôt Logistique",
-            serialNumber = "KIT2026-554109",
-            status = "ONLINE",
-            signalQuality = "Bon (85%)",
-            planName = "Starlink Priority 1TB",
-            expiryDate = "2026-12-15",
-            ipAddress = "192.168.2.50",
-            firmwareVersion = "2026.08.4.s"
-        )
-    ),
+    val terminals: List<StarlinkTerminalDto> = emptyList(),
     val plans: List<StarlinkPlanDto> = listOf(
         StarlinkPlanDto("plan_std", "Starlink Standard", 99.0, "USD", "Idéal pour les foyers et petites entreprises (illimité)", "150-250 Mbps"),
         StarlinkPlanDto("plan_pri", "Starlink Priority 1TB", 250.0, "USD", "Priorité réseau élevée pour entreprises et commerces POS", "220-350 Mbps"),

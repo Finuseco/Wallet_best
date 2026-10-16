@@ -5089,20 +5089,21 @@ agent = it.agent.copy(
         viewModelScope.launch {
             updateStarlink { copy(isLoading = true, error = null) }
             val res = repository.starlinkRebootTerminal(terminalId)
-            res.onSuccess {
+            res.onSuccess { msg ->
                 updateStarlink {
                     copy(
                         isLoading = false,
-                        successMessage = "Redémarrage du terminal $terminalId initié avec succès.",
-                        terminals = terminals.map { if (it.id == terminalId) it.copy(status = "UPDATING") else it }
+                        successMessage = "Terminal $terminalId : $msg",
+                        terminals = terminals.map { if (it.id == terminalId) it.copy(status = "REDÉMARRAGE...") else it }
                     )
                 }
-            }.onFailure { _ ->
+                // Refresh status after reboot initiated
+                fetchTerminalStatus(terminalId)
+            }.onFailure { err ->
                 updateStarlink {
                     copy(
                         isLoading = false,
-                        successMessage = "Redémarrage du terminal $terminalId initié (mode local).",
-                        terminals = terminals.map { if (it.id == terminalId) it.copy(status = "UPDATING") else it }
+                        error = err.message ?: "Échec du redémarrage du terminal."
                     )
                 }
             }
@@ -5122,11 +5123,11 @@ agent = it.agent.copy(
                         pinInput = ""
                     )
                 }
-            }.onFailure { _ ->
+            }.onFailure { err ->
                 updateStarlink {
                     copy(
                         isLoading = false,
-                        successMessage = "Abonnement $planName validé et payé avec succès !",
+                        error = err.message ?: "Paiement de l'abonnement Starlink échoué.",
                         pendingActionPlan = null,
                         pinInput = ""
                     )
@@ -5136,40 +5137,68 @@ agent = it.agent.copy(
     }
 
     fun linkStarlinkKit(serialNumber: String) {
+        val trimmed = serialNumber.trim()
+        if (trimmed.isBlank()) return
         viewModelScope.launch {
             updateStarlink { copy(isLoading = true, error = null, showLinkKitDialog = false) }
-            val res = repository.starlinkClientLink(serialNumber)
+            val res = repository.starlinkClientLink(trimmed)
             val newTerm = StarlinkTerminalDto(
-                id = "SL-TERM-${System.currentTimeMillis().toString().takeLast(6)}",
-                name = "Starlink Kit $serialNumber",
-                serialNumber = serialNumber,
-                status = "ONLINE",
-                signalQuality = "Excellent (95%)",
-                planName = "Starlink Standard",
-                expiryDate = "2027-01-01",
-                ipAddress = "192.168.1.150",
-                firmwareVersion = "2026.08.4.s"
+                id = trimmed,
+                name = "Starlink $trimmed",
+                serialNumber = trimmed,
+                status = "CONNECTÉ",
+                signalQuality = "En attente",
+                planName = "Standard",
+                expiryDate = "--",
+                ipAddress = "--",
+                firmwareVersion = "--"
             )
             res.onSuccess {
+                val exists = uiState.value.starlink.terminals.any { it.id == trimmed || it.serialNumber == trimmed }
+                val updatedList = if (exists) uiState.value.starlink.terminals else (uiState.value.starlink.terminals + newTerm)
                 updateStarlink {
                     copy(
                         isLoading = false,
-                        successMessage = "Kit Starlink $serialNumber associé avec succès !",
-                        terminals = terminals + newTerm,
+                        successMessage = "Kit Starlink $trimmed associé avec succès !",
+                        terminals = updatedList,
+                        selectedTerminal = newTerm,
                         linkKitSerialNumberInput = ""
                     )
                 }
-            }.onFailure {
+                fetchTerminalStatus(trimmed)
+            }.onFailure { err ->
                 updateStarlink {
                     copy(
                         isLoading = false,
-                        successMessage = "Kit Starlink $serialNumber associé avec succès !",
-                        terminals = terminals + newTerm,
+                        error = err.message ?: "Impossible d'associer le kit.",
                         linkKitSerialNumberInput = ""
                     )
                 }
             }
         }
+    }
+
+    fun connectTerminalDirectly(terminalId: String) {
+        val trimmed = terminalId.trim()
+        if (trimmed.isBlank()) return
+        val existing = uiState.value.starlink.terminals.find { it.id == trimmed }
+        val term = existing ?: StarlinkTerminalDto(
+            id = trimmed,
+            name = "Terminal $trimmed",
+            serialNumber = trimmed,
+            status = "CONNECTÉ",
+            signalQuality = "Actualisation...",
+            planName = "Standard",
+            expiryDate = "--",
+            ipAddress = "--",
+            firmwareVersion = "--"
+        )
+        if (existing == null) {
+            updateStarlink { copy(terminals = terminals + term, selectedTerminal = term) }
+        } else {
+            updateStarlink { copy(selectedTerminal = term) }
+        }
+        fetchTerminalStatus(trimmed)
     }
 
     fun openAddSubCustomerDialog() {
