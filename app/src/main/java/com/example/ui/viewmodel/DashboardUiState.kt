@@ -338,6 +338,7 @@ data class StarlinkUiState(
     val selectedTerminal: StarlinkTerminalDto? = null,
     val isTerminalDetailOpen: Boolean = false,
     val isLoading: Boolean = false,
+    val isRebooting: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null,
     val pinInput: String = "",
@@ -347,10 +348,8 @@ data class StarlinkUiState(
     val showLinkKitDialog: Boolean = false,
     val subCustomers: List<StarlinkSubCustomerDto> = emptyList(),
     val showAddSubCustomerDialog: Boolean = false,
-    val showRegisterTerminalDialog: Boolean = false,
-    val showResellerConfigDialog: Boolean = false,
-    val isResellerConfigured: Boolean = false,
-    val terminalLiveStatus: com.example.data.model.StarlinkTerminalStatusData? = null
+    val terminalLiveStatus: com.example.data.model.StarlinkTerminalStatusData? = null,
+    val lastTelemetryUpdate: String? = null
 )
 
 data class ExchangeUiState(

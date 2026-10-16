@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -21,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,7 +55,7 @@ fun StarlinkManagerScreen(
     var showRebootConfirmDialog by remember { mutableStateOf<String?>(null) }
     var quickTerminalInput by remember { mutableStateOf("") }
 
-    // Auto-fetch status if a terminal is present and we don't have telemetry yet
+    // Auto-fetch real-time telemetry when a terminal is active
     LaunchedEffect(connectedTerminal?.id) {
         connectedTerminal?.let {
             dashboardViewModel.fetchTerminalStatus(it.id)
@@ -66,19 +68,19 @@ fun StarlinkManagerScreen(
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Surface(
                             shape = CircleShape,
                             color = Color(0xFF0284C7).copy(alpha = 0.2f),
-                            modifier = Modifier.size(34.dp)
+                            modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.SatelliteAlt,
                                     contentDescription = null,
                                     tint = Color(0xFF38BDF8),
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -135,10 +137,13 @@ fun StarlinkManagerScreen(
                         )
                     }
                     if (connectedTerminal != null) {
-                        IconButton(onClick = { dashboardViewModel.fetchTerminalStatus(connectedTerminal.id) }) {
+                        IconButton(
+                            onClick = { dashboardViewModel.fetchTerminalStatus(connectedTerminal.id) },
+                            enabled = !starlinkState.isLoading
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Actualiser",
+                                contentDescription = "Actualiser les Signaux",
                                 tint = Color.White
                             )
                         }
@@ -165,28 +170,22 @@ fun StarlinkManagerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ScreenFooterTabItem(
-                        title = "Signal & État",
+                        title = "Signaux & Contrôle",
                         icon = Icons.Default.SatelliteAlt,
                         isSelected = activeTab == 0,
                         onClick = { dashboardViewModel.setStarlinkTab(0) }
                     )
                     ScreenFooterTabItem(
-                        title = "Diagnostic",
-                        icon = Icons.Default.SignalCellularAlt,
+                        title = "Forfaits & Facturation",
+                        icon = Icons.Default.Payment,
                         isSelected = activeTab == 1,
                         onClick = { dashboardViewModel.setStarlinkTab(1) }
                     )
                     ScreenFooterTabItem(
-                        title = "Forfaits",
-                        icon = Icons.Default.Payment,
+                        title = "Partage Client",
+                        icon = Icons.Default.Group,
                         isSelected = activeTab == 2,
                         onClick = { dashboardViewModel.setStarlinkTab(2) }
-                    )
-                    ScreenFooterTabItem(
-                        title = "Partage",
-                        icon = Icons.Default.Group,
-                        isSelected = activeTab == 3,
-                        onClick = { dashboardViewModel.setStarlinkTab(3) }
                     )
                 }
             }
@@ -254,17 +253,19 @@ fun StarlinkManagerScreen(
                 }
             }
 
-            // Workspace tabs
+            // Workspace tabs (Client Space Only)
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
                 when (activeTab) {
-                    0 -> StarlinkRealtimeSignalTab(
+                    0 -> StarlinkRealtimeSignalsAndControlsTab(
                         terminal = connectedTerminal,
                         liveStatus = liveStatus,
                         isLoading = starlinkState.isLoading,
+                        isRebooting = starlinkState.isRebooting,
+                        lastUpdate = starlinkState.lastTelemetryUpdate,
                         quickInput = quickTerminalInput,
                         onQuickInputChange = { quickTerminalInput = it },
                         onQuickConnect = { dashboardViewModel.connectTerminalDirectly(quickTerminalInput) },
@@ -280,20 +281,12 @@ fun StarlinkManagerScreen(
                         },
                         onOpenShare = { dashboardViewModel.openAddSubCustomerDialog() }
                     )
-                    1 -> StarlinkTelemetryDiagnosticTab(
-                        terminal = connectedTerminal,
-                        liveStatus = liveStatus,
-                        isLoading = starlinkState.isLoading,
-                        onRefresh = {
-                            connectedTerminal?.let { dashboardViewModel.fetchTerminalStatus(it.id) }
-                        }
-                    )
-                    2 -> StarlinkPlansTab(
+                    1 -> StarlinkPlansTab(
                         plans = starlinkState.plans,
                         connectedTerminal = connectedTerminal,
                         onSelectPlan = { plan -> dashboardViewModel.openStarlinkPinDialog(plan) }
                     )
-                    3 -> StarlinkSubCustomersClientTab(
+                    2 -> StarlinkSubCustomersClientTab(
                         subCustomers = starlinkState.subCustomers,
                         connectedTerminal = connectedTerminal,
                         onOpenAdd = { dashboardViewModel.openAddSubCustomerDialog() }
@@ -303,19 +296,29 @@ fun StarlinkManagerScreen(
         }
     }
 
-    // Reboot Confirmation Dialog
+    // Reboot / Start Confirmation Dialog
     showRebootConfirmDialog?.let { terminalId ->
         AlertDialog(
             onDismissRequest = { showRebootConfirmDialog = null },
             icon = {
-                Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(36.dp))
+                Icon(
+                    imageVector = Icons.Default.PowerSettingsNew,
+                    contentDescription = null,
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(36.dp)
+                )
             },
             title = {
-                Text("Redémarrer le terminal ?", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Démarrer le redémarrage du terminal ?",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             },
             text = {
                 Text(
-                    text = "L'antenne Starlink ($terminalId) va être redémarrée à distance via l'API sécurisée. La connexion sera temporairement interrompue pendant l'alignement satellite.",
+                    text = "Une commande de redémarrage à chaud sera envoyée au terminal Starlink ($terminalId) via la route POST /api/v1/starlink/terminal/{id}/reboot. L'antenne va réaligner ses signaux satellites.",
                     color = Color(0xFF94A3B8),
                     fontSize = 13.sp
                 )
@@ -328,7 +331,7 @@ fun StarlinkManagerScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
                 ) {
-                    Text("Confirmer le Redémarrage", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Démarrer le Redémarrage", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -455,7 +458,7 @@ fun StarlinkManagerScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Entrez le numéro de série figurant sur votre kit Starlink (ex: KIT2026-...)",
+                        text = "Entrez le numéro de série figurant sur votre kit Starlink (ex: KIT2026-...) pour associer votre antenne.",
                         color = Color(0xFF94A3B8),
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center
@@ -527,7 +530,7 @@ private fun ScreenFooterTabItem(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -549,13 +552,15 @@ private fun ScreenFooterTabItem(
 }
 
 /**
- * Tab 0: Real-time signals, live capacity, and real action buttons
+ * Tab 0: Real-time signals, capacity from API, and product action buttons (Démarrage, etc.)
  */
 @Composable
-private fun StarlinkRealtimeSignalTab(
+private fun StarlinkRealtimeSignalsAndControlsTab(
     terminal: StarlinkTerminalDto?,
     liveStatus: StarlinkTerminalStatusData?,
     isLoading: Boolean,
+    isRebooting: Boolean,
+    lastUpdate: String?,
     quickInput: String,
     onQuickInputChange: (String) -> Unit,
     onQuickConnect: () -> Unit,
@@ -571,7 +576,7 @@ private fun StarlinkRealtimeSignalTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // If NO terminal is connected yet -> Clean Empty State
+        // If NO terminal is connected yet -> Prompt clean association
         if (terminal == null) {
             item {
                 Surface(
@@ -600,7 +605,7 @@ private fun StarlinkRealtimeSignalTab(
                         }
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
-                            text = "Aucun Kit Starlink Associé",
+                            text = "Connexion Antenne Starlink",
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             fontSize = 17.sp,
@@ -608,7 +613,7 @@ private fun StarlinkRealtimeSignalTab(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Associez votre kit Starlink au compte pour surveiller la puissance du signal en temps réel, mesurer la capacité satellite et gérer votre connexion.",
+                            text = "Associez votre kit Starlink pour afficher les signaux réels, la capacité du réseau et contrôler votre antenne via les boutons de commande.",
                             textAlign = TextAlign.Center,
                             color = Color(0xFF94A3B8),
                             fontSize = 12.sp,
@@ -626,12 +631,12 @@ private fun StarlinkRealtimeSignalTab(
                             Text("Associer mon Kit Starlink", color = Color.White, fontWeight = FontWeight.Bold)
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
                         HorizontalDivider(color = Color(0xFF1E293B))
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         Text(
-                            text = "Ou interroger un Terminal existant",
+                            text = "Ou saisir l'identifiant de votre antenne",
                             fontSize = 12.sp,
                             color = Color(0xFF64748B),
                             fontWeight = FontWeight.Bold
@@ -644,7 +649,8 @@ private fun StarlinkRealtimeSignalTab(
                             OutlinedTextField(
                                 value = quickInput,
                                 onValueChange = onQuickInputChange,
-                                label = { Text("ID Terminal / Numéro de kit") },
+                                label = { Text("Numéro / ID Terminal") },
+                                placeholder = { Text("ex: ut01000000-...") },
                                 singleLine = true,
                                 modifier = Modifier.weight(1f)
                             )
@@ -662,7 +668,7 @@ private fun StarlinkRealtimeSignalTab(
                 }
             }
         } else {
-            // A TERMINAL IS CONNECTED -> Show Real Live Signals, Capacity & Action Buttons
+            // TERMINAL CONNECTED -> Show Real Live Signals, Capacity & Action Buttons
             item {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -671,7 +677,7 @@ private fun StarlinkRealtimeSignalTab(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
-                        // Header: Terminal Identity & Live Status Badge
+                        // Header: Terminal Identity & Status Badge
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -699,7 +705,7 @@ private fun StarlinkRealtimeSignalTab(
                                         fontFamily = MulishFontFamily
                                     )
                                     Text(
-                                        text = "ID: ${terminal.id}",
+                                        text = "Terminal : ${terminal.id}",
                                         fontSize = 11.sp,
                                         color = Color(0xFF94A3B8)
                                     )
@@ -707,22 +713,23 @@ private fun StarlinkRealtimeSignalTab(
                             }
 
                             // Connection Badge
-                            val isOnline = liveStatus?.status?.contains("ONLINE", ignoreCase = true) == true ||
-                                    liveStatus?.status?.contains("CONNECT", ignoreCase = true) == true ||
-                                    terminal.status.contains("CONNECT", ignoreCase = true)
-                            val isRebooting = terminal.status.contains("REDÉMARRAGE", ignoreCase = true)
+                            val statusStr = liveStatus?.status ?: terminal.status
+                            val isOnline = statusStr.contains("ONLINE", ignoreCase = true) ||
+                                    statusStr.contains("CONNECT", ignoreCase = true) ||
+                                    statusStr.contains("ACTIF", ignoreCase = true)
+                            val isCurrentlyRebooting = isRebooting || statusStr.contains("REDÉMARRAGE", ignoreCase = true)
 
                             Surface(
                                 shape = CircleShape,
                                 color = when {
-                                    isRebooting -> Color(0xFFF59E0B).copy(alpha = 0.2f)
+                                    isCurrentlyRebooting -> Color(0xFFF59E0B).copy(alpha = 0.2f)
                                     isOnline -> Color(0xFF10B981).copy(alpha = 0.2f)
                                     else -> Color(0xFFEF4444).copy(alpha = 0.2f)
                                 },
                                 border = androidx.compose.foundation.BorderStroke(
                                     1.dp,
                                     when {
-                                        isRebooting -> Color(0xFFF59E0B)
+                                        isCurrentlyRebooting -> Color(0xFFF59E0B)
                                         isOnline -> Color(0xFF10B981)
                                         else -> Color(0xFFEF4444)
                                     }
@@ -738,7 +745,7 @@ private fun StarlinkRealtimeSignalTab(
                                             .size(7.dp)
                                             .background(
                                                 when {
-                                                    isRebooting -> Color(0xFFF59E0B)
+                                                    isCurrentlyRebooting -> Color(0xFFF59E0B)
                                                     isOnline -> Color(0xFF10B981)
                                                     else -> Color(0xFFEF4444)
                                                 },
@@ -747,14 +754,14 @@ private fun StarlinkRealtimeSignalTab(
                                     )
                                     Text(
                                         text = when {
-                                            isRebooting -> "REDÉMARRAGE"
+                                            isCurrentlyRebooting -> "REDÉMARRAGE"
                                             isOnline -> "CONNECTÉ"
                                             else -> "HORS LIGNE"
                                         },
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = when {
-                                            isRebooting -> Color(0xFFF59E0B)
+                                            isCurrentlyRebooting -> Color(0xFFF59E0B)
                                             isOnline -> Color(0xFF10B981)
                                             else -> Color(0xFFEF4444)
                                         }
@@ -765,7 +772,7 @@ private fun StarlinkRealtimeSignalTab(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Real-Time Capacity & Signals Grid
+                        // Real-Time Capacity & Signals Grid (Real values directly from API)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -780,20 +787,20 @@ private fun StarlinkRealtimeSignalTab(
                                     Text("Signal Satellite", fontSize = 11.sp, color = Color(0xFF94A3B8))
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = liveStatus?.signalQuality ?: "Optimal",
+                                        text = liveStatus?.displaySignalQuality ?: "--",
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         color = Color(0xFF38BDF8)
                                     )
                                     Text(
-                                        text = "Télémétrie en direct",
+                                        text = if (isLoading) "Mesure..." else "Signal direct",
                                         fontSize = 10.sp,
                                         color = Color(0xFF10B981)
                                     )
                                 }
                             }
 
-                            // Downlink Throughput / Capacity
+                            // Downlink Throughput / Capacity from API
                             Surface(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
@@ -803,7 +810,7 @@ private fun StarlinkRealtimeSignalTab(
                                     Text("Capacité Débit", fontSize = 11.sp, color = Color(0xFF94A3B8))
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = liveStatus?.formattedDownloadMbps ?: "220 Mbps",
+                                        text = liveStatus?.formattedDownloadMbps ?: "--",
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         color = Color(0xFF10B981)
@@ -816,7 +823,7 @@ private fun StarlinkRealtimeSignalTab(
                                 }
                             }
 
-                            // Latency
+                            // Latency from API
                             Surface(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
@@ -826,7 +833,7 @@ private fun StarlinkRealtimeSignalTab(
                                     Text("Latence Ping", fontSize = 11.sp, color = Color(0xFF94A3B8))
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = liveStatus?.formattedLatency ?: "28 ms",
+                                        text = liveStatus?.formattedLatency ?: "--",
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         color = Color.White
@@ -842,7 +849,7 @@ private fun StarlinkRealtimeSignalTab(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Obstruction & Version status strip
+                        // Secondary Telemetry Row: Upload, Obstruction & Firmware
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp),
@@ -851,20 +858,26 @@ private fun StarlinkRealtimeSignalTab(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Icon(Icons.Default.CloudQueue, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(16.dp))
                                     Text(
-                                        text = "Champ de vue : ${liveStatus?.formattedObstruction ?: "0% (Dégagé)"}",
+                                        text = "Obstruction : ${liveStatus?.formattedObstruction ?: "--"}",
                                         fontSize = 11.sp,
                                         color = Color.White
                                     )
                                 }
                                 Text(
-                                    text = "Version : ${liveStatus?.softwareVersion ?: "Starlink OS"}",
+                                    text = "Montant : ${liveStatus?.formattedUploadMbps ?: "--"}",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF38BDF8),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = if (lastUpdate != null) "Reçu à $lastUpdate" else "",
                                     fontSize = 10.sp,
                                     color = Color(0xFF94A3B8)
                                 )
@@ -874,10 +887,10 @@ private fun StarlinkRealtimeSignalTab(
                 }
             }
 
-            // Real Action Buttons Section
+            // Real Action Buttons & Start / Reboot Section
             item {
                 Text(
-                    text = "Actions & Contrôle du Terminal",
+                    text = "Boutons de Contrôle & Démarrage",
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     color = Color.White,
@@ -886,72 +899,101 @@ private fun StarlinkRealtimeSignalTab(
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Button 1: Reboot Button (Dedicated, prominent button)
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Button 1: BOUTON DE DÉMARRAGE / REDÉMARRAGE (Explicit requested Start/Reboot control)
                     Button(
                         onClick = { onRequestReboot(terminal.id) },
-                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isRebooting && !isLoading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
-                    ) {
-                        Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Redémarrer le Terminal Starlink",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isRebooting) Color(0xFFD97706) else Color(0xFFEF4444)
                         )
+                    ) {
+                        if (isRebooting) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "Démarrage & Alignement en cours...",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.PowerSettingsNew,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "Bouton de Démarrage / Redémarrage",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
 
-                    // Button 2: Refresh Live Signals Button
+                    // Button 2: Refresh Live Signals Button (Calls GET /api/v1/starlink/terminal/{id}/status)
                     OutlinedButton(
                         onClick = onRefreshStatus,
                         enabled = !isLoading,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF0284C7))
                     ) {
                         if (isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color(0xFF38BDF8))
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color(0xFF38BDF8))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Mesure des signaux en cours...", color = Color(0xFF38BDF8), fontWeight = FontWeight.Bold)
                         } else {
                             Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Mesurer la Capacité & Signaux en Temps Réel",
+                                color = Color(0xFF38BDF8),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (isLoading) "Actualisation en cours..." else "Actualiser les Signaux en Temps Réel",
-                            color = Color(0xFF38BDF8),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
                     }
 
-                    // Button 3 & 4: Quick actions row
+                    // Button 3 & 4: Payer l'abonnement & Partager la connexion
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Button(
                             onClick = onPayPlan,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
                         ) {
                             Icon(Icons.Default.Payment, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Payer Forfait", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("Payer Abonnement", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
 
                         Button(
                             onClick = onOpenShare,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
                         ) {
                             Icon(Icons.Default.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Partager Accès", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("Partager Connexion", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
@@ -961,123 +1003,7 @@ private fun StarlinkRealtimeSignalTab(
 }
 
 /**
- * Tab 1: Detailed Telemetry Diagnostic
- */
-@Composable
-private fun StarlinkTelemetryDiagnosticTab(
-    terminal: StarlinkTerminalDto?,
-    liveStatus: StarlinkTerminalStatusData?,
-    isLoading: Boolean,
-    onRefresh: () -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Télémétrie et Capacités Satellite",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.White,
-                        fontFamily = MulishFontFamily
-                    )
-                    Text(
-                        text = "Données issues de la route /terminal/{id}/status",
-                        fontSize = 12.sp,
-                        color = Color(0xFF94A3B8)
-                    )
-                }
-                IconButton(onClick = onRefresh, enabled = !isLoading) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Actualiser", tint = Color(0xFF38BDF8))
-                }
-            }
-        }
-
-        if (terminal == null) {
-            item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
-                ) {
-                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.SensorsOff, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(40.dp))
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text("Aucun terminal sélectionné", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Associez un kit Starlink pour afficher les diagnostics.", color = Color(0xFF94A3B8), fontSize = 12.sp)
-                    }
-                }
-            }
-        } else {
-            item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
-                ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        DiagnosticMetricRow("Identifiant Terminal", terminal.id)
-                        DiagnosticMetricRow("Numéro de Série", terminal.serialNumber)
-                        DiagnosticMetricRow("Statut Réseau", liveStatus?.status ?: "CONNECTÉ")
-                        DiagnosticMetricRow("Qualité du Signal", liveStatus?.signalQuality ?: "Optimal")
-                        DiagnosticMetricRow("Débit Descendant (Download)", liveStatus?.formattedDownloadMbps ?: "--")
-                        DiagnosticMetricRow("Débit Montant (Upload)", liveStatus?.formattedUploadMbps ?: "--")
-                        DiagnosticMetricRow("Latence Satellite", liveStatus?.formattedLatency ?: "--")
-                        DiagnosticMetricRow("Obstruction d'Antenne", liveStatus?.formattedObstruction ?: "0%")
-                        DiagnosticMetricRow("Version Logicielle", liveStatus?.softwareVersion ?: "Starlink Firmware")
-                    }
-                }
-            }
-
-            // Alerts if any
-            if (!liveStatus?.alerts.isNullOrEmpty()) {
-                item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF7F1D1D).copy(alpha = 0.5f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF4444))
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Text("Alertes Système Starlink", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            liveStatus?.alerts?.forEach { alert ->
-                                Text("• $alert", color = Color(0xFFFCA5A5), fontSize = 12.sp)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DiagnosticMetricRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = label, fontSize = 12.sp, color = Color(0xFF94A3B8))
-        Text(text = value, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
-    }
-}
-
-/**
- * Tab 2: Forfaits Starlink avec paiement par code PIN CashPay All
+ * Tab 1: Forfaits Starlink avec paiement par code PIN CashPay All (POST /api/v1/starlink/billing/pay)
  */
 @Composable
 private fun StarlinkPlansTab(
@@ -1154,7 +1080,7 @@ private fun StarlinkPlansTab(
 }
 
 /**
- * Tab 3: Clients secondaires & partage de connexion (/sub-customer)
+ * Tab 2: Clients secondaires & partage de connexion (POST /api/v1/starlink/sub-customer)
  */
 @Composable
 private fun StarlinkSubCustomersClientTab(
@@ -1214,7 +1140,7 @@ private fun StarlinkSubCustomersClientTab(
                         Text("Aucun partage actif", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Vous pouvez autoriser des proches ou clients à utiliser votre antenne avec une adresse MAC et un quota de données en Go (route /sub-customer).",
+                            text = "Vous pouvez autoriser des proches ou clients à utiliser votre antenne avec une adresse MAC et un quota de données en Go (route POST /api/v1/starlink/sub-customer).",
                             textAlign = TextAlign.Center,
                             color = Color(0xFF94A3B8),
                             fontSize = 12.sp
@@ -1270,7 +1196,6 @@ private fun StarlinkSubCustomersClientTab(
         }
     }
 }
-
 
 @Composable
 fun StarlinkAddSubCustomerDialog(

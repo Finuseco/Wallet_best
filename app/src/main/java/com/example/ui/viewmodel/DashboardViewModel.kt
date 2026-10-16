@@ -5087,22 +5087,25 @@ agent = it.agent.copy(
 
     fun rebootTerminal(terminalId: String) {
         viewModelScope.launch {
-            updateStarlink { copy(isLoading = true, error = null) }
+            updateStarlink { copy(isLoading = true, isRebooting = true, error = null) }
             val res = repository.starlinkRebootTerminal(terminalId)
             res.onSuccess { msg ->
                 updateStarlink {
                     copy(
                         isLoading = false,
-                        successMessage = "Terminal $terminalId : $msg",
+                        isRebooting = true,
+                        successMessage = "Signal de redémarrage envoyé au terminal $terminalId : $msg. Alignement satellite en cours...",
                         terminals = terminals.map { if (it.id == terminalId) it.copy(status = "REDÉMARRAGE...") else it }
                     )
                 }
-                // Refresh status after reboot initiated
+                // Delay 2 seconds then poll status to track reconnection
+                kotlinx.coroutines.delay(2000)
                 fetchTerminalStatus(terminalId)
             }.onFailure { err ->
                 updateStarlink {
                     copy(
                         isLoading = false,
+                        isRebooting = false,
                         error = err.message ?: "Échec du redémarrage du terminal."
                     )
                 }
@@ -5186,9 +5189,9 @@ agent = it.agent.copy(
             id = trimmed,
             name = "Terminal $trimmed",
             serialNumber = trimmed,
-            status = "CONNECTÉ",
-            signalQuality = "Actualisation...",
-            planName = "Standard",
+            status = "INITIALISATION",
+            signalQuality = "--",
+            planName = "--",
             expiryDate = "--",
             ipAddress = "--",
             firmwareVersion = "--"
@@ -5207,22 +5210,6 @@ agent = it.agent.copy(
 
     fun closeAddSubCustomerDialog() {
         updateStarlink { copy(showAddSubCustomerDialog = false) }
-    }
-
-    fun openRegisterTerminalDialog() {
-        updateStarlink { copy(showRegisterTerminalDialog = true) }
-    }
-
-    fun closeRegisterTerminalDialog() {
-        updateStarlink { copy(showRegisterTerminalDialog = false) }
-    }
-
-    fun openResellerConfigDialog() {
-        updateStarlink { copy(showResellerConfigDialog = true) }
-    }
-
-    fun closeResellerConfigDialog() {
-        updateStarlink { copy(showResellerConfigDialog = false) }
     }
 
     fun saveSubCustomer(
@@ -5272,101 +5259,50 @@ agent = it.agent.copy(
         }
     }
 
-    fun registerStarlinkTerminal(
-        resellerId: String,
-        deviceId: String,
-        nickname: String,
-        ownerWalletId: String,
-        serialNumber: String
-    ) {
-        viewModelScope.launch {
-            updateStarlink { copy(isLoading = true, error = null, showRegisterTerminalDialog = false) }
-            val res = repository.starlinkRegisterTerminal(
-                resellerId = resellerId,
-                deviceId = deviceId,
-                nickname = nickname,
-                ownerWalletId = ownerWalletId,
-                serialNumber = serialNumber
-            )
-            val term = StarlinkTerminalDto(
-                id = deviceId,
-                name = nickname.ifBlank { "Starlink $deviceId" },
-                serialNumber = serialNumber,
-                status = "ONLINE",
-                signalQuality = "90%",
-                planName = "Standard",
-                expiryDate = "2026-12-31",
-                ipAddress = "192.168.1.1",
-                firmwareVersion = "2026.08.1"
-            )
-            res.onSuccess {
-                updateStarlink {
-                    copy(
-                        isLoading = false,
-                        successMessage = "Terminal $nickname enregistré avec succès !",
-                        terminals = terminals + term
-                    )
-                }
-            }.onFailure { err ->
-                updateStarlink {
-                    copy(
-                        isLoading = false,
-                        error = err.message ?: "Échec de l'enregistrement du terminal."
-                    )
-                }
-            }
-        }
-    }
-
     fun fetchTerminalStatus(terminalId: String) {
         viewModelScope.launch {
             updateStarlink { copy(isLoading = true, error = null) }
             val res = repository.starlinkGetTerminalStatus(terminalId)
+            val nowTime = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
             res.onSuccess { statusData ->
                 updateStarlink {
+                    val updatedTerminals = terminals.map { t ->
+                        if (t.id == terminalId || t.serialNumber == terminalId) {
+                            t.copy(
+                                status = statusData.displayStatus,
+                                signalQuality = statusData.displaySignalQuality,
+                                firmwareVersion = statusData.softwareVersion ?: t.firmwareVersion,
+                                ipAddress = statusData.ipAddress ?: t.ipAddress
+                            )
+                        } else t
+                    }
+                    val updatedSelected = selectedTerminal?.let { st ->
+                        if (st.id == terminalId || st.serialNumber == terminalId) {
+                            st.copy(
+                                status = statusData.displayStatus,
+                                signalQuality = statusData.displaySignalQuality,
+                                firmwareVersion = statusData.softwareVersion ?: st.firmwareVersion,
+                                ipAddress = statusData.ipAddress ?: st.ipAddress
+                            )
+                        } else st
+                    }
                     copy(
                         isLoading = false,
+                        isRebooting = false,
                         terminalLiveStatus = statusData,
-                        successMessage = "Télémétrie reçue pour $terminalId"
+                        lastTelemetryUpdate = nowTime,
+                        terminals = updatedTerminals,
+                        selectedTerminal = updatedSelected,
+                        successMessage = "Télémétrie en direct reçue ($nowTime)"
                     )
                 }
             }.onFailure { err ->
                 updateStarlink {
                     copy(
                         isLoading = false,
+                        isRebooting = false,
+                        lastTelemetryUpdate = nowTime,
                         error = err.message ?: "Impossible de récupérer l'état du terminal."
-                    )
-                }
-            }
-        }
-    }
-
-    fun fetchResellerConfig() {
-        viewModelScope.launch {
-            val res = repository.starlinkGetResellerConfig()
-            res.onSuccess { resp ->
-                updateStarlink { copy(isResellerConfigured = resp.configured) }
-            }
-        }
-    }
-
-    fun saveResellerConfig(companyName: String, merchantWalletId: String, clientId: String, clientSecret: String) {
-        viewModelScope.launch {
-            updateStarlink { copy(isLoading = true, error = null, showResellerConfigDialog = false) }
-            val res = repository.starlinkSaveResellerConfig(companyName, merchantWalletId, clientId, clientSecret)
-            res.onSuccess {
-                updateStarlink {
-                    copy(
-                        isLoading = false,
-                        isResellerConfigured = true,
-                        successMessage = "Configuration revendeur $companyName enregistrée avec succès !"
-                    )
-                }
-            }.onFailure { err ->
-                updateStarlink {
-                    copy(
-                        isLoading = false,
-                        error = err.message ?: "Échec de la sauvegarde de la configuration."
                     )
                 }
             }

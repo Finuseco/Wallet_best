@@ -63,12 +63,35 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         DashboardViewModelFactory(repository)
     }
 
+    private val notificationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            CashPayApplication.instance.notificationSyncManager.syncNow()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
             statusBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
+
+        // Request POST_NOTIFICATIONS permission on Android 13+ (API 33+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                CashPayApplication.instance.notificationSyncManager.syncNow()
+            }
+        } else {
+            CashPayApplication.instance.notificationSyncManager.syncNow()
+        }
 
         val prefs = getSharedPreferences("cashpay_preferences", Context.MODE_PRIVATE)
 
@@ -82,6 +105,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         lifecycleScope.launch {
             database.cashPayDao().getSessionOnce()?.let { session ->
                 ApiClient.sessionToken = session.sessionToken
+                if (!session.sessionToken.isNullOrBlank()) {
+                    CashPayApplication.instance.notificationSyncManager.syncNow()
+                }
             }
         }
 
@@ -126,6 +152,11 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        CashPayApplication.instance.notificationSyncManager.syncNow()
     }
 
     override fun onStop() {

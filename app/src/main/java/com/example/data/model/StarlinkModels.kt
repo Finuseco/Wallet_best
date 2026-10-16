@@ -74,8 +74,11 @@ data class StarlinkResellerTerminalsResponse(
 
 data class StarlinkTerminalStatusData(
     @Json(name = "userTerminalId") val userTerminalId: String? = null,
+    @Json(name = "deviceId") val deviceId: String? = null,
+    @Json(name = "terminalId") val terminalId: String? = null,
     @Json(name = "status") val status: String? = null,
     @Json(name = "signalQuality") val signalQuality: String? = null,
+    @Json(name = "signal") val signal: String? = null,
     @Json(name = "downlinkThroughputBps") val downlinkThroughputBps: Double? = null,
     @Json(name = "uplinkThroughputBps") val uplinkThroughputBps: Double? = null,
     @Json(name = "pingLatencyMs") val pingLatencyMs: Double? = null,
@@ -84,8 +87,16 @@ data class StarlinkTerminalStatusData(
     @Json(name = "alerts") val alerts: List<String> = emptyList(),
     @Json(name = "capacity") val capacity: String? = null,
     @Json(name = "downloadSpeed") val downloadSpeed: String? = null,
-    @Json(name = "uploadSpeed") val uploadSpeed: String? = null
+    @Json(name = "uploadSpeed") val uploadSpeed: String? = null,
+    @Json(name = "ipAddress") val ipAddress: String? = null,
+    @Json(name = "uptimeSeconds") val uptimeSeconds: Long? = null
 ) {
+    val displayStatus: String
+        get() = status ?: if (downlinkThroughputBps != null || pingLatencyMs != null) "CONNECTÉ" else "--"
+
+    val displaySignalQuality: String
+        get() = signalQuality ?: signal ?: if (status?.contains("ONLINE", ignoreCase = true) == true) "Bon" else "--"
+
     val formattedDownloadMbps: String
         get() {
             if (!downloadSpeed.isNullOrBlank()) return downloadSpeed
@@ -121,7 +132,7 @@ data class StarlinkTerminalStatusData(
                 val pct = (obstructionFraction * 100).toInt()
                 return if (pct == 0) "0% (Dégagé)" else "$pct% obstruction"
             }
-            return "Normal"
+            return "--"
         }
 }
 

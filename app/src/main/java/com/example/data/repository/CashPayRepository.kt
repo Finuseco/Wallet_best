@@ -1,5 +1,6 @@
 package com.example.data.repository
 
+import android.content.Context
 import com.example.data.local.CashPayDao
 import com.example.data.local.CountryEntity
 import com.example.data.local.NotificationEntity
@@ -38,7 +39,8 @@ import okhttp3.Request
 
 class CashPayRepository(
     private val apiService: CashPayApiService,
-    private val dao: CashPayDao
+    private val dao: CashPayDao,
+    private val context: Context? = null
 ) {
 
     init {
@@ -155,7 +157,7 @@ class CashPayRepository(
             dao.insertNotification(
                 NotificationEntity(
                     id = dto.id,
-                    title = dto.title ?: "",
+                    title = dto.title ?: "Notification CashPay All",
                     description = dto.description ?: "",
                     timestamp = dto.timestamp ?: "",
                     read = dto.read,
@@ -163,6 +165,9 @@ class CashPayRepository(
                     link = dto.link
                 )
             )
+            context?.let { ctx ->
+                com.example.util.CashPayNotificationHelper.showPushNotification(ctx, dto)
+            }
         }
     }
 
@@ -188,7 +193,7 @@ class CashPayRepository(
                 val entities = dtos.map { dto ->
                     com.example.data.local.NotificationEntity(
                         id = dto.id,
-                        title = dto.title ?: "",
+                        title = dto.title ?: "Notification CashPay All",
                         description = dto.description ?: "",
                         timestamp = dto.timestamp ?: "",
                         read = dto.read,
@@ -199,6 +204,16 @@ class CashPayRepository(
                 if (entities.isNotEmpty()) {
                     dao.insertNotifications(entities)
                 }
+
+                // Push unread notifications to Android system status bar
+                context?.let { ctx ->
+                    dtos.filter { !it.read }.forEach { dto ->
+                        if (!com.example.util.CashPayNotificationHelper.isNotificationAlreadyShown(ctx, dto.id)) {
+                            com.example.util.CashPayNotificationHelper.showPushNotification(ctx, dto)
+                        }
+                    }
+                }
+
                 Result.success(entities)
             } else {
                 val msg = extractErrorMessage(response.errorBody()?.string(), "Impossible de récupérer les notifications")
@@ -207,6 +222,10 @@ class CashPayRepository(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun syncPushNotifications() {
+        fetchNotifications(20)
     }
 
     suspend fun markNotificationRead(id: Long): Result<Boolean> {

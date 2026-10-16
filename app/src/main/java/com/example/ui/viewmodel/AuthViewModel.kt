@@ -537,6 +537,11 @@ class AuthViewModel(
                             isPinLocked = false
                         )
                     }
+                    try {
+                        com.example.CashPayApplication.instance.notificationSyncManager.onPinConfirmed()
+                    } catch (e: Exception) {
+                        // ignore if app instance not ready
+                    }
                 } else {
                     val nextAttempts = state.pinFailedAttempts + 1
                     if (nextAttempts >= 5) {
@@ -681,6 +686,11 @@ class AuthViewModel(
                     pinCode = "",
                     errorMessage = null
                 )
+            }
+            try {
+                com.example.CashPayApplication.instance.notificationSyncManager.onPinConfirmed()
+            } catch (e: Exception) {
+                // ignore
             }
         }
     }
