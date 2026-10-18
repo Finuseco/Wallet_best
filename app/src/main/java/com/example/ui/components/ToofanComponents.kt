@@ -27,8 +27,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.CancelBg
+import com.example.ui.theme.CancelGrey
+import com.example.ui.theme.ErrorRed
 import com.example.ui.theme.MulishFontFamily
 import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.SuccessGreen
 import com.example.ui.theme.ToofanBodyText
 import com.example.ui.theme.ToofanGreen
 import com.example.ui.theme.ToofanGrey1
@@ -46,11 +50,31 @@ fun ToofanButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     containerColor: Color? = null,
-    contentColor: Color = Color.White,
-    borderColor: Color = Color.White.copy(alpha = 0.85f),
+    contentColor: Color? = null,
+    borderColor: Color? = null,
+    isSuccessAction: Boolean = false,
+    isDestructiveAction: Boolean = false,
+    isCancelAction: Boolean = false,
     testTag: String = "toofan_button"
 ) {
-    val buttonBg = containerColor ?: PrimaryBlue
+    val defaultBg = when {
+        isSuccessAction -> SuccessGreen
+        isDestructiveAction -> ErrorRed
+        isCancelAction -> CancelBg
+        else -> PrimaryBlue
+    }
+    val defaultContentColor = when {
+        isCancelAction -> CancelGrey
+        else -> Color.White
+    }
+    val defaultBorderColor = when {
+        isCancelAction -> CancelGrey.copy(alpha = 0.4f)
+        else -> Color.White.copy(alpha = 0.85f)
+    }
+
+    val buttonBg = containerColor ?: defaultBg
+    val finalContentColor = contentColor ?: defaultContentColor
+    val finalBorderColor = borderColor ?: defaultBorderColor
 
     Surface(
         modifier = modifier
@@ -63,7 +87,7 @@ fun ToofanButton(
         color = if (enabled) buttonBg else buttonBg.copy(alpha = 0.5f),
         border = androidx.compose.foundation.BorderStroke(
             1.5.dp,
-            if (enabled) borderColor else borderColor.copy(alpha = 0.35f)
+            if (enabled) finalBorderColor else finalBorderColor.copy(alpha = 0.35f)
         ),
         shadowElevation = if (enabled) 2.dp else 0.dp
     ) {
@@ -76,13 +100,13 @@ fun ToofanButton(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = contentColor,
+                    color = finalContentColor,
                     strokeWidth = 2.5.dp
                 )
             } else {
                 Text(
                     text = title,
-                    color = contentColor,
+                    color = finalContentColor,
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp

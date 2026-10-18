@@ -16,15 +16,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = ToofanGreen,
+    primary = BrandBlue,
     onPrimary = ToofanWhite,
-    primaryContainer = ToofanGreen.copy(alpha = 0.12f),
+    primaryContainer = BrandBlue.copy(alpha = 0.12f),
     onPrimaryContainer = ToofanMainDark,
-    secondary = ToofanLinkPink,
+    secondary = BrandOrange,
     onSecondary = ToofanWhite,
-    secondaryContainer = ToofanLinkPink.copy(alpha = 0.12f),
+    secondaryContainer = BrandOrange.copy(alpha = 0.12f),
     onSecondaryContainer = ToofanMainDark,
-    tertiary = ToofanMainDark,
+    tertiary = BrandBlueVibrant,
     onTertiary = ToofanWhite,
     background = ToofanBgColor,
     onBackground = ToofanMainDark,
@@ -37,11 +37,11 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = ToofanGreen,
+    primary = BrandBlue,
     onPrimary = ToofanWhite,
-    primaryContainer = ToofanGreen.copy(alpha = 0.2f),
+    primaryContainer = BrandBlue.copy(alpha = 0.2f),
     onPrimaryContainer = DarkTextPrimary,
-    secondary = ToofanLinkPink,
+    secondary = BrandOrange,
     onSecondary = ToofanWhite,
     background = DarkBackground,
     onBackground = DarkTextPrimary,

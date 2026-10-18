@@ -148,6 +148,11 @@ import com.example.ui.theme.BrandBlueDark
 import com.example.ui.theme.BrandOrange
 import com.example.ui.theme.BrandOrangeDark
 import com.example.ui.theme.BrandOrangeLight
+import com.example.ui.theme.GreenOnline
+import com.example.ui.theme.SuccessGreen
+import com.example.ui.theme.ErrorRed
+import com.example.ui.theme.WarningYellow
+import com.example.ui.theme.CancelGrey
 import com.example.ui.theme.ToofanBgColor
 import com.example.ui.theme.ToofanBlue
 import com.example.ui.theme.ToofanBodyText
@@ -1113,7 +1118,7 @@ fun DashboardScreen(
                                             Icon(
                                                 Icons.Default.CheckCircle,
                                                 contentDescription = "Vérifié",
-                                                tint = Color(0xFF00C48C),
+                                                tint = SuccessGreen,
                                                 modifier = Modifier.size(14.dp)
                                             )
                                         }
@@ -1506,50 +1511,64 @@ fun CashPayTopHeader(
                     }
 
                     Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.size(46.dp)
                     ) {
-                        if (!userProfile?.profilePhotoUrl.isNullOrBlank()) {
-                            AsyncImage(
-                                model = userProfile?.profilePhotoUrl,
-                                contentDescription = "Avatar",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize().clip(CircleShape)
-                            )
-                        } else {
-                            val initials = (userProfile?.fullName ?: "CP")
-                                .trim()
-                                .split(" ")
-                                .mapNotNull { it.firstOrNull()?.toString() }
-                                .take(2)
-                                .joinToString("")
-                                .uppercase()
-                                .ifBlank { "CP" }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(
-                                                Color(0xFF000E38),
-                                                Color(0xFF00E5FF)
-                                            )
-                                        )
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = initials,
-                                    fontFamily = MulishFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = Color.White
+                        Box(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .border(1.5.dp, Color.White.copy(alpha = 0.8f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (!userProfile?.profilePhotoUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = userProfile?.profilePhotoUrl,
+                                    contentDescription = "Avatar",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize().clip(CircleShape)
                                 )
+                            } else {
+                                val initials = (userProfile?.fullName ?: "CP")
+                                    .trim()
+                                    .split(" ")
+                                    .mapNotNull { it.firstOrNull()?.toString() }
+                                    .take(2)
+                                    .joinToString("")
+                                    .uppercase()
+                                    .ifBlank { "CP" }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Brush.linearGradient(
+                                                listOf(
+                                                    BrandBlueDark,
+                                                    BrandBlue
+                                                )
+                                            )
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = initials,
+                                        fontFamily = MulishFontFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        color = Color.White
+                                    )
+                                }
                             }
                         }
+
+                        // Connected / Online Presence Indicator (Vert foncé)
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .align(Alignment.BottomEnd)
+                                .clip(CircleShape)
+                                .background(GreenOnline)
+                                .border(1.5.dp, Color.White, CircleShape)
+                        )
                     }
 
                     Column {
@@ -2455,7 +2474,7 @@ private fun ToofanDashboardTab(
                         fontFamily = MulishFontFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF000E38),
+                        color = BrandBlue,
                         modifier = Modifier.clickable { dashboardViewModel.openContactsPage() }
                     )
                 }
@@ -2465,13 +2484,13 @@ private fun ToofanDashboardTab(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
-                    val ringColors = listOf(Color(0xFF000E38), Color(0xFF00227A), Color(0xFF0038A8))
+                    val ringColors = listOf(BrandBlue, BrandOrange, BrandBlueVibrant)
 
                     // Up to 3 recent correspondents from transfers
                     recentCorrespondents.take(3).forEachIndexed { index, correspondent ->
                         RecentCorrespondentItem(
                             contact = correspondent,
-                            ringColor = ringColors.getOrElse(index) { Color(0xFF000E38) },
+                            ringColor = ringColors.getOrElse(index) { BrandBlue },
                             onClick = { onContactClick(correspondent) }
                         )
                     }
@@ -2486,8 +2505,8 @@ private fun ToofanDashboardTab(
                         Surface(
                             modifier = Modifier.size(52.dp),
                             shape = CircleShape,
-                            color = Color(0xFF000E38),
-                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
+                            color = BrandOrange,
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -2903,7 +2922,7 @@ private fun TransactionItemRow(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .border(1.5.dp, if (isCredit) Color(0xFF00C48C) else Color(0xFF3B82F6), CircleShape)
+                                .border(1.5.dp, if (isCredit) SuccessGreen else Color(0xFF3B82F6), CircleShape)
                                 .background(Color(0xFFF1F5F9)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -2923,7 +2942,7 @@ private fun TransactionItemRow(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
-                                    color = if (isCredit) Color(0xFF00C48C) else Color(0xFF3B82F6)
+                                    color = if (isCredit) SuccessGreen else Color(0xFF3B82F6)
                                 )
                             }
                         }
@@ -2933,7 +2952,7 @@ private fun TransactionItemRow(
                                 .size(10.dp)
                                 .align(Alignment.BottomEnd)
                                 .clip(CircleShape)
-                                .background(Color(0xFF00C48C))
+                                .background(SuccessGreen)
                                 .border(1.dp, Color.White, CircleShape)
                         )
                     }
@@ -3005,7 +3024,7 @@ private fun TransactionItemRow(
             ) {
                 val amountColor = when {
                     isFailed -> Color(0xFFD97706) // Amber for failed transactions (not debit)
-                    isCredit -> Color(0xFF00C48C) // Green
+                    isCredit -> SuccessGreen // Green
                     else -> Color(0xFFE11D48) // Red for true debit
                 }
                 val amountPrefix = when {
@@ -3175,9 +3194,9 @@ private fun TransactionDetailDialog(
                             HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 0.5.dp)
                             DetailRow("Total Débité :", "- ${String.format("%.2f", transaction.amount + transaction.fee)} ${transaction.currency}", isBold = true, customColor = Color(0xFFE11D48))
                         } else {
-                            DetailRow("Montant Reçu :", "+ ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true, customColor = Color(0xFF00C48C))
+                            DetailRow("Montant Reçu :", "+ ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true, customColor = SuccessGreen)
                             HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 0.5.dp)
-                            DetailRow("Total Net Crédité :", "+ ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true, customColor = Color(0xFF00C48C))
+                            DetailRow("Total Net Crédité :", "+ ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true, customColor = SuccessGreen)
                         }
                     }
                 }
@@ -5780,8 +5799,8 @@ private fun RecentCorrespondentItem(
                             .background(
                                 Brush.linearGradient(
                                     listOf(
-                                        Color(0xFF000E38),
-                                        Color(0xFF00E5FF)
+                                        BrandBlueDark,
+                                        BrandBlue
                                     )
                                 )
                             ),
@@ -5798,13 +5817,13 @@ private fun RecentCorrespondentItem(
                 }
             }
 
-            // Status indicator at bottom right
+            // Connected Status indicator at bottom right (Vert foncé pour utilisateur connecté)
             Box(
                 modifier = Modifier
                     .size(13.dp)
                     .align(Alignment.BottomEnd)
                     .clip(CircleShape)
-                    .background(Color(0xFF000E38))
+                    .background(GreenOnline)
                     .border(1.5.dp, Color.White, CircleShape)
             )
         }
@@ -5871,7 +5890,7 @@ fun AddContactDialog(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         CircularProgressIndicator(
-                            color = Color(0xFF00C48C),
+                            color = SuccessGreen,
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -5920,7 +5939,7 @@ fun AddContactDialog(
                                     .size(46.dp)
                                     .clip(CircleShape)
                                     .background(Color.White)
-                                    .border(1.5.dp, Color(0xFF00C48C), CircleShape),
+                                    .border(1.5.dp, SuccessGreen, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 val photoUrl = profile.profilePhotoUrl ?: profile.profilePhoto
@@ -5932,7 +5951,7 @@ fun AddContactDialog(
                                         modifier = Modifier.fillMaxSize().clip(CircleShape)
                                     )
                                 } else {
-                                    Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF00C48C))
+                                    Icon(Icons.Default.Person, contentDescription = null, tint = SuccessGreen)
                                 }
                             }
 
@@ -5957,7 +5976,7 @@ fun AddContactDialog(
                                     Icon(
                                         Icons.Default.CheckCircle,
                                         contentDescription = null,
-                                        tint = Color(0xFF00C48C),
+                                        tint = SuccessGreen,
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(
@@ -5965,7 +5984,7 @@ fun AddContactDialog(
                                         fontFamily = MulishFontFamily,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF00C48C)
+                                        color = SuccessGreen
                                     )
                                 }
                             }
@@ -6092,7 +6111,7 @@ fun ContactsPageDialog(
                                 text = "Détection automatique des comptes CashPay",
                                 fontFamily = MulishFontFamily,
                                 fontSize = 11.sp,
-                                color = Color(0xFF00C48C)
+                                color = SuccessGreen
                             )
                         }
                     }
@@ -6100,8 +6119,8 @@ fun ContactsPageDialog(
                     // Button to manually add / verify a number or wallet
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = Color(0xFF00C48C).copy(alpha = 0.2f),
-                        border = BorderStroke(1.dp, Color(0xFF00C48C)),
+                        color = SuccessGreen.copy(alpha = 0.2f),
+                        border = BorderStroke(1.dp, SuccessGreen),
                         modifier = Modifier.clickable {
                             dashboardViewModel.openAddContactDialog()
                         }
@@ -6111,13 +6130,13 @@ fun ContactsPageDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, tint = Color(0xFF00C48C), modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Add, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(16.dp))
                             Text(
                                 text = "Ajouter",
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
-                                color = Color(0xFF00C48C)
+                                color = SuccessGreen
                             )
                         }
                     }
@@ -6136,12 +6155,12 @@ fun ContactsPageDialog(
                     onValueChange = { dashboardViewModel.setContactSearchQuery(it) },
                     placeholder = { Text("Rechercher par nom, 9 chiffres ou Wallet ID...", color = Color(0xFF64748B), fontFamily = MulishFontFamily, fontSize = 13.sp) },
                     leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF00C48C), modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Search, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF00C48C),
+                        focusedBorderColor = SuccessGreen,
                         unfocusedBorderColor = Color(0xFF334155),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
@@ -6165,14 +6184,14 @@ fun ContactsPageDialog(
                         ) {
                             Surface(
                                 shape = CircleShape,
-                                color = Color(0xFF00C48C).copy(alpha = 0.15f),
+                                color = SuccessGreen.copy(alpha = 0.15f),
                                 modifier = Modifier.size(60.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         Icons.Default.Person,
                                         contentDescription = null,
-                                        tint = Color(0xFF00C48C),
+                                        tint = SuccessGreen,
                                         modifier = Modifier.size(32.dp)
                                     )
                                 }
@@ -6216,13 +6235,13 @@ fun ContactsPageDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = Color(0xFF00C48C))
+                            CircularProgressIndicator(color = SuccessGreen)
                             Spacer(modifier = Modifier.height(14.dp))
                             Text(
                                 text = "Recherche en temps réel des comptes CashPay...",
                                 fontFamily = MulishFontFamily,
                                 fontSize = 13.sp,
-                                color = Color(0xFF00C48C),
+                                color = SuccessGreen,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(modifier = Modifier.height(4.dp))
@@ -6287,7 +6306,7 @@ fun ContactsPageDialog(
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp,
-                                        color = Color(0xFF00C48C)
+                                        color = SuccessGreen
                                     )
                                     Text(
                                         text = "Actifs",
@@ -6402,7 +6421,7 @@ private fun ContactItemCard(
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(Color(0xFF1E293B))
-                        .border(1.5.dp, Color(0xFF00C48C), CircleShape),
+                        .border(1.5.dp, SuccessGreen, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     val photoUrl = contact.publicProfile?.profilePhotoUrl ?: contact.publicProfile?.profilePhoto
@@ -6418,7 +6437,7 @@ private fun ContactItemCard(
                             text = contact.name.take(2).uppercase(),
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF00C48C),
+                            color = SuccessGreen,
                             fontSize = 16.sp
                         )
                     }
@@ -6438,7 +6457,7 @@ private fun ContactItemCard(
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = "Vérifié",
-                                tint = Color(0xFF00C48C),
+                                tint = SuccessGreen,
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -6454,12 +6473,12 @@ private fun ContactItemCard(
 
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFF00C48C).copy(alpha = 0.2f),
+                color = SuccessGreen.copy(alpha = 0.2f),
                 modifier = Modifier.clickable(onClick = onSendClick)
             ) {
                 Text(
                     text = "Envoyer",
-                    color = Color(0xFF00C48C),
+                    color = SuccessGreen,
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
@@ -6580,7 +6599,7 @@ fun ServicesDialog(
                     Triple("Réclamations internationales", "Western Union, MoneyGram, Ria", Color(0xFF00E676)),
                     Triple("Mobile Money", "M-Pesa, Orange Money, Airtel, MTN", Color(0xFFF59E0B)),
                     Triple("Abonnements TV", "Canal+ RDC, EasyTV, BLUS", Color(0xFF2563EB)),
-                    Triple("Factures Publiques", "SNEL (Électricité), REGIDESO (Eau)", Color(0xFF00C48C)),
+                    Triple("Factures Publiques", "SNEL (Électricité), REGIDESO (Eau)", SuccessGreen),
                     Triple("Starlink Manager", "Gestion des équipements Starlink", Color(0xFF1E293B)),
                     Triple("Clés FINUSECO CPK", "Lecteur .cpk, Clés USB & Cloud Google Drive", Color(0xFF38BDF8)),
                     Triple("Services Digitaux", "Netflix, Spotify, Apple Music, PlayStation", Color(0xFF8B5CF6))
@@ -6710,7 +6729,7 @@ fun ActionPlusModalDialog(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp,
-                        color = Color(0xFF00C48C),
+                        color = SuccessGreen,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                     ActionPlusTile(
@@ -6842,7 +6861,7 @@ fun ActionPlusModalDialog(
                         title = "Envoyer de l'argent",
                         subtitle = "QR Code, Wallet ID ou N°",
                         icon = Icons.Default.Send,
-                        iconBg = Color(0xFF00C48C),
+                        iconBg = SuccessGreen,
                         onClick = onSendScan
                     )
                     ActionPlusTile(
