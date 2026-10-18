@@ -7,6 +7,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -361,7 +362,8 @@ fun RegisterAccountScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = ToofanGreen),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                        border = BorderStroke(1.2.dp, Color.White),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(

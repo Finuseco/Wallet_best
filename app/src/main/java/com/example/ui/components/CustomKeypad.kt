@@ -116,19 +116,19 @@ private fun RowScope.ToofanKeypadKey(
     val scale by animateFloatAsState(if (isPressed && isEnabled) 0.92f else 1.0f, label = "key_scale")
 
     val bg = if (isDark) {
-        if (isEnabled) Color(0xFF1E293B) else Color(0xFF1E293B).copy(alpha = 0.4f)
+        if (isEnabled) Color(0xFF0C2A87) else Color(0xFF0C2A87).copy(alpha = 0.4f)
     } else {
         if (isEnabled) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.4f)
     }
     val textColor = if (isDark) {
         if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f)
     } else {
-        if (isEnabled) Color(0xFF0F172A) else Color(0xFF0F172A).copy(alpha = 0.3f)
+        if (isEnabled) Color(0xFF0C2A87) else Color(0xFF0C2A87).copy(alpha = 0.3f)
     }
     val border = if (isDark) {
-        if (isEnabled) BorderStroke(1.dp, Color(0xFF334155)) else BorderStroke(1.dp, Color(0xFF334155).copy(alpha = 0.3f))
+        if (isEnabled) BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)) else BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
     } else {
-        if (isEnabled) BorderStroke(1.dp, Color(0xFFE2E8F0)) else BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.3f))
+        if (isEnabled) BorderStroke(1.dp, Color(0xFF0C2A87).copy(alpha = 0.25f)) else BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.3f))
     }
 
     Surface(
@@ -191,16 +191,16 @@ private fun RowScope.BiometricKeypadKey(
         label = "biometric_rotation"
     )
 
-    val tint = if (isEnabled) Color(0xFF00E676) else Color(0xFF64748B)
+    val tint = if (isEnabled) Color.White else Color(0xFF64748B)
     val bg = if (isDark) {
-        if (isEnabled) Color(0xFF00E676).copy(alpha = 0.16f) else Color(0xFF1E293B)
+        if (isEnabled) Color(0xFF0C2A87) else Color(0xFF0C2A87).copy(alpha = 0.4f)
     } else {
-        if (isEnabled) Color(0xFFE8F7F0) else Color(0xFFF1F5F9)
+        if (isEnabled) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.4f)
     }
     val border = if (isEnabled) {
-        BorderStroke(1.dp, Color(0xFF00E676).copy(alpha = 0.5f))
+        BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
     } else {
-        BorderStroke(1.dp, Color(0xFF334155))
+        BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
     }
 
     Surface(
@@ -248,19 +248,19 @@ private fun RowScope.BackspaceKeypadKey(
     val scale by animateFloatAsState(if (isPressed && isEnabled) 0.90f else 1.0f, label = "backspace_scale")
 
     val bg = if (isDark) {
-        if (isEnabled) Color(0xFF1E293B) else Color(0xFF1E293B).copy(alpha = 0.4f)
+        if (isEnabled) Color(0xFF0C2A87) else Color(0xFF0C2A87).copy(alpha = 0.4f)
     } else {
         if (isEnabled) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.4f)
     }
     val border = if (isDark) {
-        if (isEnabled) BorderStroke(1.dp, Color(0xFF334155)) else BorderStroke(1.dp, Color(0xFF334155).copy(alpha = 0.3f))
+        if (isEnabled) BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)) else BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
     } else {
-        if (isEnabled) BorderStroke(1.dp, Color(0xFFE2E8F0)) else BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.3f))
+        if (isEnabled) BorderStroke(1.dp, Color(0xFF0C2A87).copy(alpha = 0.25f)) else BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.3f))
     }
     val tint = if (isDark) {
         if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f)
     } else {
-        if (isEnabled) Color(0xFF0F172A) else Color(0xFF0F172A).copy(alpha = 0.3f)
+        if (isEnabled) Color(0xFF0C2A87) else Color(0xFF0C2A87).copy(alpha = 0.3f)
     }
 
     Surface(

@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.BrandBlue
+import com.example.ui.theme.BrandOrange
 import com.example.ui.theme.MulishFontFamily
 
 @Composable
@@ -106,7 +108,7 @@ fun FloatingCapsuleBottomBar(
                 )
             }
 
-            // Central elevated + button
+            // Central elevated + button in primary navy blue with crisp white border
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -117,7 +119,8 @@ fun FloatingCapsuleBottomBar(
                         .size(52.dp)
                         .clickable(onClick = onCentralActionClick),
                     shape = CircleShape,
-                    color = Color(0xFFFF5B37),
+                    color = BrandOrange,
+                    border = BorderStroke(2.dp, Color.White),
                     shadowElevation = 8.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -153,7 +156,7 @@ private fun FloatingNavItem(
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (isSelected) Color(0xFF00C48C) else Color(0xFF94A3B8),
+            tint = if (isSelected) BrandBlue else Color(0xFF94A3B8),
             modifier = Modifier.size(22.dp)
         )
         Spacer(modifier = Modifier.height(2.dp))
@@ -162,7 +165,7 @@ private fun FloatingNavItem(
             fontFamily = MulishFontFamily,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             fontSize = 10.sp,
-            color = if (isSelected) Color(0xFF00C48C) else Color(0xFF94A3B8)
+            color = if (isSelected) BrandBlue else Color(0xFF94A3B8)
         )
     }
 }

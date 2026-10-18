@@ -142,6 +142,12 @@ import com.example.data.model.WalletResponse
 import com.example.ui.components.ToofanButton
 import com.example.ui.components.ToofanInputField
 import com.example.ui.theme.MulishFontFamily
+import com.example.ui.theme.BrandBlue
+import com.example.ui.theme.BrandBlueVibrant
+import com.example.ui.theme.BrandBlueDark
+import com.example.ui.theme.BrandOrange
+import com.example.ui.theme.BrandOrangeDark
+import com.example.ui.theme.BrandOrangeLight
 import com.example.ui.theme.ToofanBgColor
 import com.example.ui.theme.ToofanBlue
 import com.example.ui.theme.ToofanBodyText
@@ -575,9 +581,11 @@ fun DashboardScreen(
             confirmButton = {
                 Button(
                     onClick = { showDigitalServicesComingSoonDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                    border = BorderStroke(1.2.dp, Color.White),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Compris", color = Color.White)
+                    Text("Compris", color = Color.White, fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -1434,33 +1442,33 @@ fun CashPayTopHeader(
                 Modifier.wrapContentHeight()
             }
         )
-        .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+        .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
         .background(
             Brush.verticalGradient(
                 colors = listOf(
-                    Color(0xFF000E38), // Official Brand Midnight Blue
-                    Color(0xFF0A1C4D),
-                    Color(0xFF16255C)
+                    Color(0xFFFF7A00),
+                    Color(0xFFFF6600), // Brand Orange FF6600
+                    Color(0xFFE65100)
                 )
             )
         )
 
     Box(modifier = boxModifier) {
-        // Glowing ambient cosmic orbs
+        // Subtle ambient warm highlights
         Box(
             modifier = Modifier
-                .size(170.dp)
+                .size(190.dp)
                 .offset(x = (-30).dp, y = (-20).dp + statusBarHeight)
                 .clip(CircleShape)
-                .background(Color(0xFF00E5FF).copy(alpha = 0.16f))
+                .background(Color(0xFFFFB74D).copy(alpha = 0.22f))
         )
         Box(
             modifier = Modifier
-                .size(200.dp)
+                .size(220.dp)
                 .align(Alignment.TopEnd)
                 .offset(x = 60.dp, y = (-30).dp + statusBarHeight)
                 .clip(CircleShape)
-                .background(Color(0xFFFF6600).copy(alpha = 0.20f))
+                .background(Color(0xFFFF8F00).copy(alpha = 0.25f))
         )
 
         Column(
@@ -1699,12 +1707,21 @@ private fun BalanceCardsCarousel(
                             .padding(horizontal = 16.dp)
                             .height(180.dp),
                         shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.45f)),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Brush.linearGradient(listOf(Color(0xFF065F46), Color(0xFF047857), Color(0xFF10B981))))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            BrandBlueVibrant,
+                                            BrandBlue,
+                                            BrandBlueDark
+                                        )
+                                    )
+                                )
                                 .padding(18.dp)
                         ) {
                             Icon(
@@ -1813,12 +1830,21 @@ private fun BalanceCardsCarousel(
                             .padding(horizontal = 16.dp)
                             .height(180.dp),
                         shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.45f)),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Brush.linearGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B), Color(0xFF334155))))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF0284C7),
+                                            Color(0xFF0369A1),
+                                            Color(0xFF082F49)
+                                        )
+                                    )
+                                )
                                 .padding(18.dp)
                         ) {
                             Icon(
@@ -1927,12 +1953,21 @@ private fun BalanceCardsCarousel(
                             .padding(horizontal = 16.dp)
                             .height(180.dp),
                         shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.45f)),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Brush.linearGradient(listOf(Color(0xFF2563EB), Color(0xFF1D4ED8), Color(0xFF1E40AF))))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF6366F1),
+                                            Color(0xFF4338CA),
+                                            Color(0xFF1E1B4B)
+                                        )
+                                    )
+                                )
                                 .padding(18.dp)
                         ) {
                             Icon(
@@ -2041,12 +2076,22 @@ private fun BalanceCardsCarousel(
                             .padding(horizontal = 16.dp)
                             .height(180.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF181B24)),
+                        border = BorderStroke(1.2.dp, Color(0xFFF59E0B).copy(alpha = 0.65f)),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF2E2416),
+                                            Color(0xFF1E160C),
+                                            Color(0xFF100C06)
+                                        )
+                                    )
+                                )
                                 .padding(16.dp)
                         ) {
                             Icon(
@@ -2185,7 +2230,7 @@ private fun BalanceCardsCarousel(
                         .padding(horizontal = 4.dp)
                         .size(if (isSelected) 22.dp else 6.dp, 6.dp)
                         .clip(RoundedCornerShape(3.dp))
-                        .background(if (isSelected) Color(0xFF00E5FF) else Color.White.copy(alpha = 0.35f))
+                        .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.45f))
                         .clickable {
                             coroutineScope.launch { pagerState.animateScrollToPage(i) }
                         }
@@ -2324,7 +2369,8 @@ private fun ToofanDashboardTab(
                         .padding(horizontal = 20.dp)
                         .clickable { dashboardViewModel.openAgentServicesScreen() },
                     shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFF047857),
+                    color = Color(0xFF000E38),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
                     shadowElevation = 2.dp
                 ) {
                     Row(
@@ -2375,188 +2421,8 @@ private fun ToofanDashboardTab(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp,
-                                color = Color(0xFF047857),
+                                color = Color(0xFF000E38),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // Ligne 1: 4 boutons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ToofanActionSquare(
-                        title = "Envoyer\nTransfert",
-                        bgColor = Color(0xFF0066FF),
-                        icon = Icons.Default.Send,
-                        modifier = Modifier.weight(1f),
-                        onClick = onOpenTransfer
-                    )
-                    ToofanActionSquare(
-                        title = "Retrait\nEspèces",
-                        bgColor = Color(0xFFFF6600),
-                        icon = Icons.Default.CallReceived,
-                        modifier = Modifier.weight(1f),
-                        onClick = { dashboardViewModel.openWithdrawalDialog() }
-                    )
-                    ToofanActionSquare(
-                        title = "Crédit\n& Prêts",
-                        bgColor = Color(0xFF00B386),
-                        icon = Icons.Default.MonetizationOn,
-                        modifier = Modifier.weight(1f),
-                        onClick = { dashboardViewModel.openLoansDialog() }
-                    )
-                    ToofanActionSquare(
-                        title = if (isAgentUser) "Espace\nAgent" else "PayScan\nPanier/POS",
-                        bgColor = Color(0xFF000E38),
-                        icon = if (isAgentUser) Icons.Default.SupportAgent else Icons.Default.QrCode,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            if (isAgentUser) dashboardViewModel.openAgentServicesScreen()
-                            else dashboardViewModel.openPayScan(PayScanMode.SUPERMARKET_BASKET)
-                        }
-                    )
-                }
-
-                // Ligne 2: 4 boutons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ToofanActionSquare(
-                        title = "Dépôt\nRecharger",
-                        bgColor = Color(0xFF10B981),
-                        icon = Icons.Default.Add,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            dashboardViewModel.openDepositDialog()
-                        }
-                    )
-                    ToofanActionSquare(
-                        title = "Paiement\nFactures",
-                        bgColor = Color(0xFF8B5CF6),
-                        icon = Icons.Default.Receipt,
-                        modifier = Modifier.weight(1f),
-                        onClick = onOpenServices
-                    )
-                    ToofanActionSquare(
-                        title = "Mes\nCartes",
-                        bgColor = Color(0xFFEC4899),
-                        icon = Icons.Default.CreditCard,
-                        modifier = Modifier.weight(1f),
-                        onClick = { dashboardViewModel.setSelectedTab(2) }
-                    )
-                    ToofanActionSquare(
-                        title = "Voir\nPlus",
-                        bgColor = Color(0xFF64748B),
-                        icon = Icons.Default.FilterList,
-                        modifier = Modifier.weight(1f),
-                        onClick = onActionPlusClick
-                    )
-                }
-            }
-        }
-
-        // Banner FINUSECO CPK (Lecteur Clés USB & Cloud Google Drive)
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 6.dp)
-                    .clickable { dashboardViewModel.openCpkReader() },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
-                border = BorderStroke(1.dp, Color(0xFF334155))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF38BDF8).copy(alpha = 0.2f),
-                            modifier = Modifier.size(42.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.Usb,
-                                    contentDescription = null,
-                                    tint = Color(0xFF38BDF8),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(
-                                    text = "Lecteur de Clés CPK",
-                                    fontFamily = MulishFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp,
-                                    color = Color.White
-                                )
-                                Surface(
-                                    color = Color(0xFF38BDF8).copy(alpha = 0.2f),
-                                    shape = RoundedCornerShape(4.dp)
-                                ) {
-                                    Text(
-                                        text = ".cpk",
-                                        color = Color(0xFF38BDF8),
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                    )
-                                }
-                            }
-                            Text(
-                                text = "FINUSECO • Clés USB & Coffre Google Drive",
-                                fontFamily = MulishFontFamily,
-                                fontSize = 11.sp,
-                                color = Color(0xFF94A3B8)
-                            )
-                        }
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = if (uiState.cpk.isDriveConnected) Color(0xFF00E676).copy(alpha = 0.2f) else Color(0xFFF59E0B).copy(alpha = 0.2f),
-                        border = BorderStroke(1.dp, if (uiState.cpk.isDriveConnected) Color(0xFF00E676) else Color(0xFFF59E0B))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (uiState.cpk.isDriveConnected) Icons.Default.CloudDone else Icons.Default.CloudUpload,
-                                contentDescription = null,
-                                tint = if (uiState.cpk.isDriveConnected) Color(0xFF00E676) else Color(0xFFF59E0B),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = if (uiState.cpk.isDriveConnected) "Drive Lié" else "Ouvrir",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (uiState.cpk.isDriveConnected) Color(0xFF00E676) else Color(0xFFF59E0B)
                             )
                         }
                     }
@@ -2589,7 +2455,7 @@ private fun ToofanDashboardTab(
                         fontFamily = MulishFontFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFE11D48),
+                        color = Color(0xFF000E38),
                         modifier = Modifier.clickable { dashboardViewModel.openContactsPage() }
                     )
                 }
@@ -2599,13 +2465,13 @@ private fun ToofanDashboardTab(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
-                    val ringColors = listOf(Color(0xFF00C48C), Color(0xFFF59E0B), Color(0xFF3B82F6))
+                    val ringColors = listOf(Color(0xFF000E38), Color(0xFF00227A), Color(0xFF0038A8))
 
                     // Up to 3 recent correspondents from transfers
                     recentCorrespondents.take(3).forEachIndexed { index, correspondent ->
                         RecentCorrespondentItem(
                             contact = correspondent,
-                            ringColor = ringColors.getOrElse(index) { Color(0xFF00C48C) },
+                            ringColor = ringColors.getOrElse(index) { Color(0xFF000E38) },
                             onClick = { onContactClick(correspondent) }
                         )
                     }
@@ -2620,7 +2486,8 @@ private fun ToofanDashboardTab(
                         Surface(
                             modifier = Modifier.size(52.dp),
                             shape = CircleShape,
-                            color = Color(0xFF60A5FA).copy(alpha = 0.85f)
+                            color = Color(0xFF000E38),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -2652,7 +2519,8 @@ private fun ToofanDashboardTab(
                         Surface(
                             modifier = Modifier.size(52.dp),
                             shape = CircleShape,
-                            color = Color(0xFF0F172A)
+                            color = Color(0xFF000E38),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -2673,6 +2541,90 @@ private fun ToofanDashboardTab(
                             textAlign = TextAlign.Center
                         )
                     }
+                }
+            }
+        }
+
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Ligne 1: 4 boutons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ToofanActionSquare(
+                        title = "Envoyer\nTransfert",
+                        bgColor = BrandOrange,
+                        icon = Icons.Default.Send,
+                        modifier = Modifier.weight(1f),
+                        onClick = onOpenTransfer
+                    )
+                    ToofanActionSquare(
+                        title = "Retrait\nEspèces",
+                        bgColor = BrandBlue,
+                        icon = Icons.Default.CallReceived,
+                        modifier = Modifier.weight(1f),
+                        onClick = { dashboardViewModel.openWithdrawalDialog() }
+                    )
+                    ToofanActionSquare(
+                        title = "Crédit\n& Prêts",
+                        bgColor = BrandBlue,
+                        icon = Icons.Default.MonetizationOn,
+                        modifier = Modifier.weight(1f),
+                        onClick = { dashboardViewModel.openLoansDialog() }
+                    )
+                    ToofanActionSquare(
+                        title = if (isAgentUser) "Espace\nAgent" else "PayScan\nPanier/POS",
+                        bgColor = BrandBlue,
+                        icon = if (isAgentUser) Icons.Default.SupportAgent else Icons.Default.QrCode,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (isAgentUser) dashboardViewModel.openAgentServicesScreen()
+                            else dashboardViewModel.openPayScan(PayScanMode.SUPERMARKET_BASKET)
+                        }
+                    )
+                }
+
+                // Ligne 2: 4 boutons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ToofanActionSquare(
+                        title = "Dépôt\nRecharger",
+                        bgColor = BrandOrange,
+                        icon = Icons.Default.Add,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            dashboardViewModel.openDepositDialog()
+                        }
+                    )
+                    ToofanActionSquare(
+                        title = "Paiement\nFactures",
+                        bgColor = BrandBlue,
+                        icon = Icons.Default.Receipt,
+                        modifier = Modifier.weight(1f),
+                        onClick = onOpenServices
+                    )
+                    ToofanActionSquare(
+                        title = "Mes\nCartes",
+                        bgColor = BrandBlue,
+                        icon = Icons.Default.CreditCard,
+                        modifier = Modifier.weight(1f),
+                        onClick = { dashboardViewModel.setSelectedTab(2) }
+                    )
+                    ToofanActionSquare(
+                        title = "Voir\nPlus",
+                        bgColor = BrandBlue,
+                        icon = Icons.Default.FilterList,
+                        modifier = Modifier.weight(1f),
+                        onClick = onActionPlusClick
+                    )
                 }
             }
         }
@@ -2702,7 +2654,7 @@ private fun ToofanDashboardTab(
                         fontFamily = MulishFontFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFE11D48),
+                        color = Color(0xFF000E38),
                         modifier = Modifier.clickable { dashboardViewModel.setSelectedTab(1) }
                     )
                 }
@@ -2729,7 +2681,7 @@ private fun ToofanDashboardTab(
                                     .fillMaxHeight()
                                     .clickable { dashboardViewModel.setTxDirectionFilter(code) },
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (selected) Color(0xFF00C48C) else Color.Transparent
+                                color = if (selected) Color(0xFF000E38) else Color.Transparent
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
@@ -3415,7 +3367,7 @@ private fun ToofanHistoryTab(
                                     .fillMaxHeight()
                                     .clickable { dashboardViewModel.setTxDirectionFilter(code) },
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (selected) Color(0xFF00C48C) else Color.Transparent
+                                color = if (selected) Color(0xFF000E38) else Color.Transparent
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
@@ -4469,42 +4421,44 @@ fun ToofanCardsAndSecurityTab(
                     }
                 } else if (uiState.userCards.isEmpty()) {
                     item {
-                        Card(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 12.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(containerColor = ToofanWhite),
-                            border = BorderStroke(1.5.dp, ToofanGrey1.copy(alpha = 0.5f))
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Column(
+                            // Sample Vertical Brand Card ("tout droit, pas en paysage")
+                            CashPayCardComponent(
+                                card = com.example.data.model.CardInfoDto(
+                                    id = "preview",
+                                    brand = "visa",
+                                    cardType = "virtuelle",
+                                    currency = "USD",
+                                    last4 = "4820",
+                                    status = "active"
+                                ),
+                                onFreeze = { dashboardViewModel.openBuyCardDialog() },
+                                onUnfreeze = { dashboardViewModel.openBuyCardDialog() },
+                                onManage = { dashboardViewModel.openBuyCardDialog() }
+                            )
+
+                            Text(
+                                text = "Aperçu de votre modèle de carte CashPay Visa / Mastercard",
+                                fontFamily = MulishFontFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp,
+                                color = ToofanBodyText,
+                                textAlign = TextAlign.Center
+                            )
+
+                            ToofanButton(
+                                title = "Commander votre première carte",
+                                onClick = { dashboardViewModel.openBuyCardDialog() },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(Icons.Default.CreditCard, contentDescription = null, tint = ToofanGrey1, modifier = Modifier.size(48.dp))
-                                Text(
-                                    text = "Aucune carte active",
-                                    fontFamily = MulishFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = ToofanMainDark
-                                )
-                                Text(
-                                    text = "Commandez votre carte Visa ou Mastercard virtuelle ou physique pour effectuer des paiements sécurisés partout dans le monde.",
-                                    fontFamily = MulishFontFamily,
-                                    fontSize = 12.sp,
-                                    color = ToofanBodyText,
-                                    textAlign = TextAlign.Center
-                                )
-                                ToofanButton(
-                                    title = "Commander une carte",
-                                    onClick = { dashboardViewModel.openBuyCardDialog() },
-                                    modifier = Modifier.fillMaxWidth(0.8f)
-                                )
-                            }
+                                    .padding(horizontal = 24.dp)
+                            )
                         }
                     }
                 } else {
@@ -4557,13 +4511,14 @@ fun ToofanCardsAndSecurityTab(
                             )
                             Button(
                                 onClick = { dashboardViewModel.openCpkReader() },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF38BDF8)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                                border = BorderStroke(1.2.dp, Color.White),
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Icon(Icons.Default.FolderOpen, contentDescription = null, tint = Color(0xFF0F172A), modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.FolderOpen, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Ouvrir le Lecteur CPK (${uiState.cpk.keys.size} clés)", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Text("Ouvrir le Lecteur CPK (${uiState.cpk.keys.size} clés)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                             }
                         }
                     }
@@ -4669,164 +4624,338 @@ fun CashPayCardComponent(
     val isFrozen = card.status?.lowercase() == "frozen" || card.status?.lowercase() == "inactive"
     val isPending = card.status?.lowercase() == "pending"
 
-    // Card background linear gradient
-    val brush = if (isVisa) {
-        Brush.linearGradient(listOf(Color(0xFF1E3A8A), Color(0xFF2563EB), Color(0xFF3B82F6)))
-    } else {
-        Brush.linearGradient(listOf(Color(0xFF311045), Color(0xFF701A75), Color(0xFFD946EF)))
-    }
-
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Box(
+        // Vertical Card: strictly upright ("tout droit, pas en paysage")
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .background(brush)
-                .padding(18.dp)
+                .width(250.dp)
+                .height(395.dp),
+            shape = RoundedCornerShape(18.dp),
+            border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.55f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            // Watermark icon with soft opacity
-            Icon(
-                imageVector = Icons.Default.CreditCard,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.08f),
+            Box(
                 modifier = Modifier
-                    .size(140.dp)
-                    .align(Alignment.BottomEnd)
-            )
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(18.dp))
             ) {
-                // Header with CashPay brand text & Provider/Brand Logo
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "CASH PAY",
-                        fontFamily = MulishFontFamily,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 15.sp,
-                        color = Color.White
-                    )
-
-                    // Real Card Brand Logo Pill
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = if (isVisa) "VISA" else "MASTERCARD",
-                            fontFamily = MulishFontFamily,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 10.sp,
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-
-                // Masked PAN
-                Text(
-                    text = "••••  ••••  ••••  ${card.last4 ?: ""}",
-                    fontFamily = MulishFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    letterSpacing = 2.sp
+                // Official Card Background image (waves & curves identified from design)
+                Image(
+                    painter = painterResource(id = R.drawable.cashpay_card_vertical_bg),
+                    contentDescription = "Fond de carte CashPay",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
 
-                // Footer with Owner Name, Status badge & main action triggers
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                // High-legibility subtle vignette to ensure crisp text reading
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.28f),
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.50f)
+                                )
+                            )
+                        )
+                )
+
+                // Vertical Card Layout content
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 22.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column {
+                    // TOP ROW: Brand Name + Logo (VISA / Mastercard)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "CASHPAY",
+                                fontFamily = MulishFontFamily,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 16.sp,
+                                color = Color.White,
+                                letterSpacing = 1.5.sp
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(BrandOrange)
+                            )
+                        }
+
+                        // Real Brand Logo: VISA or Mastercard
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color.White.copy(alpha = 0.18f),
+                            border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.4f)),
+                            modifier = Modifier.height(28.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(
+                                        id = if (isVisa) R.drawable.logo_visa else R.drawable.logo_mastercard
+                                    ),
+                                    contentDescription = if (isVisa) "VISA" else "Mastercard",
+                                    modifier = Modifier.height(18.dp),
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+                        }
+                    }
+
+                    // CHIP & CONTACTLESS & STATUS ROW
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // Metallic Gold EMV Chip
+                            Box(
+                                modifier = Modifier
+                                    .size(width = 44.dp, height = 34.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color(0xFFFFDF7A),
+                                                Color(0xFFE2B236),
+                                                Color(0xFF9E781B)
+                                            )
+                                        )
+                                    )
+                                    .border(1.dp, Color(0xFFFFF0A6), RoundedCornerShape(6.dp))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(4.dp)
+                                        .border(0.6.dp, Color(0xFF6B4D08).copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                                )
+                            }
+
+                            // Contactless wave indicator
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                            ) {
+                                Box(modifier = Modifier.width(2.5.dp).height(10.dp).clip(RoundedCornerShape(1.dp)).background(Color.White.copy(alpha = 0.55f)))
+                                Box(modifier = Modifier.width(2.5.dp).height(14.dp).clip(RoundedCornerShape(1.dp)).background(Color.White.copy(alpha = 0.75f)))
+                                Box(modifier = Modifier.width(2.5.dp).height(18.dp).clip(RoundedCornerShape(1.dp)).background(Color.White.copy(alpha = 0.95f)))
+                            }
+                        }
+
+                        // Status Badge
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = when {
+                                isPending -> Color.Gray.copy(alpha = 0.85f)
+                                isFrozen -> BrandOrange.copy(alpha = 0.9f)
+                                else -> Color(0xFF00E5FF).copy(alpha = 0.25f)
+                            },
+                            border = BorderStroke(
+                                1.dp,
+                                when {
+                                    isPending -> Color.White.copy(alpha = 0.4f)
+                                    isFrozen -> BrandOrange
+                                    else -> Color(0xFF00E5FF).copy(alpha = 0.8f)
+                                }
+                            )
+                        ) {
+                            Text(
+                                text = if (isFrozen) "GELÉE" else if (isPending) "EN ATTENTE" else "ACTIVE",
+                                fontFamily = MulishFontFamily,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
+
+                    // MASKED CARD NUMBER (PAN)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = "PROPRIÉTAIRE DE LA CARTE",
+                            text = "NUMÉRO DE CARTE",
                             fontFamily = MulishFontFamily,
                             fontSize = 8.sp,
-                            color = Color.White.copy(alpha = 0.6f)
+                            color = Color.White.copy(alpha = 0.7f),
+                            letterSpacing = 1.sp
                         )
                         Text(
-                            text = "TITULAIRE DU COMPTE",
+                            text = "••••  ••••  ••••  ${card.last4 ?: "0000"}",
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = Color.White
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            letterSpacing = 2.sp
                         )
                     }
 
+                    // EXPIRY & CURRENCY ROW
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Quick Action Buttons
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color.White.copy(alpha = 0.2f),
-                            modifier = Modifier.clickable {
-                                if (isFrozen) onUnfreeze() else onFreeze()
-                            }
-                        ) {
+                        Column {
                             Text(
-                                text = if (isFrozen) "Dégeler" else "Geler",
+                                text = "EXPIRE FIN",
+                                fontFamily = MulishFontFamily,
+                                fontSize = 8.sp,
+                                color = Color.White.copy(alpha = 0.7f),
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = "12/28",
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                fontSize = 13.sp,
+                                color = Color.White
                             )
                         }
 
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = ToFocusBorderColor, // Golden Orange accent
-                            modifier = Modifier.clickable(onClick = onManage)
-                        ) {
+                        Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "Gérer",
+                                text = "DEVISE",
                                 fontFamily = MulishFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                fontSize = 8.sp,
+                                color = Color.White.copy(alpha = 0.7f),
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = card.currency?.uppercase() ?: "USD",
+                                fontFamily = MulishFontFamily,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 13.sp,
+                                color = BrandOrangeLight
                             )
                         }
+                    }
+
+                    // BOTTOM ROW: CARDHOLDER NAME & TYPE
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column {
+                            Text(
+                                text = "TITULAIRE",
+                                fontFamily = MulishFontFamily,
+                                fontSize = 8.sp,
+                                color = Color.White.copy(alpha = 0.7f),
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = "TITULAIRE DU COMPTE",
+                                fontFamily = MulishFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = Color.White
+                            )
+                        }
+
+                        Text(
+                            text = if (card.cardType?.contains("physique", ignoreCase = true) == true) "PHYSIQUE" else "VIRTUELLE",
+                            fontFamily = MulishFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
                     }
                 }
             }
+        }
 
-            // Top-right Functional Status Indicator Dot
-            Box(
+        // Action Buttons right below the vertical card
+        Row(
+            modifier = Modifier.width(250.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Freeze / Unfreeze Button
+            Surface(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 28.dp)
+                    .weight(1f)
+                    .height(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable { if (isFrozen) onUnfreeze() else onFreeze() },
+                shape = RoundedCornerShape(10.dp),
+                color = if (isFrozen) BrandOrange.copy(alpha = 0.15f) else Color.White,
+                border = BorderStroke(1.dp, if (isFrozen) BrandOrange else ToofanGrey1)
             ) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = when {
-                        isPending -> Color.Gray
-                        isFrozen -> Color(0xFFFFB000)
-                        else -> ToofanGreen
-                    }
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = if (isFrozen) BrandOrange else ToofanMainDark,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = card.status?.uppercase() ?: "",
+                        text = if (isFrozen) "Dégeler" else "Geler",
                         fontFamily = MulishFontFamily,
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = if (isFrozen) BrandOrange else ToofanMainDark
+                    )
+                }
+            }
+
+            // Gérer Settings Button
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable(onClick = onManage),
+                shape = RoundedCornerShape(10.dp),
+                color = BrandOrange,
+                shadowElevation = 2.dp
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Gérer",
+                        fontFamily = MulishFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = Color.White
                     )
                 }
             }
@@ -5559,7 +5688,7 @@ fun resolveAvatarUrl(raw: String?): Any? {
 @Composable
 fun ToofanActionSquare(
     title: String,
-    bgColor: Color,
+    bgColor: Color = BrandBlue,
     icon: ImageVector,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
@@ -5571,6 +5700,7 @@ fun ToofanActionSquare(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         color = bgColor,
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
         shadowElevation = 0.5.dp
     ) {
         Column(
@@ -5668,13 +5798,13 @@ private fun RecentCorrespondentItem(
                 }
             }
 
-            // Green status indicator at bottom right
+            // Status indicator at bottom right
             Box(
                 modifier = Modifier
                     .size(13.dp)
                     .align(Alignment.BottomEnd)
                     .clip(CircleShape)
-                    .background(Color(0xFF00C48C))
+                    .background(Color(0xFF000E38))
                     .border(1.5.dp, Color.White, CircleShape)
             )
         }
@@ -6066,14 +6196,15 @@ fun ContactsPageDialog(
                                     permissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C48C)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                                border = BorderStroke(1.2.dp, Color.White),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
                                     text = "Autoriser l'accès aux contacts",
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF0F172A),
+                                    color = Color.White,
                                     fontSize = 14.sp
                                 )
                             }
@@ -6537,15 +6668,15 @@ fun ActionPlusModalDialog(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFF00C48C).copy(alpha = 0.2f),
-                    border = BorderStroke(1.dp, Color(0xFF00C48C)),
+                    color = Color.White.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
                     modifier = Modifier.size(40.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
-                            tint = Color(0xFF00C48C),
+                            tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -6739,11 +6870,11 @@ fun ActionPlusModalDialog(
                 Spacer(modifier = Modifier.height(10.dp))
             }
         },
-        containerColor = Color(0xFF070F22),
+        containerColor = Color(0xFF000E38),
         shape = RoundedCornerShape(24.dp),
         confirmButton = {
             TextButton(onClick = onDismiss, modifier = Modifier.padding(bottom = 8.dp)) {
-                Text("Fermer", fontFamily = MulishFontFamily, color = Color(0xFF00C48C), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Fermer", fontFamily = MulishFontFamily, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     )
@@ -7079,17 +7210,19 @@ fun CashPaySettingsModal(
                 item {
                     Button(
                         onClick = onLogout,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF4868).copy(alpha = 0.1f)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                        border = BorderStroke(1.2.dp, Color.White),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.Logout, contentDescription = null, tint = Color(0xFFFF4868), modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Logout, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Se déconnecter",
-                            color = Color(0xFFFF4868),
+                            color = Color.White,
+                            fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -7260,7 +7393,8 @@ fun MiniPublicProfileDialog(
                 // Action: Envoyer de l'argent
                 Button(
                     onClick = onSendMoney,
-                    colors = ButtonDefaults.buttonColors(containerColor = ToofanGreen),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                    border = BorderStroke(1.2.dp, Color.White),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -7292,8 +7426,8 @@ private fun ActionPlusTile(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
-        color = Color(0xFF1E293B),
-        border = BorderStroke(1.dp, Color(0xFF334155))
+        color = Color(0xFF000E38),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f))
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -7302,8 +7436,8 @@ private fun ActionPlusTile(
         ) {
             Surface(
                 shape = CircleShape,
-                color = iconBg.copy(alpha = 0.2f),
-                border = BorderStroke(1.dp, iconBg.copy(alpha = 0.5f)),
+                color = Color.White.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -7318,7 +7452,7 @@ private fun ActionPlusTile(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = iconBg,
+                            tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
                     }

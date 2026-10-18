@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.MulishFontFamily
+import com.example.ui.theme.PrimaryBlue
 import com.example.ui.theme.ToofanBodyText
 import com.example.ui.theme.ToofanGreen
 import com.example.ui.theme.ToofanGrey1
@@ -45,35 +46,32 @@ fun ToofanButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     containerColor: Color? = null,
-    contentColor: Color = ToofanWhite,
+    contentColor: Color = Color.White,
+    borderColor: Color = Color.White.copy(alpha = 0.85f),
     testTag: String = "toofan_button"
 ) {
-    // Premium brand gradient from the screenshots (Violet/Purple to Cyan/Blue)
-    val defaultGradient = Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFF06B6D4)))
-    
+    val buttonBg = containerColor ?: PrimaryBlue
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp) // Agrandissement à 56dp pour de meilleures cibles de touche
-            .clip(RoundedCornerShape(14.dp))
+            .height(52.dp)
+            .clip(RoundedCornerShape(12.dp))
             .clickable(enabled = enabled && !isLoading, onClick = onClick)
             .testTag(testTag),
-        shape = RoundedCornerShape(14.dp),
-        color = Color.Transparent, // Clear to let background brush show
+        shape = RoundedCornerShape(12.dp),
+        color = if (enabled) buttonBg else buttonBg.copy(alpha = 0.5f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.5.dp,
+            if (enabled) borderColor else borderColor.copy(alpha = 0.35f)
+        ),
         shadowElevation = if (enabled) 2.dp else 0.dp
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = if (containerColor != null) {
-                        Brush.linearGradient(listOf(containerColor, containerColor))
-                    } else {
-                        defaultGradient
-                    },
-                    alpha = if (enabled) 1f else 0.5f
-                )
+                .height(52.dp)
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -86,8 +84,8 @@ fun ToofanButton(
                     text = title,
                     color = contentColor,
                     fontFamily = MulishFontFamily,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 16.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
                 )
             }
         }

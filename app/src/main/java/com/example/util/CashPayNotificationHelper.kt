@@ -93,7 +93,7 @@ object CashPayNotificationHelper {
             pendingIntentFlags
         )
 
-        val smallIcon = R.mipmap.ic_launcher
+        val smallIcon = R.drawable.ic_cashpay_favicon_white
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(smallIcon)

@@ -64,14 +64,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
+import com.example.ui.theme.BrandBlue
 import com.example.ui.theme.MulishFontFamily
 
-// Immersive Premium Palette (OnChat Violet & Cyan Theme)
-private val BrandBlueMidnight = Color(0xFF0B0F19)
-private val BrandBlueDark = Color(0xFF13182E)
-private val BrandPurple = Color(0xFF8B5CF6)
-private val BrandCyan = Color(0xFF00E5FF)
-private val BrandGreen = Color(0xFF00C853)
+// Immersive CashPay Palette (Brand Card Royal Blue Theme)
+private val BrandBlueMidnight = Color(0xFF061548)
+private val BrandBlueDark = Color(0xFF05102E)
+private val BrandPurple = Color(0xFF0C2A87)
+private val BrandCyan = Color(0xFF004BE5)
+private val BrandGreen = Color(0xFF0C2A87)
 
 data class GuideStepData(
     val title: String,
@@ -384,8 +385,9 @@ fun InstallationGuideScreen(
                                         permissionsLauncher.launch(perms.toTypedArray())
                                     },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (permissionsRequested) BrandGreen else BrandPurple
+                                        containerColor = BrandBlue
                                     ),
+                                    border = BorderStroke(1.5.dp, Color.White),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -446,10 +448,10 @@ fun InstallationGuideScreen(
                         Button(
                             onClick = { stepIndex-- },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White.copy(alpha = 0.15f),
+                                containerColor = BrandBlueMidnight.copy(alpha = 0.75f),
                                 contentColor = Color.White
                             ),
-                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                            border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.7f)),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .weight(0.35f)
@@ -473,7 +475,8 @@ fun InstallationGuideScreen(
                                 onFinished()
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = BrandPurple),
+                        colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
+                        border = BorderStroke(1.5.dp, Color.White),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .weight(if (stepIndex > 0) 0.65f else 1f)
