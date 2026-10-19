@@ -68,20 +68,17 @@ class CashPayNotificationSyncManager(
                     }
                     dao.insertNotifications(entities)
 
-                    var pushedCount = 0
-                    // 1. Post push notifications for all unshown notifications
+                    // 1. Post push notifications only for genuinely new unshown and unread notifications
                     dtos.forEach { dto ->
-                        if (!CashPayNotificationHelper.isNotificationAlreadyShown(context, dto.id)) {
+                        if (!dto.read && !CashPayNotificationHelper.isNotificationAlreadyShown(context, dto.id)) {
                             CashPayNotificationHelper.showPushNotification(context, dto)
-                            pushedCount++
                         }
                     }
 
-                    // 2. If unlocked with PIN and no unshown notification was found, but notifications exist
-                    if (forcePushOnSessionUnlock && pushedCount == 0 && dtos.isNotEmpty()) {
-                        val latest = dtos.first()
-                        CashPayNotificationHelper.showPushNotification(context, latest)
-                    }
+                    // Update Home Screen Widget with latest notifications
+                    try {
+                        com.example.widget.NotificationWidgetProvider.updateAllWidgets(context)
+                    } catch (_: Exception) {}
                 }
             } catch (e: Exception) {
                 Log.w("NotificationSync", "Erreur lors de la synchronisation des notifications: ${e.message}")
@@ -119,6 +116,9 @@ class CashPayNotificationSyncManager(
 
             // Trigger real-time system push notification
             CashPayNotificationHelper.showPushNotification(context, dto)
+            try {
+                com.example.widget.NotificationWidgetProvider.updateAllWidgets(context)
+            } catch (_: Exception) {}
         }
     }
 

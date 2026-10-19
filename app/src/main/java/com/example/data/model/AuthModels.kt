@@ -375,13 +375,47 @@ data class TransfersMetaResponse(
 
 @JsonClass(generateAdapter = true)
 data class TransferRequest(
-    @Json(name = "userId") val userId: Long,
+    @Json(name = "userId") val userId: Long? = null,
     @Json(name = "receiverWalletId") val receiverWalletId: String? = null,
     @Json(name = "recipientAddress") val recipientAddress: String? = null,
     @Json(name = "amount") val amount: Double,
     @Json(name = "currency") val currency: String,
     @Json(name = "pin") val pin: String? = null,
     @Json(name = "preview") val preview: Boolean? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class BtcTransferRequest(
+    @Json(name = "currency") val currency: String = "BTC",
+    @Json(name = "amount") val amount: Double,
+    @Json(name = "recipientAddress") val recipientAddress: String,
+    @Json(name = "pin") val pin: String
+)
+
+@JsonClass(generateAdapter = true)
+data class BtcTransferDataDto(
+    @Json(name = "currency") val currency: String? = "BTC",
+    @Json(name = "amount") val amount: Double? = null,
+    @Json(name = "fee") val fee: Double? = null,
+    @Json(name = "totalDebit") val totalDebit: Double? = null,
+    @Json(name = "recipientAddress") val recipientAddress: String? = null,
+    @Json(name = "txHash") val txHash: String? = null,
+    @Json(name = "transactionId") val transactionId: Long? = null,
+    @Json(name = "withdrawalId") val withdrawalId: Long? = null,
+    @Json(name = "referenceCode") val referenceCode: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class BtcTransferResponse(
+    @Json(name = "success") val success: Boolean = true,
+    @Json(name = "status") val status: String? = null,
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "data") val data: BtcTransferDataDto? = null,
+    @Json(name = "error") val error: String? = null,
+    @Json(name = "amount") val amount: Double? = null,
+    @Json(name = "fee") val fee: Double? = null,
+    @Json(name = "totalDebit") val totalDebit: Double? = null,
+    @Json(name = "availableBalance") val availableBalance: Double? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -400,13 +434,14 @@ data class TransactionDetailsDto(
 @JsonClass(generateAdapter = true)
 data class TransferResponse(
     @Json(name = "success") val success: Boolean,
-    @Json(name = "status") val status: Int? = null,
+    @Json(name = "status") val status: String? = null,
     @Json(name = "message") val message: String? = null,
     @Json(name = "amount") val amount: Double? = null,
     @Json(name = "currency") val currency: String? = null,
     @Json(name = "fee") val fee: Double? = null,
     @Json(name = "totalDebit") val totalDebit: Double? = null,
     @Json(name = "transaction") val transaction: TransactionDetailsDto? = null,
+    @Json(name = "data") val data: BtcTransferDataDto? = null,
     @Json(name = "error") val error: String? = null
 )
 

@@ -88,6 +88,7 @@ class DashboardViewModel(
                     fetchUserCards()
                     fetchCardCatalog()
                     loadAgentCommissions()
+                    fetchBtcLiveRate()
                 } else if (session == null || !session.isAuthenticated) {
                     _uiState.value = DashboardUiState(main = MainUiState(isDarkMode = _uiState.value.isDarkMode))
                 }
@@ -722,16 +723,94 @@ class DashboardViewModel(
     }
 
     fun openBtcTransferDialog() {
-        updateMain { copy(isQuickTransferOpen = true,
-                transferRecipient = "",
-                transferCurrency = "BTC",
-                transferAmount = "",
-                transferFee = null,
-                transferTotalDebit = null,
-                transferError = null,
-                transferStep = 1,
-                transferSuccess = false,
-                isSearchingTransferRecipient = false) }
+        updateMain {
+            copy(
+                isSendBtcDialogOpen = true,
+                isBtcTransferLoading = false,
+                btcTransferError = null,
+                btcTransferSuccess = false,
+                btcTransferTxRef = null
+            )
+        }
+        fetchBtcLiveRate()
+    }
+
+    fun closeBtcTransferDialog() {
+        updateMain {
+            copy(
+                isSendBtcDialogOpen = false,
+                btcTransferError = null,
+                btcTransferSuccess = false
+            )
+        }
+    }
+
+    fun fetchBtcLiveRate() {
+        updateMain { copy(isBtcRateLoading = true) }
+        viewModelScope.launch {
+            val result = repository.getBtcRateUsd()
+            result.onSuccess { rate ->
+                updateMain { copy(isBtcRateLoading = false, btcLiveRateUsd = rate) }
+                updateExchange {
+                    val updated = exchangeRatesMap.toMutableMap()
+                    updated["BTC_USD"] = rate
+                    if (rate > 0.0) {
+                        updated["USD_BTC"] = 1.0 / rate
+                    }
+                    copy(exchangeRatesMap = updated)
+                }
+            }.onFailure {
+                updateMain { copy(isBtcRateLoading = false) }
+            }
+        }
+    }
+
+    fun sendBtc(recipientAddress: String, amountBtc: Double, pin: String) {
+        val effectiveUserId = getEffectiveUserId(null)
+        val cleanAddr = recipientAddress.trim().removePrefix("bitcoin:").substringBefore("?")
+        if (cleanAddr.isBlank()) {
+            updateMain { copy(btcTransferError = "Veuillez entrer une adresse Bitcoin de destination valide.") }
+            return
+        }
+        if (amountBtc <= 0.0) {
+            updateMain { copy(btcTransferError = "Le montant en BTC doit être supérieur à zéro.") }
+            return
+        }
+        val cleanPin = pin.trim()
+        if (cleanPin.length != 4 || !cleanPin.all { it.isDigit() }) {
+            updateMain { copy(btcTransferError = "Veuillez saisir votre code PIN CashPay (4 chiffres).") }
+            return
+        }
+
+        updateMain { copy(isBtcTransferLoading = true, btcTransferError = null) }
+        viewModelScope.launch {
+            val result = repository.transferBtc(
+                recipientAddress = cleanAddr,
+                amountBtc = amountBtc,
+                pin = cleanPin
+            )
+            result.onSuccess { resp ->
+                val txRef = resp.data?.txHash ?: resp.data?.referenceCode ?: "BTC-${System.currentTimeMillis()}"
+                updateMain {
+                    copy(
+                        isBtcTransferLoading = false,
+                        btcTransferSuccess = true,
+                        btcTransferTxRef = txRef,
+                        btcTransferError = null
+                    )
+                }
+                fetchWallet(effectiveUserId)
+                loadTransactions(effectiveUserId)
+            }.onFailure { err ->
+                val msg = err.message ?: "Erreur lors du transfert Bitcoin."
+                updateMain {
+                    copy(
+                        isBtcTransferLoading = false,
+                        btcTransferError = msg
+                    )
+                }
+            }
+        }
     }
 
     fun closeTransferDialog() {

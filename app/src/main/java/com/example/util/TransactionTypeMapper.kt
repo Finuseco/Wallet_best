@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.CallReceived
+import androidx.compose.material.icons.filled.CurrencyBitcoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.data.local.TransactionEntity
 
@@ -45,6 +46,26 @@ object TransactionTypeMapper {
             nature = "P2P",
             icon = Icons.Default.SwapHoriz,
             isPersonToPerson = true
+        ),
+        "BTC_TRANSFER" to TransactionTypeInfo(
+            code = "BTC_TRANSFER",
+            translationKey = "transaction.btc_transfer",
+            nameFr = "Transfert Bitcoin (BTC)",
+            shortName = "Transfert BTC",
+            description = "Transfert de Bitcoin vers une adresse blockchain externe",
+            nature = "CRYPTO",
+            icon = Icons.Default.CurrencyBitcoin,
+            isPersonToPerson = false
+        ),
+        "CRYPTO_WITHDRAWAL" to TransactionTypeInfo(
+            code = "CRYPTO_WITHDRAWAL",
+            translationKey = "transaction.crypto_withdrawal",
+            nameFr = "Retrait Bitcoin (BTC)",
+            shortName = "Retrait BTC",
+            description = "Retrait de cryptomonnaie vers un portefeuille externe",
+            nature = "CRYPTO",
+            icon = Icons.Default.CurrencyBitcoin,
+            isPersonToPerson = false
         ),
         "EXCHANGE" to TransactionTypeInfo(
             code = "EXCHANGE",
@@ -307,6 +328,7 @@ object TransactionTypeMapper {
 
         return when (info.code) {
             "TR" -> if (isIncoming) "Transfert reçu" else "Transfert envoyé"
+            "BTC_TRANSFER", "CRYPTO_WITHDRAWAL" -> if (isIncoming) "Bitcoin reçu (Crédit)" else "Transfert Bitcoin envoyé (Débit)"
             "DP_AGENT", "DP" -> if (isIncoming) "Dépôt reçu via agent" else "Dépôt via agent"
             "WD", "WD_AGENT" -> if (isIncoming) "Retrait annulé" else "Retrait auprès d'un agent"
             "LR", "LR_AGENT" -> "Remboursement de prêt"

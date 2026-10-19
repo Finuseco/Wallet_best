@@ -686,6 +686,20 @@ fun DashboardScreen(
         onDismiss = { dashboardViewModel.closeReceiveBtcDialog() }
     )
 
+    SendBtcDialog(
+        isOpen = uiState.isSendBtcDialogOpen,
+        btcBalance = uiState.walletResponse?.bitcoin?.balance ?: 0.0,
+        liveBtcRateUsd = uiState.btcLiveRateUsd,
+        isLoading = uiState.isBtcTransferLoading,
+        errorMessage = uiState.btcTransferError,
+        success = uiState.btcTransferSuccess,
+        txRef = uiState.btcTransferTxRef,
+        onDismiss = { dashboardViewModel.closeBtcTransferDialog() },
+        onSendBtc = { addr, amt, pin ->
+            dashboardViewModel.sendBtc(addr, amt, pin)
+        }
+    )
+
     // International Transfer Claims Screen & Dialogs (Section Client)
     androidx.activity.compose.BackHandler(enabled = uiState.isClaimsScreenOpen) {
         dashboardViewModel.closeClaimsScreen()
@@ -1212,12 +1226,13 @@ fun DashboardScreen(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable { 
-                                            dashboardViewModel.onCurrencyChanged(curr)
-                                            // Auto-update recipient address if prefilledRecipient is available
-                                            if (uiState.prefilledRecipient != null) {
-                                                if (curr == "BTC" && uiState.prefilledRecipient!!.bitcoin?.available == true) {
-                                                    dashboardViewModel.onRecipientChanged(uiState.prefilledRecipient!!.bitcoin!!.address ?: "")
-                                                } else {
+                                            if (curr == "BTC") {
+                                                dashboardViewModel.closeTransferDialog()
+                                                dashboardViewModel.openBtcTransferDialog()
+                                            } else {
+                                                dashboardViewModel.onCurrencyChanged(curr)
+                                                // Auto-update recipient address if prefilledRecipient is available
+                                                if (uiState.prefilledRecipient != null) {
                                                     dashboardViewModel.onRecipientChanged(uiState.prefilledRecipient!!.walletId)
                                                 }
                                             }
@@ -1280,100 +1295,111 @@ fun DashboardScreen(
                                     )
                                 }
                             } else {
-                            // Dual Search Mode Selector (ID Wallet vs Phone)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp))
-                                    .padding(3.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                val isWallet = uiState.transferSearchMode == "wallet"
-                                Box(
+                                // Dual Search Mode Selector (ID Wallet vs Phone)
+                                Row(
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .height(34.dp)
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(if (isWallet) Color(0xFF000E38) else Color.Transparent)
-                                        .clickable { dashboardViewModel.setTransferSearchMode("wallet") },
-                                    contentAlignment = Alignment.Center
+                                        .fillMaxWidth()
+                                        .background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp))
+                                        .padding(3.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    val isWallet = uiState.transferSearchMode == "wallet"
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(34.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(if (isWallet) Color(0xFF000E38) else Color.Transparent)
+                                            .clickable { dashboardViewModel.setTransferSearchMode("wallet") },
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.AccountBalanceWallet,
-                                            contentDescription = null,
-                                            tint = if (isWallet) Color.White else Color(0xFF475569),
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                        Text("ID Wallet", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (isWallet) Color.White else Color(0xFF475569))
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.AccountBalanceWallet,
+                                                contentDescription = null,
+                                                tint = if (isWallet) Color.White else Color(0xFF475569),
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                            Text("ID Wallet", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (isWallet) Color.White else Color(0xFF475569))
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(34.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(if (!isWallet) Color(0xFF000E38) else Color.Transparent)
+                                            .clickable { dashboardViewModel.setTransferSearchMode("phone") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PhoneAndroid,
+                                                contentDescription = null,
+                                                tint = if (!isWallet) Color.White else Color(0xFF475569),
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                            Text("N° Téléphone", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (!isWallet) Color.White else Color(0xFF475569))
+                                        }
                                     }
                                 }
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(34.dp)
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(if (!isWallet) Color(0xFF000E38) else Color.Transparent)
-                                        .clickable { dashboardViewModel.setTransferSearchMode("phone") },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.PhoneAndroid,
-                                            contentDescription = null,
-                                            tint = if (!isWallet) Color.White else Color(0xFF475569),
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                        Text("N° Téléphone", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (!isWallet) Color.White else Color(0xFF475569))
-                                    }
-                                }
-                            }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                OutlinedTextField(
-                                    value = uiState.transferRecipient,
-                                    onValueChange = { dashboardViewModel.onRecipientChanged(it) },
-                                    label = {
-                                        Text(if (uiState.transferSearchMode == "wallet") "Entrer l'ID Wallet (ex: WAL-XXX)" else "Entrer le numéro (ex: +243...)")
-                                    },
-                                    placeholder = {
-                                        Text(if (uiState.transferSearchMode == "wallet") "WAL-123456" else "+243812345678")
-                                    },
-                                    shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Button(
-                                    onClick = { dashboardViewModel.searchTransferRecipient() },
-                                    enabled = !uiState.isSearchingTransferRecipient && uiState.transferRecipient.isNotBlank(),
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
-                                    modifier = Modifier.height(52.dp)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (uiState.isSearchingTransferRecipient) {
-                                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                                    } else {
-                                        Icon(Icons.Default.Search, contentDescription = "Vérifier", modifier = Modifier.size(18.dp))
+                                    OutlinedTextField(
+                                        value = uiState.transferRecipient,
+                                        onValueChange = { dashboardViewModel.onRecipientChanged(it) },
+                                        label = {
+                                            Text(if (uiState.transferSearchMode == "wallet") "Entrer l'ID Wallet (ex: WAL-XXX)" else "Entrer le numéro (ex: +243...)")
+                                        },
+                                        placeholder = {
+                                            Text(if (uiState.transferSearchMode == "wallet") "WAL-123456" else "+243812345678")
+                                        },
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier.weight(1f),
+                                        singleLine = true
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Button(
+                                        onClick = { dashboardViewModel.searchTransferRecipient() },
+                                        enabled = !uiState.isSearchingTransferRecipient && uiState.transferRecipient.isNotBlank(),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                                        modifier = Modifier.height(52.dp)
+                                    ) {
+                                        if (uiState.isSearchingTransferRecipient) {
+                                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                                        } else {
+                                            Icon(Icons.Default.Search, contentDescription = "Vérifier", modifier = Modifier.size(18.dp))
+                                        }
                                     }
                                 }
                             }
-                          }
                         }
 
                         ToofanInputField(
                             value = uiState.transferAmount,
                             onValueChange = { dashboardViewModel.onAmountChanged(it) },
                             placeholder = "Montant à transférer"
+                        )
+                        
+                        // Always show PIN field for validation
+                        Spacer(modifier = Modifier.height(6.dp))
+                        OutlinedTextField(
+                            value = pinInput,
+                            onValueChange = { pinInput = it.filter { ch -> ch.isDigit() }.take(4) },
+                            label = { Text("Code PIN CashPay (4 chiffres)") },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
                         )
                     }
 
@@ -2175,57 +2201,67 @@ private fun BalanceCardsCarousel(
                                         modifier = Modifier.size(26.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (uiState.isBalanceVisible) String.format("%.8f", btcBal) else "•••••••• BTC",
-                                        fontFamily = MulishFontFamily,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 22.sp,
-                                        color = Color.White
-                                    )
-                                }
-
-                                // Shortened BTC Address Script
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    val displayAddr = if (btcAddress.length > 18) {
-                                        "${btcAddress.take(8)}...${btcAddress.takeLast(6)}"
-                                    } else btcAddress
-
-                                    Text(
-                                        text = "Adresse BTC : $displayAddr",
-                                        fontFamily = MulishFontFamily,
-                                        fontSize = 11.sp,
-                                        color = Color.White.copy(alpha = 0.7f)
-                                    )
-
-                                    IconButton(
-                                        onClick = {
-                                            clipboardManager.setText(AnnotatedString(btcAddress))
-                                            Toast.makeText(context, "Adresse BTC copiée !", Toast.LENGTH_SHORT).show()
-                                        },
-                                        modifier = Modifier.size(22.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ContentCopy,
-                                            contentDescription = "Copier BTC",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(14.dp)
+                                    Column {
+                                        Text(
+                                            text = if (uiState.isBalanceVisible) String.format("%.8f", btcBal) else "•••••••• BTC",
+                                            fontFamily = MulishFontFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 22.sp,
+                                            color = Color.White
+                                        )
+                                        val liveBtcRate = if (uiState.btcLiveRateUsd > 1000.0) {
+                                            uiState.btcLiveRateUsd
+                                        } else {
+                                            uiState.exchangeRatesMap["BTC_USD"] ?: 82000.0
+                                        }
+                                        val btcUsdValue = btcBal * liveBtcRate
+                                        Text(
+                                            text = if (uiState.isBalanceVisible) {
+                                                "≈ $ ${String.format(java.util.Locale.US, "%,.2f", btcUsdValue)} USD"
+                                            } else "•••• USD",
+                                            fontFamily = MulishFontFamily,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 12.sp,
+                                            color = Color.White.copy(alpha = 0.85f)
+                                        )
+                                        Text(
+                                            text = "1 BTC = $ ${String.format(java.util.Locale.US, "%,.2f", liveBtcRate)} USD",
+                                            fontFamily = MulishFontFamily,
+                                            fontSize = 10.sp,
+                                            color = Color(0xFFF59E0B)
                                         )
                                     }
                                 }
 
-                                // Quick Action Pills
+                                // Quick Action Buttons (Organized with icons and high contrast)
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    BtcActionPill("Recevoir") { dashboardViewModel.openReceiveBtcDialog() }
-                                    BtcActionPill("Envoyer") { dashboardViewModel.openBtcTransferDialog() }
-                                    BtcActionPill("Acheter") { dashboardViewModel.openBuyBtcDialog() }
-                                    BtcActionPill("Vendre") { dashboardViewModel.openSellBtcDialog() }
+                                    BtcCardActionButton(
+                                        label = "Recevoir",
+                                        icon = Icons.Default.CallReceived,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openReceiveBtcDialog() }
+
+                                    BtcCardActionButton(
+                                        label = "Envoyer",
+                                        icon = Icons.Default.Send,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openBtcTransferDialog() }
+
+                                    BtcCardActionButton(
+                                        label = "Acheter",
+                                        icon = Icons.Default.ShoppingCart,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openBuyBtcDialog() }
+
+                                    BtcCardActionButton(
+                                        label = "Vendre",
+                                        icon = Icons.Default.CurrencyExchange,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openSellBtcDialog() }
                                 }
                             }
                         }
@@ -2442,6 +2478,99 @@ private fun ToofanDashboardTab(
                                 fontSize = 11.sp,
                                 color = Color(0xFF000E38),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Widget Installation Banner (Shown ONLY if the widget is NOT already configured on the home screen)
+        item {
+            val isWidgetConfigured = remember {
+                com.example.widget.NotificationWidgetProvider.isWidgetInstalled(context)
+            }
+            var widgetBannerDismissed by remember { mutableStateOf(false) }
+
+            if (!isWidgetConfigured && !widgetBannerDismissed) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF000E38),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFFF6600).copy(alpha = 0.2f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Widget",
+                                    tint = Color(0xFFFF6600),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Column {
+                                Text(
+                                    text = "Widget Notifications CashPay",
+                                    fontFamily = MulishFontFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Suivez vos alertes et transactions en temps réel depuis votre écran d'accueil.",
+                                    fontFamily = MulishFontFamily,
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF94A3B8)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    val appWidgetManager = context.getSystemService(android.appwidget.AppWidgetManager::class.java)
+                                    if (appWidgetManager?.isRequestPinAppWidgetSupported == true) {
+                                        val myProvider = android.content.ComponentName(context, com.example.widget.NotificationWidgetProvider::class.java)
+                                        appWidgetManager.requestPinAppWidget(myProvider, null, null)
+                                        Toast.makeText(context, "Demande d'installation du widget envoyée !", Toast.LENGTH_SHORT).show()
+                                        widgetBannerDismissed = true
+                                    } else {
+                                        Toast.makeText(context, "Maintenez l'écran d'accueil pour ajouter le widget CashPay.", Toast.LENGTH_LONG).show()
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Maintenez l'écran d'accueil pour ajouter le widget CashPay.", Toast.LENGTH_LONG).show()
+                                }
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Installer",
+                                fontFamily = MulishFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                color = Color.White
                             )
                         }
                     }
@@ -2858,24 +2987,42 @@ private fun ToofanDashboardTab(
 }
 
 @Composable
-private fun BtcActionPill(
+private fun BtcCardActionButton(
     label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick),
-        color = Color.White.copy(alpha = 0.15f)
+        onClick = onClick,
+        modifier = modifier.height(36.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF261D13),
+        border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.55f))
     ) {
-        Text(
-            text = label,
-            fontFamily = MulishFontFamily,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color(0xFFF59E0B),
+                modifier = Modifier.size(13.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = label,
+                fontFamily = MulishFontFamily,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                maxLines = 1
+            )
+        }
     }
 }
 

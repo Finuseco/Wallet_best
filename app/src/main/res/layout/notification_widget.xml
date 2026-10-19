@@ -3,20 +3,127 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white"
-    android:padding="8dp">
+    android:background="@drawable/widget_bg"
+    android:clipChildren="true"
+    android:clipToPadding="true">
 
-    <TextView
-        android:id="@+id/widget_title"
+    <!-- Premium Brand Header -->
+    <LinearLayout
+        android:id="@+id/widget_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Notifications CashPay"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:paddingBottom="4dp"/>
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@drawable/widget_header_bg"
+        android:paddingStart="12dp"
+        android:paddingEnd="10dp"
+        android:gravity="center_vertical">
 
-    <ListView
-        android:id="@+id/notification_list"
+        <!-- Logo CashPay -->
+        <ImageView
+            android:id="@+id/widget_logo"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_cashpay_favicon"
+            android:scaleType="centerInside" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="8dp">
+
+            <TextView
+                android:id="@+id/widget_app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CashPay All"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notifications &amp; Direct"
+                android:textColor="#94A3B8"
+                android:textSize="9sp" />
+        </LinearLayout>
+
+        <!-- Bouton Actualiser -->
+        <ImageButton
+            android:id="@+id/widget_btn_refresh"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_widget_refresh"
+            android:scaleType="centerInside"
+            android:contentDescription="Actualiser"
+            android:layout_marginEnd="4dp" />
+
+        <!-- Bouton Ouvrir -->
+        <TextView
+            android:id="@+id/widget_btn_open_app"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ouvrir"
+            android:textColor="#FFB74D"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp" />
+    </LinearLayout>
+
+    <!-- Main List Container -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:padding="6dp">
+
+        <ListView
+            android:id="@+id/notification_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:scrollbars="vertical" />
+
+        <!-- Empty View -->
+        <LinearLayout
+            android:id="@+id/widget_empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_cashpay_favicon"
+                android:alpha="0.4"
+                android:contentDescription="Logo CashPay" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aucune notification récente"
+                android:textColor="#1E293B"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connectez-vous pour suivre vos alertes et transactions en direct."
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

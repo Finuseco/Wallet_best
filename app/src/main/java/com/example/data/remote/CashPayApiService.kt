@@ -73,6 +73,9 @@ interface CashPayApiService {
     @POST("api/v1/transfers")
     suspend fun transfer(@Body request: TransferRequest): Response<TransferResponse>
 
+    @POST("api/v1/transfers")
+    suspend fun transferBtc(@Body request: com.example.data.model.BtcTransferRequest): Response<com.example.data.model.BtcTransferResponse>
+
     @POST("api/v1/exchange")
     suspend fun exchange(@Body request: ExchangeRequest): Response<ExchangeResponse>
 

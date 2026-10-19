@@ -212,6 +212,9 @@ class CashPayRepository(
                             com.example.util.CashPayNotificationHelper.showPushNotification(ctx, dto)
                         }
                     }
+                    try {
+                        com.example.widget.NotificationWidgetProvider.updateAllWidgets(ctx)
+                    } catch (_: Exception) {}
                 }
 
                 Result.success(entities)
@@ -231,6 +234,9 @@ class CashPayRepository(
     suspend fun markNotificationRead(id: Long): Result<Boolean> {
         return try {
             dao.markNotificationRead(id)
+            context?.let { ctx ->
+                try { com.example.widget.NotificationWidgetProvider.updateAllWidgets(ctx) } catch (_: Exception) {}
+            }
             val response = apiService.markNotificationRead(id)
             if (response.isSuccessful && response.body()?.success == true) {
                 Result.success(true)
@@ -246,6 +252,9 @@ class CashPayRepository(
     suspend fun markAllNotificationsRead(): Result<Boolean> {
         return try {
             dao.markAllNotificationsRead()
+            context?.let { ctx ->
+                try { com.example.widget.NotificationWidgetProvider.updateAllWidgets(ctx) } catch (_: Exception) {}
+            }
             val response = apiService.markAllNotificationsRead()
             if (response.isSuccessful && response.body()?.success == true) {
                 Result.success(true)
@@ -585,6 +594,12 @@ class CashPayRepository(
         dao.clearUserProfile()
         dao.clearTransactions()
         dao.clearNotifications()
+        context?.let { ctx ->
+            try {
+                com.example.util.CashPayNotificationHelper.clearNotificationHistory(ctx)
+                com.example.widget.NotificationWidgetProvider.updateAllWidgets(ctx)
+            } catch (_: Exception) {}
+        }
     }
 
     private fun mapProfileDtoToEntity(p: UserProfileDto): UserProfileEntity {
@@ -705,6 +720,101 @@ class CashPayRepository(
         }
     }
 
+    suspend fun transferBtc(
+        recipientAddress: String,
+        amountBtc: Double,
+        pin: String
+    ): Result<com.example.data.model.BtcTransferResponse> {
+        return kotlinx.coroutines.withContext(Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val req = com.example.data.model.BtcTransferRequest(
+                    currency = "BTC",
+                    amount = amountBtc,
+                    recipientAddress = recipientAddress.trim(),
+                    pin = pin.trim()
+                )
+                val response = apiService.transferBtc(req)
+                if (response.isSuccessful && response.body() != null) {
+                    val body = response.body()!!
+                    if (body.success) {
+                        // Record DEBIT transaction
+                        try {
+                            val nowFmt = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).apply {
+                                timeZone = java.util.TimeZone.getTimeZone("UTC")
+                            }.format(java.util.Date())
+                            val dateHuman = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+
+                            val txHash = body.data?.txHash ?: "BTC-${System.currentTimeMillis()}"
+                            val refCode = body.data?.referenceCode ?: txHash
+                            val btcRate = getBtcRateUsd().getOrDefault(82500.0)
+                            val usdValue = amountBtc * btcRate
+
+                            val debitTx = TransactionEntity(
+                                id = body.data?.transactionId ?: System.currentTimeMillis(),
+                                title = "Transfert Bitcoin envoyé",
+                                recipient = recipientAddress.trim(),
+                                amount = amountBtc,
+                                currency = "BTC",
+                                type = "BTC_TRANSFER",
+                                date = dateHuman,
+                                status = body.status ?: "completed",
+                                reference = refCode,
+                                direction = "outgoing",
+                                displayKind = "service",
+                                displayName = "Transfert Bitcoin (${recipientAddress.trim().take(6)}...${recipientAddress.trim().takeLast(4)})",
+                                displayAvatar = null,
+                                displayIcon = "currency_bitcoin",
+                                fee = body.data?.fee ?: 0.00001,
+                                createdAt = nowFmt,
+                                otherUserFullName = "Réseau Bitcoin ($recipientAddress)",
+                                otherUserProfilePhoto = null,
+                                description = "Transfert blockchain envoyé vers $recipientAddress. Valeur : ≈ $${String.format(java.util.Locale.US, "%.2f", usdValue)} USD. TXID: $txHash",
+                                senderWalletId = null,
+                                receiverWalletId = recipientAddress.trim()
+                            )
+                            dao.insertTransaction(debitTx)
+
+                            // Insert notification so widget & notification center display it
+                            val notif = NotificationEntity(
+                                id = System.currentTimeMillis(),
+                                title = "Transfert Bitcoin envoyé (Débit)",
+                                description = "Votre transfert de ${String.format(java.util.Locale.US, "%.8f", amountBtc).trimEnd('0').trimEnd('.')} BTC (≈ $${String.format(java.util.Locale.US, "%.2f", usdValue)} USD) vers ${recipientAddress.take(8)}... a été envoyé avec succès.",
+                                timestamp = nowFmt,
+                                read = false,
+                                type = "general"
+                            )
+                            dao.insertNotification(notif)
+                            com.example.data.remote.ApiClient.currentUserId?.let { uid ->
+                                try { getWallet(uid) } catch (_: Exception) {}
+                            }
+                            context?.let { ctx ->
+                                com.example.widget.NotificationWidgetProvider.updateAllWidgets(ctx)
+                            }
+                        } catch (_: Exception) {}
+
+                        Result.success(body)
+                    } else {
+                        val errMsg = body.error ?: body.message ?: "Échec du transfert Bitcoin."
+                        Result.failure(Exception(errMsg))
+                    }
+                } else {
+                    val rawErr = response.errorBody()?.string()
+                    val msg = when (response.code()) {
+                        202 -> "Vérification auprès du nœud Bitcoin en cours. Aucun débit effectué."
+                        400 -> extractErrorMessage(rawErr, "Paramètres ou solde Bitcoin invalide.")
+                        401 -> "Session expirée. Veuillez vous reconnecter."
+                        500 -> "Erreur interne lors du transfert Bitcoin."
+                        else -> extractErrorMessage(rawErr, "Erreur lors du transfert Bitcoin (${response.code()})")
+                    }
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception(e.message ?: "Erreur réseau lors du transfert Bitcoin.", e))
+            }
+        }
+    }
+
     suspend fun exchangeCurrencies(
         amount: Double,
         fromCurrency: String,
@@ -775,6 +885,77 @@ class CashPayRepository(
             }
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    // --- BITCOIN REAL-TIME EXCHANGE RATE API ---
+    suspend fun getBtcRateUsd(): Result<Double> {
+        return kotlinx.coroutines.withContext(Dispatchers.IO) {
+            try {
+                // 1. Try Binance public API (real-time ticker)
+                try {
+                    val request = Request.Builder()
+                        .url("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT")
+                        .get()
+                        .build()
+                    val response = com.example.data.remote.ApiClient.okHttpClient.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        val bodyStr = response.body?.string()
+                        if (!bodyStr.isNullOrBlank()) {
+                            val obj = JSONObject(bodyStr)
+                            val price = obj.optDouble("price", 0.0)
+                            if (price > 1000.0) {
+                                return@withContext Result.success(price)
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+
+                // 2. Try Blockchain.info ticker
+                try {
+                    val request = Request.Builder()
+                        .url("https://blockchain.info/ticker")
+                        .get()
+                        .build()
+                    val response = com.example.data.remote.ApiClient.okHttpClient.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        val bodyStr = response.body?.string()
+                        if (!bodyStr.isNullOrBlank()) {
+                            val obj = JSONObject(bodyStr)
+                            val usdObj = obj.optJSONObject("USD")
+                            val last = usdObj?.optDouble("last", 0.0) ?: 0.0
+                            if (last > 1000.0) {
+                                return@withContext Result.success(last)
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+
+                // 3. Try CoinGecko
+                try {
+                    val request = Request.Builder()
+                        .url("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
+                        .get()
+                        .build()
+                    val response = com.example.data.remote.ApiClient.okHttpClient.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        val bodyStr = response.body?.string()
+                        if (!bodyStr.isNullOrBlank()) {
+                            val obj = JSONObject(bodyStr)
+                            val btcObj = obj.optJSONObject("bitcoin")
+                            val price = btcObj?.optDouble("usd", 0.0) ?: 0.0
+                            if (price > 1000.0) {
+                                return@withContext Result.success(price)
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+
+                // Default fallback market rate if offline
+                Result.success(82000.0)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 

@@ -141,4 +141,12 @@ object CashPayNotificationHelper {
         val shownSet = prefs.getStringSet("shown_ids", emptySet()) ?: emptySet()
         return shownSet.contains(id.toString())
     }
+
+    fun clearNotificationHistory(context: Context) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NOTIFS, Context.MODE_PRIVATE)
+            prefs.edit().clear().apply()
+            NotificationManagerCompat.from(context).cancelAll()
+        } catch (_: Exception) {}
+    }
 }

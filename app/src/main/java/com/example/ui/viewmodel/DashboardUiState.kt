@@ -53,6 +53,13 @@ data class MainUiState(
     val transferSearchMode: String = "wallet", // "wallet" or "phone"
     val isSearchingTransferRecipient: Boolean = false,
     val isReceiveBtcDialogOpen: Boolean = false,
+    val isSendBtcDialogOpen: Boolean = false,
+    val btcLiveRateUsd: Double = 82500.0,
+    val isBtcRateLoading: Boolean = false,
+    val isBtcTransferLoading: Boolean = false,
+    val btcTransferError: String? = null,
+    val btcTransferSuccess: Boolean = false,
+    val btcTransferTxRef: String? = null,
     val isLoansScreenOpen: Boolean = false
 )
 
@@ -571,8 +578,15 @@ data class DashboardUiState(
     val isBalanceVisible: Boolean = main.isBalanceVisible
     val currentUserId: Long? = main.currentUserId
     val transferSearchMode: String = main.transferSearchMode
-    val isSearchingTransferRecipient: Boolean = main.isSearchingTransferRecipient
+    val isSearchingTransferRecipient: Boolean get() = main.isSearchingTransferRecipient
     val isReceiveBtcDialogOpen: Boolean get() = main.isReceiveBtcDialogOpen
+    val isSendBtcDialogOpen: Boolean get() = main.isSendBtcDialogOpen
+    val btcLiveRateUsd: Double get() = main.btcLiveRateUsd
+    val isBtcRateLoading: Boolean get() = main.isBtcRateLoading
+    val isBtcTransferLoading: Boolean get() = main.isBtcTransferLoading
+    val btcTransferError: String? get() = main.btcTransferError
+    val btcTransferSuccess: Boolean get() = main.btcTransferSuccess
+    val btcTransferTxRef: String? get() = main.btcTransferTxRef
     val isLoansScreenOpen: Boolean get() = main.isLoansScreenOpen
 
     // --- CARDS IMMUTABLE FIELDS ---
