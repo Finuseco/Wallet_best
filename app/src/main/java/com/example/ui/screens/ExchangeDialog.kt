@@ -341,7 +341,7 @@ fun ExchangeDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Vous convertissez (Source)",
+                                    text = "Source",
                                     fontFamily = MulishFontFamily,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium,
@@ -431,7 +431,7 @@ fun ExchangeDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Vous recevez (Destination)",
+                                    text = "Destination",
                                     fontFamily = MulishFontFamily,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium,
@@ -585,42 +585,45 @@ fun ExchangeDialog(
                                             .background(if (liveRate != null) Color(0xFF00E676) else Color(0xFFF59E0B))
                                     )
                                     Text(
-                                        "Taux en temps réel (Base de données) :",
-                                        fontSize = 11.5.sp,
+                                        "Taux en temps réel",
+                                        fontSize = 12.sp,
                                         color = Color(0xFF94A3B8),
                                         fontFamily = MulishFontFamily
                                     )
                                 }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                IconButton(
+                                    onClick = onRefreshRates,
+                                    modifier = Modifier.size(26.dp)
                                 ) {
-                                    if (isQuoteLoading) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(14.dp),
-                                            strokeWidth = 2.dp,
-                                            color = Color(0xFF00E676)
-                                        )
-                                    } else {
-                                        Text(
-                                            if (liveRate != null) "1 $fromCurrency = ${formatRate(liveRate)} $toCurrency" else "En cours de détection...",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (liveRate != null) Color(0xFF00E676) else Color(0xFFF59E0B),
-                                            fontFamily = MulishFontFamily
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = onRefreshRates,
-                                        modifier = Modifier.size(24.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.SwapVert,
-                                            contentDescription = "Actualiser le taux",
-                                            tint = Color(0xFF00E676),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.SwapVert,
+                                        contentDescription = "Actualiser le taux",
+                                        tint = Color(0xFF00E676),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Valeur du taux :", fontSize = 12.sp, color = Color(0xFF94A3B8), fontFamily = MulishFontFamily)
+                                if (isQuoteLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color(0xFF00E676)
+                                    )
+                                } else {
+                                    Text(
+                                        if (liveRate != null) "1 $fromCurrency = ${formatRate(liveRate)} $toCurrency" else "En cours...",
+                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (liveRate != null) Color(0xFF00E676) else Color(0xFFF59E0B),
+                                        fontFamily = MulishFontFamily
+                                    )
                                 }
                             }
 
