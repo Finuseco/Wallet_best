@@ -52,8 +52,55 @@ class DashboardViewModel(
     fun updateRegideso(transform: RegidesoUiState.() -> RegidesoUiState) = _uiState.update { it.copy(regideso = it.regideso.transform()) }
     fun updateCpk(transform: CpkUiState.() -> CpkUiState) = _uiState.update { it.copy(cpk = it.cpk.transform()) }
     fun updatePayScan(transform: PayScanUiState.() -> PayScanUiState) = _uiState.update { it.copy(payscan = it.payscan.transform()) }
+    fun updateAnalytics(transform: AnalyticsUiState.() -> AnalyticsUiState) = _uiState.update { it.copy(analytics = it.analytics.transform()) }
     fun openLoansScreen() = updateMain { copy(isLoansScreenOpen = true) }
     fun closeLoansScreen() = updateMain { copy(isLoansScreenOpen = false) }
+
+    fun openAnalyticsScreen() {
+        updateAnalytics { copy(isAnalyticsOpen = true) }
+        fetchBtcMarketTelemetry(_uiState.value.analytics.selectedPeriod)
+    }
+
+    fun closeAnalyticsScreen() {
+        updateAnalytics { copy(isAnalyticsOpen = false) }
+    }
+
+    fun setAnalyticsTab(tab: Int) = updateAnalytics { copy(selectedTab = tab) }
+
+    fun setAnalyticsPeriod(period: String) {
+        updateAnalytics { copy(selectedPeriod = period) }
+        fetchBtcMarketTelemetry(period)
+    }
+
+    fun setAnalyticsFlowFilter(filter: String) = updateAnalytics { copy(flowDirectionFilter = filter) }
+
+    fun setBudgetTarget(target: Double) = updateAnalytics { copy(budgetTargetUsd = target) }
+
+    fun setLiveActivePointIndex(idx: Int) = updateAnalytics { copy(liveActivePointIndex = idx) }
+
+    fun fetchBtcMarketTelemetry(period: String = "1M") {
+        updateAnalytics { copy(isBtcMarketLoading = true, btcMarketError = null) }
+        viewModelScope.launch {
+            val result = repository.getBtcMarketTelemetry(period)
+            result.onSuccess { telemetry ->
+                updateAnalytics {
+                    copy(
+                        isBtcMarketLoading = false,
+                        btcTelemetry = telemetry,
+                        btcMarketError = null
+                    )
+                }
+                updateMain { copy(btcLiveRateUsd = telemetry.priceUsd) }
+            }.onFailure { err ->
+                updateAnalytics {
+                    copy(
+                        isBtcMarketLoading = false,
+                        btcMarketError = err.message
+                    )
+                }
+            }
+        }
+    }
 
 
     val userProfile: StateFlow<UserProfileEntity?> = repository.userProfile
@@ -790,7 +837,7 @@ class DashboardViewModel(
                 pin = cleanPin
             )
             result.onSuccess { resp ->
-                val txRef = resp.data?.txHash ?: resp.data?.referenceCode ?: "BTC-${System.currentTimeMillis()}"
+                val txRef = resp.referenceCode ?: resp.data?.referenceCode ?: resp.data?.txHash ?: "BTC-${System.currentTimeMillis()}"
                 updateMain {
                     copy(
                         isBtcTransferLoading = false,
@@ -1020,6 +1067,8 @@ contacts = it.contacts.copy(
                 transferStep = 1,
                 transferSuccess = false) }
     }
+
+    fun clearTransferError() = updateMain { copy(transferError = null) }
 
     // --- CONTACTS & PUBLIC PROFILE ACTIONS ---
     fun openContactsDialog() {

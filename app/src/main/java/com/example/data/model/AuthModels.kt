@@ -410,11 +410,14 @@ data class BtcTransferResponse(
     @Json(name = "success") val success: Boolean = true,
     @Json(name = "status") val status: String? = null,
     @Json(name = "message") val message: String? = null,
-    @Json(name = "data") val data: BtcTransferDataDto? = null,
-    @Json(name = "error") val error: String? = null,
+    @Json(name = "referenceCode") val referenceCode: String? = null,
+    @Json(name = "currency") val currency: String? = "BTC",
     @Json(name = "amount") val amount: Double? = null,
     @Json(name = "fee") val fee: Double? = null,
+    @Json(name = "totalDebited") val totalDebited: Double? = null,
     @Json(name = "totalDebit") val totalDebit: Double? = null,
+    @Json(name = "data") val data: BtcTransferDataDto? = null,
+    @Json(name = "error") val error: String? = null,
     @Json(name = "availableBalance") val availableBalance: Double? = null
 )
 

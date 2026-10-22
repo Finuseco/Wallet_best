@@ -156,16 +156,16 @@ private fun FloatingNavItem(
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (isSelected) BrandBlue else Color(0xFF94A3B8),
-            modifier = Modifier.size(22.dp)
+            tint = if (isSelected) Color(0xFF000E38) else Color(0xFF94A3B8),
+            modifier = Modifier.size(24.dp)
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(3.dp))
         Text(
             text = label,
             fontFamily = MulishFontFamily,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            fontSize = 10.sp,
-            color = if (isSelected) BrandBlue else Color(0xFF94A3B8)
+            fontSize = 11.sp,
+            color = if (isSelected) Color(0xFF000E38) else Color(0xFF94A3B8)
         )
     }
 }

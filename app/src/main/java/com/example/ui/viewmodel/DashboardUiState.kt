@@ -508,6 +508,18 @@ data class ForgotPinUiState(
     val forgotPinSuccessMessage: String? = null
 )
 
+data class AnalyticsUiState(
+    val isAnalyticsOpen: Boolean = false,
+    val selectedTab: Int = 0, // 0: Synthèse & Portefeuille, 1: Flux & Graphiques, 2: Marché BTC
+    val selectedPeriod: String = "1M", // "1J", "1S", "1M", "3M", "1A", "ALL"
+    val flowDirectionFilter: String = "ALL", // "ALL", "INCOMING", "OUTGOING"
+    val btcTelemetry: com.example.data.model.BtcMarketTelemetry = com.example.data.model.BtcMarketTelemetry(),
+    val isBtcMarketLoading: Boolean = false,
+    val btcMarketError: String? = null,
+    val budgetTargetUsd: Double = 5000.0,
+    val liveActivePointIndex: Int = -1
+)
+
 /**
  * Root UI State composing focused modular states.
  * Eliminates JVM/DEX signature bloat and allows Kotlin compiler smart-casting.
@@ -529,7 +541,8 @@ data class DashboardUiState(
     val regideso: RegidesoUiState = RegidesoUiState(),
     val cpk: CpkUiState = CpkUiState(),
     val payscan: PayScanUiState = PayScanUiState(),
-    val starlink: StarlinkUiState = StarlinkUiState()
+    val starlink: StarlinkUiState = StarlinkUiState(),
+    val analytics: AnalyticsUiState = AnalyticsUiState()
 ) {
     // --- MAIN IMMUTABLE FIELDS ---
     val selectedTab: Int = main.selectedTab
@@ -912,5 +925,16 @@ data class DashboardUiState(
     val pendingStarlinkPlan: StarlinkPlanDto? = starlink.pendingActionPlan
     val linkKitSerialNumberInput: String = starlink.linkKitSerialNumberInput
     val showStarlinkLinkKitDialog: Boolean = starlink.showLinkKitDialog
+
+    // --- ANALYTICS IMMUTABLE FIELDS ---
+    val isAnalyticsOpen: Boolean = analytics.isAnalyticsOpen
+    val analyticsTab: Int = analytics.selectedTab
+    val analyticsPeriod: String = analytics.selectedPeriod
+    val analyticsFlowFilter: String = analytics.flowDirectionFilter
+    val btcTelemetry: com.example.data.model.BtcMarketTelemetry = analytics.btcTelemetry
+    val isBtcMarketLoading: Boolean = analytics.isBtcMarketLoading
+    val btcMarketError: String? = analytics.btcMarketError
+    val budgetTargetUsd: Double = analytics.budgetTargetUsd
+    val liveActivePointIndex: Int = analytics.liveActivePointIndex
 }
 

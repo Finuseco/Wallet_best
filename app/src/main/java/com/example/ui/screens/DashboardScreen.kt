@@ -169,9 +169,13 @@ import com.example.ui.viewmodel.DashboardViewModel
 import com.example.util.PdfReceiptGenerator
 import com.example.util.QrCodeGenerator
 import com.example.util.TransactionTypeMapper
+import com.example.util.CashPayMessageTranslator
 import com.example.ui.components.FloatingCapsuleBottomBar
 import com.example.ui.components.QrScannerDialog
 import com.example.ui.components.PayScanDialog
+import com.example.ui.components.CashPaySquareStatusDialog
+import com.example.ui.components.SquareStatusType
+import com.example.ui.components.StatusDetailItem
 import com.example.ui.viewmodel.PayScanMode
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -200,8 +204,9 @@ fun DashboardScreen(
     var showDigitalServicesComingSoonDialog by remember { mutableStateOf(false) }
     var isAgentCustomerListOpen by remember { mutableStateOf(false) }
 
-    Scaffold(
-        containerColor = Color(0xFF000E38),
+    Box(modifier = modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Color(0xFF000E38),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             FloatingCapsuleBottomBar(
@@ -459,6 +464,27 @@ fun DashboardScreen(
         }
     )
 
+    // Neumorphic Analytics & Real-time Bitcoin Stock Market Full-Screen Application
+    AnalyticsAppScreen(
+        isOpen = uiState.isAnalyticsOpen,
+        uiState = uiState,
+        userProfile = userProfile,
+        transactions = transactions,
+        notifications = notifications,
+        walletResponse = uiState.walletResponse,
+        onDismiss = { dashboardViewModel.closeAnalyticsScreen() },
+        onTabSelected = { dashboardViewModel.setAnalyticsTab(it) },
+        onPeriodSelected = { dashboardViewModel.setAnalyticsPeriod(it) },
+        onFlowFilterSelected = { dashboardViewModel.setAnalyticsFlowFilter(it) },
+        onRefreshMarket = { dashboardViewModel.fetchBtcMarketTelemetry(uiState.analyticsPeriod) },
+        onTransactionClick = { tx -> dashboardViewModel.updateMain { copy(selectedTransactionForDetail = tx) } },
+        onOpenSendBtc = { dashboardViewModel.openBtcTransferDialog() },
+        onOpenReceiveBtc = { dashboardViewModel.openReceiveBtcDialog() },
+        onOpenExchange = { dashboardViewModel.openExchangeDialog() },
+        onOpenDeposit = { dashboardViewModel.openDepositDialog() },
+        onOpenWithdraw = { dashboardViewModel.openWithdrawalDialog() }
+    )
+
     // Agent Shopping Suite (Boutiques, Publication, Catalogue Public)
     AgentShoppingDialog(
         isOpen = uiState.isAgentShoppingDialogOpen,
@@ -527,6 +553,9 @@ fun DashboardScreen(
             onServiceSelected = { service ->
                 showServicesDialog = false
                 when (service) {
+                    "Analytique & Marché BTC" -> {
+                        dashboardViewModel.openAnalyticsScreen()
+                    }
                     "Réclamations internationales" -> {
                         dashboardViewModel.openClaimsScreen()
                     }
@@ -1052,12 +1081,48 @@ fun DashboardScreen(
         var pinInput by remember { mutableStateOf("") }
         var showBtcScanner by remember { mutableStateOf(false) }
 
-        AlertDialog(
-            onDismissRequest = { 
-                dashboardViewModel.closeTransferDialog()
-                dashboardViewModel.clearPrefilledTransfer()
-            },
-            shape = RoundedCornerShape(12.dp),
+        if (uiState.transferSuccess) {
+            CashPaySquareStatusDialog(
+                isOpen = true,
+                type = SquareStatusType.SUCCESS,
+                title = "Transfert Réussi !",
+                message = "Votre transfert a été validé avec succès.",
+                details = listOf(
+                    StatusDetailItem("Montant", "${uiState.transferAmount} ${uiState.transferCurrency}", isHighlight = true),
+                    StatusDetailItem("Frais", "${uiState.transferFee ?: 0.0} ${uiState.transferCurrency}"),
+                    StatusDetailItem("Total débité", "${uiState.transferTotalDebit ?: uiState.transferAmount} ${uiState.transferCurrency}")
+                ),
+                primaryButtonText = "Terminer",
+                onPrimaryAction = {
+                    dashboardViewModel.closeTransferDialog()
+                    dashboardViewModel.clearPrefilledTransfer()
+                },
+                onDismiss = {
+                    dashboardViewModel.closeTransferDialog()
+                    dashboardViewModel.clearPrefilledTransfer()
+                }
+            )
+        } else {
+            if (uiState.transferError != null) {
+                val isSoldeErr = uiState.transferError!!.contains("solde", ignoreCase = true) ||
+                        uiState.transferError!!.contains("insuffisant", ignoreCase = true)
+                CashPaySquareStatusDialog(
+                    isOpen = true,
+                    type = if (isSoldeErr) SquareStatusType.INSUFFICIENT_BALANCE else SquareStatusType.ERROR,
+                    title = if (isSoldeErr) "Solde Insuffisant" else "Échec du Transfert",
+                    message = uiState.transferError!!,
+                    primaryButtonText = if (isSoldeErr) "Compris" else "Fermer",
+                    onPrimaryAction = { dashboardViewModel.clearTransferError() },
+                    onDismiss = { dashboardViewModel.clearTransferError() }
+                )
+            }
+
+            AlertDialog(
+                onDismissRequest = { 
+                    dashboardViewModel.closeTransferDialog()
+                    dashboardViewModel.clearPrefilledTransfer()
+                },
+                shape = RoundedCornerShape(20.dp),
             title = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -1450,7 +1515,9 @@ fun DashboardScreen(
                 }
             }
         )
+        }
     }
+}
 }
 
 @Composable
@@ -1477,21 +1544,20 @@ fun CashPayTopHeader(
         .background(
             Brush.verticalGradient(
                 colors = listOf(
-                    Color(0xFFFF7A00),
-                    Color(0xFFFF6600), // Brand Orange FF6600
-                    Color(0xFFE65100)
+                    Color(0xFF0A1E5C),
+                    Color(0xFF000E38)
                 )
             )
         )
 
     Box(modifier = boxModifier) {
-        // Subtle ambient warm highlights
+        // Subtle ambient blue/cyan highlights
         Box(
             modifier = Modifier
                 .size(190.dp)
                 .offset(x = (-30).dp, y = (-20).dp + statusBarHeight)
                 .clip(CircleShape)
-                .background(Color(0xFFFFB74D).copy(alpha = 0.22f))
+                .background(Color(0xFF00E5FF).copy(alpha = 0.15f))
         )
         Box(
             modifier = Modifier
@@ -1499,7 +1565,7 @@ fun CashPayTopHeader(
                 .align(Alignment.TopEnd)
                 .offset(x = 60.dp, y = (-30).dp + statusBarHeight)
                 .clip(CircleShape)
-                .background(Color(0xFFFF8F00).copy(alpha = 0.25f))
+                .background(Color(0xFF38BDF8).copy(alpha = 0.15f))
         )
 
         Column(
@@ -2203,7 +2269,7 @@ private fun BalanceCardsCarousel(
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Column {
                                         Text(
-                                            text = if (uiState.isBalanceVisible) String.format("%.8f", btcBal) else "•••••••• BTC",
+                                            text = if (uiState.isBalanceVisible) CashPayMessageTranslator.formatBtc(btcBal) else "•••••••• BTC",
                                             fontFamily = MulishFontFamily,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 22.sp,
@@ -3180,8 +3246,15 @@ private fun TransactionItemRow(
                     else -> "- "
                 }
 
+                val isBtc = tx.currency.equals("BTC", ignoreCase = true)
+                val displayAmount = if (isBtc) {
+                    CashPayMessageTranslator.formatBtc(tx.amount)
+                } else {
+                    "${String.format(java.util.Locale.US, "%,.2f", tx.amount)} ${tx.currency}"
+                }
+
                 Text(
-                    text = "$amountPrefix${String.format("%,.2f", tx.amount)} ${tx.currency}",
+                    text = "$amountPrefix$displayAmount",
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
@@ -3190,8 +3263,13 @@ private fun TransactionItemRow(
 
                 // Only show fees if outgoing (debit) and not failed.
                 if (!isCredit && !isFailed && tx.fee > 0.0) {
+                    val displayFee = if (isBtc) {
+                        CashPayMessageTranslator.formatBtc(tx.fee)
+                    } else {
+                        "${String.format(java.util.Locale.US, "%,.2f", tx.fee)} ${tx.currency}"
+                    }
                     Text(
-                        text = "Frais : - ${String.format("%,.2f", tx.fee)} ${tx.currency}",
+                        text = "Frais : - $displayFee",
                         fontFamily = MulishFontFamily,
                         fontSize = 10.5.sp,
                         color = Color(0xFFE11D48).copy(alpha = 0.85f),
@@ -3235,6 +3313,7 @@ private fun TransactionDetailDialog(
 ) {
     val context = LocalContext.current
     val isCredit = transaction.direction.lowercase() == "incoming"
+    val isTxBtc = transaction.currency.equals("BTC", ignoreCase = true)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -3304,8 +3383,10 @@ private fun TransactionDetailDialog(
 
                         Spacer(modifier = Modifier.height(4.dp))
 
+                        val isTxBtc = transaction.currency.equals("BTC", ignoreCase = true)
+                        val mainDispAmount = if (isTxBtc) CashPayMessageTranslator.formatBtc(transaction.amount) else "${String.format("%.2f", transaction.amount)} ${transaction.currency}"
                         Text(
-                            text = "${if (isCredit) "+" else "-"} ${String.format("%.2f", transaction.amount)} ${transaction.currency}",
+                            text = "${if (isCredit) "+" else "-"} $mainDispAmount",
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 24.sp,
@@ -3313,7 +3394,7 @@ private fun TransactionDetailDialog(
                         )
 
                         Text(
-                            text = "Statut : ${transaction.status.uppercase()} • CERTIFIÉ",
+                            text = "Statut : ${CashPayMessageTranslator.translateStatus(transaction.status)} • CERTIFIÉ",
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = if (isCredit) ToofanGreen else Color(0xFF2E7D32),
@@ -3333,17 +3414,21 @@ private fun TransactionDetailDialog(
                         modifier = Modifier.padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
+                        val dispAmt = if (isTxBtc) CashPayMessageTranslator.formatBtc(transaction.amount) else "${String.format("%.2f", transaction.amount)} ${transaction.currency}"
+                        val dispFee = if (isTxBtc) CashPayMessageTranslator.formatBtc(transaction.fee) else "${String.format("%.2f", transaction.fee)} ${transaction.currency}"
+                        val dispTot = if (isTxBtc) CashPayMessageTranslator.formatBtc(transaction.amount + transaction.fee) else "${String.format("%.2f", transaction.amount + transaction.fee)} ${transaction.currency}"
+
                         if (!isCredit) {
-                            DetailRow("Montant Transféré :", "- ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true)
+                            DetailRow("Montant Transféré :", "- $dispAmt", isBold = true)
                             if (transaction.fee > 0.0) {
-                                DetailRow("Frais Réseau / Service :", "- ${String.format("%.2f", transaction.fee)} ${transaction.currency}")
+                                DetailRow("Frais Réseau / Service :", "- $dispFee")
                             }
                             HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 0.5.dp)
-                            DetailRow("Total Débité :", "- ${String.format("%.2f", transaction.amount + transaction.fee)} ${transaction.currency}", isBold = true, customColor = Color(0xFFE11D48))
+                            DetailRow("Total Débité :", "- $dispTot", isBold = true, customColor = Color(0xFFE11D48))
                         } else {
-                            DetailRow("Montant Reçu :", "+ ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true, customColor = SuccessGreen)
+                            DetailRow("Montant Reçu :", "+ $dispAmt", isBold = true, customColor = SuccessGreen)
                             HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 0.5.dp)
-                            DetailRow("Total Net Crédité :", "+ ${String.format("%.2f", transaction.amount)} ${transaction.currency}", isBold = true, customColor = SuccessGreen)
+                            DetailRow("Total Net Crédité :", "+ $dispAmt", isBold = true, customColor = SuccessGreen)
                         }
                     }
                 }
@@ -3360,7 +3445,7 @@ private fun TransactionDetailDialog(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         val typeInfo = TransactionTypeMapper.getTypeInfo(transaction.type)
-                        DetailRow("Type Opération :", "${typeInfo.nameFr} (${transaction.type})")
+                        DetailRow("Type Opération :", typeInfo.nameFr)
                         DetailRow("Référence Transaction :", transaction.reference, isBold = true)
                         DetailRow("Intitulé / Libellé :", transaction.displayName.ifBlank { transaction.title })
                         val otherName = transaction.otherUserFullName ?: transaction.displayName.ifBlank { transaction.title }
@@ -3841,22 +3926,22 @@ private fun ToofanProfileTab(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = CardDefaults.cardColors(containerColor = ToofanWhite),
-                elevation = CardDefaults.cardElevation(1.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF000E38)),
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(76.dp)
+                            .size(80.dp)
                             .clip(CircleShape)
-                            .background(Color.White)
-                            .border(2.dp, ToofanGreen, CircleShape),
+                            .background(Color(0xFF0A1E5C))
+                            .border(2.dp, Color(0xFF00E5FF), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         if (!userProfile?.profilePhotoUrl.isNullOrBlank()) {
@@ -3881,7 +3966,7 @@ private fun ToofanProfileTab(
                                     .background(
                                         Brush.linearGradient(
                                             listOf(
-                                                Color(0xFF000E38),
+                                                Color(0xFF0A1E5C),
                                                 Color(0xFF00E5FF)
                                             )
                                         )
@@ -3899,7 +3984,7 @@ private fun ToofanProfileTab(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -3910,7 +3995,7 @@ private fun ToofanProfileTab(
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
-                            color = ToofanMainDark
+                            color = Color.White
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Image(
@@ -3924,7 +4009,7 @@ private fun ToofanProfileTab(
                         text = userProfile?.profession ?: "—",
                         fontFamily = MulishFontFamily,
                         fontSize = 13.sp,
-                        color = ToofanBodyText
+                        color = Color(0xFF94A3B8)
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -6743,6 +6828,7 @@ fun ServicesDialog(
                 )
 
                 val services = listOf(
+                    Triple("Analytique & Marché BTC", "Graphiques temps réel, BTC & Synthèse financière", Color(0xFF00E5FF)),
                     Triple("Réclamations internationales", "Western Union, MoneyGram, Ria", Color(0xFF00E676)),
                     Triple("Mobile Money", "M-Pesa, Orange Money, Airtel, MTN", Color(0xFFF59E0B)),
                     Triple("Abonnements TV", "Canal+ RDC, EasyTV, BLUS", Color(0xFF2563EB)),

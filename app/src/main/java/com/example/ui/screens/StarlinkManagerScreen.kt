@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -62,236 +63,541 @@ fun StarlinkManagerScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF0284C7).copy(alpha = 0.2f),
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.SatelliteAlt,
-                                    contentDescription = null,
-                                    tint = Color(0xFF38BDF8),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Column {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Text(
-                                    text = "STARLINK",
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 15.sp,
-                                    color = Color.White,
-                                    fontFamily = MulishFontFamily,
-                                    letterSpacing = 2.sp
-                                )
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = Color(0xFF10B981).copy(alpha = 0.2f)
-                                ) {
-                                    Text(
-                                        text = "ESPACE CLIENT",
-                                        fontSize = 8.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF10B981),
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                            Text(
-                                text = userProfile?.fullName ?: userProfile?.phone ?: "Client CashPay All",
-                                fontSize = 11.sp,
-                                color = Color(0xFF94A3B8),
-                                fontFamily = MulishFontFamily
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Retour",
-                            tint = Color.White
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { dashboardViewModel.openStarlinkLinkKitDialog() }) {
-                        Icon(
-                            imageVector = Icons.Default.AddLink,
-                            contentDescription = "Associer Kit",
-                            tint = Color(0xFF38BDF8)
-                        )
-                    }
-                    if (connectedTerminal != null) {
-                        IconButton(
-                            onClick = { dashboardViewModel.fetchTerminalStatus(connectedTerminal.id) },
-                            enabled = !starlinkState.isLoading
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Actualiser les Signaux",
-                                tint = Color.White
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF0F172A),
-                    titleContentColor = Color.White
-                )
-            )
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFF0F172A),
-                shadowElevation = 8.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ScreenFooterTabItem(
-                        title = "Signaux & Contrôle",
-                        icon = Icons.Default.SatelliteAlt,
-                        isSelected = activeTab == 0,
-                        onClick = { dashboardViewModel.setStarlinkTab(0) }
-                    )
-                    ScreenFooterTabItem(
-                        title = "Forfaits & Facturation",
-                        icon = Icons.Default.Payment,
-                        isSelected = activeTab == 1,
-                        onClick = { dashboardViewModel.setStarlinkTab(1) }
-                    )
-                    ScreenFooterTabItem(
-                        title = "Partage Client",
-                        icon = Icons.Default.Group,
-                        isSelected = activeTab == 2,
-                        onClick = { dashboardViewModel.setStarlinkTab(2) }
-                    )
-                }
-            }
-        },
-        containerColor = Color(0xFF070B14)
-    ) { padding ->
+    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF070B14))
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
         ) {
-            // Error banner
-            if (starlinkState.error != null) {
-                Surface(
+            // TOP BAR COMPACTE EN PLEIN ÉCRAN (Bande haute touchant le réseau/status bar, en BLEU PRIMAIRE SANS BANDE NOIRE)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF000E38),
+                shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
+                shadowElevation = 8.dp
+            ) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFF7F1D1D)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF0A1E5C),
+                                    Color(0xFF000E38)
+                                )
+                            )
+                        )
+                        .padding(top = statusBarHeight)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Default.Error, contentDescription = null, tint = Color.White)
-                        Text(
-                            text = starlinkState.error ?: "",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = { dashboardViewModel.clearStarlinkMessages() }) {
-                            Icon(Icons.Default.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            IconButton(
+                                onClick = onBack,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.12f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Retour",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0xFF0284C7).copy(alpha = 0.2f),
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.SatelliteAlt,
+                                        contentDescription = null,
+                                        tint = Color(0xFF38BDF8),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            Column {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = "STARLINK",
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 15.sp,
+                                        color = Color.White,
+                                        fontFamily = MulishFontFamily,
+                                        letterSpacing = 2.sp
+                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0xFF10B981).copy(alpha = 0.2f)
+                                    ) {
+                                        Text(
+                                            text = "ESPACE CLIENT",
+                                            fontSize = 8.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF10B981),
+                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Text(
+                                    text = userProfile?.fullName ?: userProfile?.phone ?: "Client CashPay All",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF94A3B8),
+                                    fontFamily = MulishFontFamily
+                                )
+                            }
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            IconButton(onClick = { dashboardViewModel.openStarlinkLinkKitDialog() }) {
+                                Icon(
+                                    imageVector = Icons.Default.AddLink,
+                                    contentDescription = "Associer Kit",
+                                    tint = Color(0xFF38BDF8)
+                                )
+                            }
+                            if (connectedTerminal != null) {
+                                IconButton(
+                                    onClick = { dashboardViewModel.fetchTerminalStatus(connectedTerminal.id) },
+                                    enabled = !starlinkState.isLoading
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = "Actualiser",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Success banner
-            if (starlinkState.successMessage != null) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFF065F46)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.White)
-                        Text(
-                            text = starlinkState.successMessage ?: "",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = { dashboardViewModel.clearStarlinkMessages() }) {
-                            Icon(Icons.Default.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                        }
-                    }
-                }
-            }
-
-            // Workspace tabs (Client Space Only)
+            // Body Content Area
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                when (activeTab) {
-                    0 -> StarlinkRealtimeSignalsAndControlsTab(
-                        terminal = connectedTerminal,
-                        liveStatus = liveStatus,
-                        isLoading = starlinkState.isLoading,
-                        isRebooting = starlinkState.isRebooting,
-                        lastUpdate = starlinkState.lastTelemetryUpdate,
-                        quickInput = quickTerminalInput,
-                        onQuickInputChange = { quickTerminalInput = it },
-                        onQuickConnect = { dashboardViewModel.connectTerminalDirectly(quickTerminalInput) },
-                        onOpenLinkKit = { dashboardViewModel.openStarlinkLinkKitDialog() },
-                        onRefreshStatus = {
-                            connectedTerminal?.let { dashboardViewModel.fetchTerminalStatus(it.id) }
-                        },
-                        onRequestReboot = { terminalId -> showRebootConfirmDialog = terminalId },
-                        onPayPlan = {
-                            val defaultPlan = starlinkState.plans.firstOrNull()
-                                ?: StarlinkPlanDto("standard", "Standard", 99.0, "USD", "Illimité", "150-250 Mbps")
-                            dashboardViewModel.openStarlinkPinDialog(defaultPlan)
-                        },
-                        onOpenShare = { dashboardViewModel.openAddSubCustomerDialog() }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF070B14))
+                ) {
+                    // Error banner
+                    if (starlinkState.error != null) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color(0xFF7F1D1D)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.Error, contentDescription = null, tint = Color.White)
+                                Text(
+                                    text = starlinkState.error ?: "",
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(onClick = { dashboardViewModel.clearStarlinkMessages() }) {
+                                    Icon(Icons.Default.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        }
+                    }
+
+                    // Success banner
+                    if (starlinkState.successMessage != null) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color(0xFF065F46)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.White)
+                                Text(
+                                    text = starlinkState.successMessage ?: "",
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(onClick = { dashboardViewModel.clearStarlinkMessages() }) {
+                                    Icon(Icons.Default.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        }
+                    }
+
+                    // Workspace tabs (Client Space Only)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        when (activeTab) {
+                            0 -> StarlinkRealtimeSignalsAndControlsTab(
+                                terminal = connectedTerminal,
+                                liveStatus = liveStatus,
+                                isLoading = starlinkState.isLoading,
+                                isRebooting = starlinkState.isRebooting,
+                                lastUpdate = starlinkState.lastTelemetryUpdate,
+                                quickInput = quickTerminalInput,
+                                onQuickInputChange = { quickTerminalInput = it },
+                                onQuickConnect = { dashboardViewModel.connectTerminalDirectly(quickTerminalInput) },
+                                onOpenLinkKit = { dashboardViewModel.openStarlinkLinkKitDialog() },
+                                onRefreshStatus = {
+                                    connectedTerminal?.let { dashboardViewModel.fetchTerminalStatus(it.id) }
+                                },
+                                onRequestReboot = { terminalId -> showRebootConfirmDialog = terminalId },
+                                onPayPlan = {
+                                    val defaultPlan = starlinkState.plans.firstOrNull()
+                                        ?: StarlinkPlanDto("standard", "Standard", 99.0, "USD", "Illimité", "150-250 Mbps")
+                                    dashboardViewModel.openStarlinkPinDialog(defaultPlan)
+                                },
+                                onOpenShare = { dashboardViewModel.openAddSubCustomerDialog() }
+                            )
+                            1 -> StarlinkPlansTab(
+                                plans = starlinkState.plans,
+                                connectedTerminal = connectedTerminal,
+                                onSelectPlan = { plan -> dashboardViewModel.openStarlinkPinDialog(plan) }
+                            )
+                            2 -> StarlinkSubCustomersClientTab(
+                                subCustomers = starlinkState.subCustomers,
+                                connectedTerminal = connectedTerminal,
+                                onOpenAdd = { dashboardViewModel.openAddSubCustomerDialog() }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Bottom Bar Footer Navigation
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                color = Color(0xFF000E38),
+                shadowElevation = 10.dp,
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E2A44))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(bottom = 6.dp)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ScreenFooterTabItem(
+                        title = "Signaux",
+                        icon = Icons.Default.SatelliteAlt,
+                        isSelected = activeTab == 0,
+                        onClick = { dashboardViewModel.setStarlinkTab(0) },
+                        modifier = Modifier.weight(1f)
                     )
-                    1 -> StarlinkPlansTab(
-                        plans = starlinkState.plans,
-                        connectedTerminal = connectedTerminal,
-                        onSelectPlan = { plan -> dashboardViewModel.openStarlinkPinDialog(plan) }
+                    ScreenFooterTabItem(
+                        title = "Forfaits",
+                        icon = Icons.Default.Payment,
+                        isSelected = activeTab == 1,
+                        onClick = { dashboardViewModel.setStarlinkTab(1) },
+                        modifier = Modifier.weight(1f)
                     )
-                    2 -> StarlinkSubCustomersClientTab(
-                        subCustomers = starlinkState.subCustomers,
-                        connectedTerminal = connectedTerminal,
-                        onOpenAdd = { dashboardViewModel.openAddSubCustomerDialog() }
+                    ScreenFooterTabItem(
+                        title = "Partage",
+                        icon = Icons.Default.Group,
+                        isSelected = activeTab == 2,
+                        onClick = { dashboardViewModel.setStarlinkTab(2) },
+                        modifier = Modifier.weight(1f)
                     )
                 }
+            }
+        }
+
+    // Reboot / Start Confirmation Dialog
+    showRebootConfirmDialog?.let { terminalId ->
+        AlertDialog(
+            onDismissRequest = { showRebootConfirmDialog = null },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.PowerSettingsNew,
+                    contentDescription = null,
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(36.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Démarrer le redémarrage du terminal ?",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "Une commande de redémarrage à chaud sera envoyée au terminal Starlink ($terminalId) via la route POST /api/v1/starlink/terminal/{id}/reboot. L'antenne va réaligner ses signaux satellites.",
+                    color = Color(0xFF94A3B8),
+                    fontSize = 13.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        dashboardViewModel.rebootTerminal(terminalId)
+                        showRebootConfirmDialog = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                ) {
+                    Text("Démarrer le Redémarrage", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showRebootConfirmDialog = null }) {
+                    Text("Annuler", color = Color.LightGray)
+                }
+            },
+            containerColor = Color(0xFF0F172A),
+            textContentColor = Color.White
+        )
+    }
+
+    // PIN Payment Dialog
+    if (starlinkState.showPinDialog && starlinkState.pendingActionPlan != null) {
+        val plan = starlinkState.pendingActionPlan
+        Dialog(
+            onDismissRequest = { dashboardViewModel.closeStarlinkPinDialog() },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(20.dp),
+                color = Color(0xFF0F172A),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(36.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Confirmation Paiement Starlink",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Forfait : ${plan.name} (${plan.price} ${plan.currency})",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    OutlinedTextField(
+                        value = starlinkState.pinInput,
+                        onValueChange = { dashboardViewModel.onStarlinkPinChanged(it) },
+                        label = { Text("Code PIN CashPay (4 chiffres)") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { dashboardViewModel.closeStarlinkPinDialog() },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Annuler", color = Color.LightGray)
+                        }
+
+                        Button(
+                            onClick = {
+                                val targetTerminalId = connectedTerminal?.id ?: "TERMINAL-CLIENT"
+                                dashboardViewModel.payStarlinkPlan(targetTerminalId, plan.name, starlinkState.pinInput)
+                            },
+                            enabled = starlinkState.pinInput.length == 4 && !starlinkState.isLoading,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                        ) {
+                            if (starlinkState.isLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.Black)
+                            } else {
+                                Text("Payer", color = Color.Black, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Link Kit Serial Dialog (POST /api/v1/starlink/client/link)
+    if (starlinkState.showLinkKitDialog) {
+        Dialog(
+            onDismissRequest = { dashboardViewModel.closeStarlinkLinkKitDialog() },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(20.dp),
+                color = Color(0xFF0F172A),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(Icons.Default.SatelliteAlt, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(38.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Associer un Kit Starlink",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Entrez le numéro de série figurant sur votre kit Starlink (ex: KIT2026-...) pour associer votre antenne.",
+                        color = Color(0xFF94A3B8),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    OutlinedTextField(
+                        value = starlinkState.linkKitSerialNumberInput,
+                        onValueChange = { dashboardViewModel.onStarlinkKitSerialChanged(it) },
+                        label = { Text("Numéro de série du kit (kitSerialNumber)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { dashboardViewModel.closeStarlinkLinkKitDialog() },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Annuler", color = Color.LightGray)
+                        }
+
+                        Button(
+                            onClick = { dashboardViewModel.linkStarlinkKit(starlinkState.linkKitSerialNumberInput) },
+                            enabled = starlinkState.linkKitSerialNumberInput.isNotBlank() && !starlinkState.isLoading,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7))
+                        ) {
+                            if (starlinkState.isLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White)
+                            } else {
+                                Text("Associer", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bottom Bar Footer Navigation
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            color = Color(0xFF000E38),
+            shadowElevation = 10.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E2A44))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 6.dp)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ScreenFooterTabItem(
+                    title = "Signaux",
+                    icon = Icons.Default.SatelliteAlt,
+                    isSelected = activeTab == 0,
+                    onClick = { dashboardViewModel.setStarlinkTab(0) },
+                    modifier = Modifier.weight(1f)
+                )
+                ScreenFooterTabItem(
+                    title = "Forfaits",
+                    icon = Icons.Default.Payment,
+                    isSelected = activeTab == 1,
+                    onClick = { dashboardViewModel.setStarlinkTab(1) },
+                    modifier = Modifier.weight(1f)
+                )
+                ScreenFooterTabItem(
+                    title = "Partage",
+                    icon = Icons.Default.Group,
+                    isSelected = activeTab == 2,
+                    onClick = { dashboardViewModel.setStarlinkTab(2) },
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -518,35 +824,47 @@ fun StarlinkManagerScreen(
         )
     }
 }
+}
 
 @Composable
 private fun ScreenFooterTabItem(
     title: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = if (isSelected) Color(0xFF38BDF8) else Color(0xFF64748B),
-            modifier = Modifier.size(20.dp)
-        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.18f) else Color.Transparent)
+                .padding(horizontal = 14.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = if (isSelected) Color(0xFF38BDF8) else Color(0xFF94A3B8),
+                modifier = Modifier.size(20.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = title,
             fontSize = 11.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else Color(0xFF64748B),
-            fontFamily = MulishFontFamily
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = if (isSelected) Color.White else Color(0xFF94A3B8),
+            fontFamily = MulishFontFamily,
+            maxLines = 1,
+            textAlign = TextAlign.Center
         )
     }
 }

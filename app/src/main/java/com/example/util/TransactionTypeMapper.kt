@@ -50,19 +50,59 @@ object TransactionTypeMapper {
         "BTC_TRANSFER" to TransactionTypeInfo(
             code = "BTC_TRANSFER",
             translationKey = "transaction.btc_transfer",
-            nameFr = "Transfert Bitcoin (BTC)",
+            nameFr = "Transfert Bitcoin",
             shortName = "Transfert BTC",
-            description = "Transfert de Bitcoin vers une adresse blockchain externe",
+            description = "Transfert de Bitcoin vers une adresse Bitcoin",
             nature = "CRYPTO",
             icon = Icons.Default.CurrencyBitcoin,
             isPersonToPerson = false
         ),
+        "WD_CRYPTO_MONEY" to TransactionTypeInfo(
+            code = "WD_CRYPTO_MONEY",
+            translationKey = "transaction.wd_crypto_money",
+            nameFr = "Retrait Bitcoin",
+            shortName = "Retrait BTC",
+            description = "Retrait de cryptomonnaie Bitcoin",
+            nature = "CRYPTO",
+            icon = Icons.Default.CurrencyBitcoin,
+            isPersonToPerson = false
+        ),
+        "WD_CRYPTO" to TransactionTypeInfo(
+            code = "WD_CRYPTO",
+            translationKey = "transaction.wd_crypto",
+            nameFr = "Retrait Bitcoin",
+            shortName = "Retrait BTC",
+            description = "Retrait de cryptomonnaie Bitcoin",
+            nature = "CRYPTO",
+            icon = Icons.Default.CurrencyBitcoin,
+            isPersonToPerson = false
+        ),
+        "INTERNAL_CASHPAY" to TransactionTypeInfo(
+            code = "INTERNAL_CASHPAY",
+            translationKey = "transaction.internal_cashpay",
+            nameFr = "Transfert BTC interne",
+            shortName = "Transfert interne",
+            description = "Transfert Bitcoin interne entre comptes CashPay All",
+            nature = "CRYPTO",
+            icon = Icons.Default.CurrencyBitcoin,
+            isPersonToPerson = true
+        ),
         "CRYPTO_WITHDRAWAL" to TransactionTypeInfo(
             code = "CRYPTO_WITHDRAWAL",
             translationKey = "transaction.crypto_withdrawal",
-            nameFr = "Retrait Bitcoin (BTC)",
+            nameFr = "Retrait Bitcoin",
             shortName = "Retrait BTC",
             description = "Retrait de cryptomonnaie vers un portefeuille externe",
+            nature = "CRYPTO",
+            icon = Icons.Default.CurrencyBitcoin,
+            isPersonToPerson = false
+        ),
+        "CRYPTO_TRANSFER" to TransactionTypeInfo(
+            code = "CRYPTO_TRANSFER",
+            translationKey = "transaction.crypto_transfer",
+            nameFr = "Transfert de cryptomonnaie",
+            shortName = "Transfert crypto",
+            description = "Transfert de cryptomonnaie CashPay",
             nature = "CRYPTO",
             icon = Icons.Default.CurrencyBitcoin,
             isPersonToPerson = false
@@ -310,33 +350,40 @@ object TransactionTypeMapper {
     )
 
     fun getTypeInfo(typeCode: String): TransactionTypeInfo {
-        return MAPPINGS[typeCode.uppercase()] ?: TransactionTypeInfo(
-            code = typeCode,
+        val clean = typeCode.uppercase().trim()
+        val mapped = MAPPINGS[clean]
+        if (mapped != null) return mapped
+
+        val translatedName = CashPayMessageTranslator.translateTransactionType(clean)
+        return TransactionTypeInfo(
+            code = clean,
             translationKey = "transaction.generic",
-            nameFr = typeCode,
-            shortName = typeCode,
-            description = "Opération CashPay ($typeCode)",
-            nature = "SERVICE",
-            icon = Icons.Default.AccountBalanceWallet,
-            isPersonToPerson = false
+            nameFr = translatedName,
+            shortName = translatedName,
+            description = translatedName,
+            nature = if (clean.contains("CRYPTO") || clean.contains("BTC")) "CRYPTO" else "SERVICE",
+            icon = if (clean.contains("CRYPTO") || clean.contains("BTC")) Icons.Default.CurrencyBitcoin else Icons.Default.AccountBalanceWallet,
+            isPersonToPerson = clean.contains("P2P") || clean.contains("INTERNAL")
         )
     }
 
     fun getDisplayTitle(typeCode: String, direction: String): String {
-        val info = getTypeInfo(typeCode)
+        val clean = typeCode.uppercase().trim()
         val isIncoming = direction.lowercase() == "incoming"
 
-        return when (info.code) {
+        return when (clean) {
             "TR" -> if (isIncoming) "Transfert reçu" else "Transfert envoyé"
-            "BTC_TRANSFER", "CRYPTO_WITHDRAWAL" -> if (isIncoming) "Bitcoin reçu (Crédit)" else "Transfert Bitcoin envoyé (Débit)"
-            "DP_AGENT", "DP" -> if (isIncoming) "Dépôt reçu via agent" else "Dépôt via agent"
-            "WD", "WD_AGENT" -> if (isIncoming) "Retrait annulé" else "Retrait auprès d'un agent"
+            "BTC_TRANSFER" -> if (isIncoming) "Bitcoin reçu" else "Transfert Bitcoin envoyé"
+            "INTERNAL_CASHPAY", "INTERNAL_BTC" -> if (isIncoming) "Transfert BTC interne reçu" else "Transfert BTC interne envoyé"
+            "WD_CRYPTO_MONEY", "WD_CRYPTO", "WITHDRAW_CRYPTO", "CRYPTO_WITHDRAWAL" -> if (isIncoming) "Crédit Bitcoin reçu" else "Retrait Bitcoin"
+            "DP_AGENT", "DP", "DEPOSIT" -> if (isIncoming) "Dépôt d'argent reçu" else "Dépôt d'argent"
+            "WD", "WD_AGENT", "WITHDRAW" -> if (isIncoming) "Retrait annulé" else "Retrait auprès d'un agent"
             "LR", "LR_AGENT" -> "Remboursement de prêt"
             "LP" -> "Décaissement de prêt"
             "CPK_RECOVER", "CPK_CLAIM", "ENCAISSEMENT" -> "Encaissement clé CPK (Dépôt)"
             "CPK_ISSUE", "HSM_LOCK" -> "Création de clé CPK (Mise sous clé)"
             "CPK_CANCEL" -> "Remboursement de clé CPK (Crédit)"
-            else -> info.nameFr
+            else -> CashPayMessageTranslator.translateTransactionType(clean, isIncoming)
         }
     }
 }

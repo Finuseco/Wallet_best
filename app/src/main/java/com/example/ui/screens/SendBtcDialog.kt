@@ -1,8 +1,8 @@
 package com.example.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -28,9 +28,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.example.ui.components.CashPaySquareStatusDialog
 import com.example.ui.components.QrScannerDialog
+import com.example.ui.components.SquareStatusType
+import com.example.ui.components.StatusDetailItem
 import com.example.ui.theme.MulishFontFamily
-import com.example.ui.theme.SuccessGreen
 import java.util.Locale
 
 @Composable
@@ -59,16 +62,115 @@ fun SendBtcDialog(
     var isPinVisible by remember { mutableStateOf(false) }
     var showQrScanner by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = {
-        if (!isLoading) onDismiss()
-    }) {
+    // Client-side status popup state
+    var localStatusType by remember { mutableStateOf<SquareStatusType?>(null) }
+    var localStatusTitle by remember { mutableStateOf("") }
+    var localStatusMessage by remember { mutableStateOf("") }
+
+    // Handle external error or success with square pop-up dialog
+    val isExternalError = !errorMessage.isNullOrBlank()
+    val isInsufficientBalance = isExternalError && (
+            errorMessage!!.contains("solde", ignoreCase = true) ||
+            errorMessage.contains("balance", ignoreCase = true) ||
+            errorMessage.contains("fonds", ignoreCase = true) ||
+            errorMessage.contains("insuffisant", ignoreCase = true)
+    )
+
+    // Render square status dialog for SUCCESS
+    if (success) {
+        val lastBtcAmount = btcAmountInput.toDoubleOrNull() ?: 0.0
+        val details = mutableListOf<StatusDetailItem>()
+        if (lastBtcAmount > 0.0) {
+            details.add(StatusDetailItem("Montant", "${String.format(Locale.US, "%.6f", lastBtcAmount)} BTC", isHighlight = true))
+        }
+        if (addressInput.isNotBlank()) {
+            val shortAddr = if (addressInput.length > 18) {
+                "${addressInput.take(8)}...${addressInput.takeLast(6)}"
+            } else addressInput
+            details.add(StatusDetailItem("Destinataire", shortAddr))
+        }
+        if (!txRef.isNullOrBlank()) {
+            details.add(StatusDetailItem("TXID / Réf", txRef.take(16)))
+        }
+
+        CashPaySquareStatusDialog(
+            isOpen = true,
+            type = SquareStatusType.SUCCESS,
+            title = "Transfert BTC Réussi",
+            message = "Votre transfert de Bitcoin a été validé et diffusé avec succès sur le réseau.",
+            details = details,
+            primaryButtonText = "Terminer",
+            onPrimaryAction = onDismiss,
+            onDismiss = onDismiss
+        )
+        return
+    }
+
+    // Render square status dialog for INSUFFICIENT BALANCE
+    if (isInsufficientBalance) {
+        CashPaySquareStatusDialog(
+            isOpen = true,
+            type = SquareStatusType.INSUFFICIENT_BALANCE,
+            title = "Solde Insuffisant",
+            message = errorMessage ?: "Votre solde en BTC est insuffisant pour effectuer ce transfert.",
+            details = listOf(
+                StatusDetailItem("Solde disponible", "${String.format(Locale.US, "%.6f", btcBalance)} BTC"),
+                StatusDetailItem("Devise", "Bitcoin (BTC)")
+            ),
+            primaryButtonText = "Compris",
+            onPrimaryAction = {
+                // Clear local inputs and allow user to retry
+                localStatusType = null
+            },
+            onDismiss = {
+                localStatusType = null
+            }
+        )
+    } else if (isExternalError) {
+        // Render square status dialog for GENERIC / PIN ERROR
+        val isPinErr = errorMessage!!.contains("pin", ignoreCase = true)
+        CashPaySquareStatusDialog(
+            isOpen = true,
+            type = if (isPinErr) SquareStatusType.WARNING else SquareStatusType.ERROR,
+            title = if (isPinErr) "Code PIN Invalide" else "Échec du Transfert",
+            message = errorMessage,
+            primaryButtonText = "Fermer",
+            onPrimaryAction = {
+                localStatusType = null
+            },
+            onDismiss = {
+                localStatusType = null
+            }
+        )
+    }
+
+    // Client-side local validation popup (in case of insufficient balance before call)
+    if (localStatusType != null) {
+        CashPaySquareStatusDialog(
+            isOpen = true,
+            type = localStatusType!!,
+            title = localStatusTitle,
+            message = localStatusMessage,
+            primaryButtonText = "OK",
+            onPrimaryAction = { localStatusType = null },
+            onDismiss = { localStatusType = null }
+        )
+    }
+
+    // Main Square / Centered Form Dialog
+    Dialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF101827),
-            tonalElevation = 8.dp,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .widthIn(min = 310.dp, max = 350.dp)
+                .wrapContentHeight()
+                .padding(16.dp),
+            shape = RoundedCornerShape(22.dp),
+            color = Color(0xFF101827),
+            border = BorderStroke(1.dp, Color(0xFF334155)),
+            shadowElevation = 24.dp
         ) {
             Column(
                 modifier = Modifier
@@ -103,14 +205,14 @@ fun SendBtcDialog(
                         }
                         Column {
                             Text(
-                                text = "Envoyer des BTC",
+                                text = "Envoyer BTC",
                                 color = Color.White,
-                                fontSize = 17.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = MulishFontFamily
                             )
                             Text(
-                                text = "Réseau Bitcoin Mini Blockchain",
+                                text = "Réseau Bitcoin",
                                 color = Color(0xFF94A3B8),
                                 fontSize = 11.sp,
                                 fontFamily = MulishFontFamily
@@ -120,348 +222,187 @@ fun SendBtcDialog(
                     IconButton(
                         onClick = onDismiss,
                         enabled = !isLoading,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Fermer",
-                            tint = Color.White.copy(alpha = 0.7f)
+                            tint = Color(0xFF94A3B8),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                if (success) {
-                    // Success View
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF064E3B).copy(alpha = 0.6f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, SuccessGreen),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(18.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = SuccessGreen,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "Transfert BTC Réussi !",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                fontFamily = MulishFontFamily
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Votre envoi a été validé et diffusé avec succès sur le réseau.",
-                                color = Color(0xFFD1FAE5),
-                                fontSize = 12.sp,
-                                textAlign = TextAlign.Center,
-                                fontFamily = MulishFontFamily
-                            )
-                            if (!txRef.isNullOrBlank()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Réf: $txRef",
-                                    color = Color(0xFF6EE7B7),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = onDismiss,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                    ) {
-                        Text("Terminer", fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-                } else {
-                    // Live Market Rate & Available Balance Card
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF1E293B),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Taux en direct",
-                                    fontSize = 10.sp,
-                                    color = Color(0xFF94A3B8),
-                                    fontFamily = MulishFontFamily
-                                )
-                                Text(
-                                    text = "1 BTC ≈ $ ${String.format(Locale.US, "%,.2f", effectiveRate)}",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFF59E0B),
-                                    fontFamily = MulishFontFamily
-                                )
-                            }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = "Solde disponible",
-                                    fontSize = 10.sp,
-                                    color = Color(0xFF94A3B8),
-                                    fontFamily = MulishFontFamily
-                                )
-                                Text(
-                                    text = "${String.format(Locale.US, "%.6f", btcBalance)} BTC",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    fontFamily = MulishFontFamily
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // 1. Destination BTC Address Field
-                    Text(
-                        text = "Adresse Bitcoin de destination",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFE2E8F0),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = addressInput,
-                        onValueChange = {
-                            addressInput = it.trim().removePrefix("bitcoin:").substringBefore("?")
-                        },
-                        placeholder = { Text("bc1q... ou 1...", color = Color(0xFF64748B), fontSize = 13.sp) },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color(0xFFF59E0B),
-                            unfocusedBorderColor = Color(0xFF334155),
-                            focusedContainerColor = Color(0xFF1E293B),
-                            unfocusedContainerColor = Color(0xFF1E293B)
-                        ),
-                        trailingIcon = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                // Paste from clipboard button
-                                IconButton(onClick = {
-                                    val clipText = clipboardManager.getText()?.text?.trim()
-                                    if (!clipText.isNullOrBlank()) {
-                                        addressInput = clipText.removePrefix("bitcoin:").substringBefore("?")
-                                        Toast.makeText(context, "Adresse collée !", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(context, "Presse-papier vide", Toast.LENGTH_SHORT).show()
-                                    }
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.ContentPaste,
-                                        contentDescription = "Coller l'adresse",
-                                        tint = Color(0xFFF59E0B),
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                }
-                                // Camera QR Code scanner button
-                                IconButton(onClick = { showQrScanner = true }) {
-                                    Icon(
-                                        imageVector = Icons.Default.QrCodeScanner,
-                                        contentDescription = "Scanner QR",
-                                        tint = Color(0xFF00E5FF),
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // 2. Dual Amount Mode Toggle ($ USD vs ₿ BTC)
+                // Rate & Balance Header Info (Compact & Straight)
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFF1E293B),
+                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0xFF1E293B))
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(38.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (activeInputMode == "USD") Color(0xFFF59E0B) else Color.Transparent)
-                                .clickable { activeInputMode = "USD" },
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Column {
                             Text(
-                                text = "USD ($)",
-                                color = if (activeInputMode == "USD") Color.Black else Color(0xFF94A3B8),
+                                text = "Taux direct",
+                                fontSize = 10.sp,
+                                color = Color(0xFF94A3B8),
+                                fontFamily = MulishFontFamily
+                            )
+                            Text(
+                                text = "$ ${String.format(Locale.US, "%,.0f", effectiveRate)}",
+                                fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                maxLines = 1,
-                                softWrap = false,
+                                color = Color(0xFFF59E0B),
                                 fontFamily = MulishFontFamily
                             )
                         }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(38.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (activeInputMode == "BTC") Color(0xFFF59E0B) else Color.Transparent)
-                                .clickable { activeInputMode = "BTC" },
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "BTC (₿)",
-                                color = if (activeInputMode == "BTC") Color.Black else Color(0xFF94A3B8),
+                                text = "Solde disponible",
+                                fontSize = 10.sp,
+                                color = Color(0xFF94A3B8),
+                                fontFamily = MulishFontFamily
+                            )
+                            Text(
+                                text = "${String.format(Locale.US, "%.6f", btcBalance)} BTC",
+                                fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                maxLines = 1,
-                                softWrap = false,
+                                color = Color.White,
                                 fontFamily = MulishFontFamily
                             )
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    if (activeInputMode == "USD") {
-                        // Saisie en Dollars avec conversion automatique en BTC
-                        OutlinedTextField(
-                            value = usdAmountInput,
-                            onValueChange = { text ->
-                                val clean = text.filter { it.isDigit() || it == '.' }
-                                usdAmountInput = clean
-                                val usdVal = clean.toDoubleOrNull() ?: 0.0
-                                btcAmountInput = if (usdVal > 0.0 && effectiveRate > 0.0) {
-                                    String.format(Locale.US, "%.8f", usdVal / effectiveRate)
-                                } else ""
-                            },
-                            label = { Text("Montant en Dollars ($)", color = Color(0xFF94A3B8)) },
-                            placeholder = { Text("Ex: 20", color = Color(0xFF64748B)) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            shape = RoundedCornerShape(12.dp),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFF59E0B),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF1E293B),
-                                unfocusedContainerColor = Color(0xFF1E293B)
-                            ),
-                            trailingIcon = {
-                                TextButton(onClick = {
-                                    val fullUsd = btcBalance * effectiveRate
-                                    usdAmountInput = String.format(Locale.US, "%.2f", fullUsd)
-                                    btcAmountInput = String.format(Locale.US, "%.8f", btcBalance)
-                                }) {
-                                    Text("MAX", color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                // 1. Destination BTC Address
+                Text(
+                    text = "Adresse de destination",
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFE2E8F0),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = addressInput,
+                    onValueChange = {
+                        addressInput = it.trim().removePrefix("bitcoin:").substringBefore("?")
+                    },
+                    placeholder = { Text("bc1q... ou 1...", color = Color(0xFF64748B), fontSize = 12.sp) },
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color(0xFFF59E0B),
+                        unfocusedBorderColor = Color(0xFF334155),
+                        focusedContainerColor = Color(0xFF1E293B),
+                        unfocusedContainerColor = Color(0xFF1E293B)
+                    ),
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = {
+                                val clipText = clipboardManager.getText()?.text?.trim()
+                                if (!clipText.isNullOrBlank()) {
+                                    addressInput = clipText.removePrefix("bitcoin:").substringBefore("?")
+                                    Toast.makeText(context, "Adresse collée !", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Presse-papier vide", Toast.LENGTH_SHORT).show()
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        if (btcAmountInput.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Équivaut à : $btcAmountInput BTC (envoyé en BTC)",
-                                color = Color(0xFF38BDF8),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentPaste,
+                                    contentDescription = "Coller",
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            IconButton(onClick = { showQrScanner = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.QrCodeScanner,
+                                    contentDescription = "Scanner",
+                                    tint = Color(0xFF00E5FF),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
-                    } else {
-                        // Saisie directe en BTC avec conversion en USD
-                        OutlinedTextField(
-                            value = btcAmountInput,
-                            onValueChange = { text ->
-                                val clean = text.filter { it.isDigit() || it == '.' }
-                                btcAmountInput = clean
-                                val btcVal = clean.toDoubleOrNull() ?: 0.0
-                                usdAmountInput = if (btcVal > 0.0 && effectiveRate > 0.0) {
-                                    String.format(Locale.US, "%.2f", btcVal * effectiveRate)
-                                } else ""
-                            },
-                            label = { Text("Montant en Bitcoins (BTC)", color = Color(0xFF94A3B8)) },
-                            placeholder = { Text("Ex: 0.00025", color = Color(0xFF64748B)) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            shape = RoundedCornerShape(12.dp),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFF59E0B),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF1E293B),
-                                unfocusedContainerColor = Color(0xFF1E293B)
-                            ),
-                            trailingIcon = {
-                                TextButton(onClick = {
-                                    btcAmountInput = String.format(Locale.US, "%.8f", btcBalance)
-                                    usdAmountInput = String.format(Locale.US, "%.2f", btcBalance * effectiveRate)
-                                }) {
-                                    Text("MAX", color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 2. Dual Amount Mode Toggle (Compact, concise labels: USD vs BTC)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFF1E293B))
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (activeInputMode == "USD") Color(0xFFF59E0B) else Color.Transparent)
+                            .clickable { activeInputMode = "USD" },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "USD ($)",
+                            color = if (activeInputMode == "USD") Color.Black else Color(0xFF94A3B8),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            fontFamily = MulishFontFamily
                         )
-                        if (usdAmountInput.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Valeur estimée : ≈ $ $usdAmountInput USD",
-                                color = Color(0xFF38BDF8),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
                     }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (activeInputMode == "BTC") Color(0xFFF59E0B) else Color.Transparent)
+                            .clickable { activeInputMode = "BTC" },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "BTC (₿)",
+                            color = if (activeInputMode == "BTC") Color.Black else Color(0xFF94A3B8),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            fontFamily = MulishFontFamily
+                        )
+                    }
+                }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    // 3. Security PIN Code Field (4 digits)
-                    Text(
-                        text = "Code PIN CashPay (4 chiffres)",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFE2E8F0),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                if (activeInputMode == "USD") {
                     OutlinedTextField(
-                        value = pinInput,
-                        onValueChange = {
-                            pinInput = it.filter { ch -> ch.isDigit() }.take(4)
+                        value = usdAmountInput,
+                        onValueChange = { text ->
+                            val clean = text.filter { it.isDigit() || it == '.' }
+                            usdAmountInput = clean
+                            val usdVal = clean.toDoubleOrNull() ?: 0.0
+                            btcAmountInput = if (usdVal > 0.0 && effectiveRate > 0.0) {
+                                String.format(Locale.US, "%.8f", usdVal / effectiveRate)
+                            } else ""
                         },
-                        placeholder = { Text("••••", color = Color(0xFF64748B)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                        visualTransformation = if (isPinVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        label = { Text("Montant USD ($)", color = Color(0xFF94A3B8), fontSize = 11.5.sp) },
+                        placeholder = { Text("Ex: 25", color = Color(0xFF64748B), fontSize = 12.sp) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -473,74 +414,173 @@ fun SendBtcDialog(
                             unfocusedContainerColor = Color(0xFF1E293B)
                         ),
                         trailingIcon = {
-                            IconButton(onClick = { isPinVisible = !isPinVisible }) {
-                                Icon(
-                                    imageVector = if (isPinVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = "Afficher PIN",
-                                    tint = Color(0xFF94A3B8)
-                                )
+                            TextButton(onClick = {
+                                val fullUsd = btcBalance * effectiveRate
+                                usdAmountInput = String.format(Locale.US, "%.2f", fullUsd)
+                                btcAmountInput = String.format(Locale.US, "%.8f", btcBalance)
+                            }) {
+                                Text("MAX", color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold, fontSize = 11.sp)
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    // Error Message Display
-                    if (!errorMessage.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color(0xFF7F1D1D).copy(alpha = 0.5f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF4444)),
+                    if (btcAmountInput.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "≈ $btcAmountInput BTC",
+                            color = Color(0xFF38BDF8),
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = errorMessage,
-                                color = Color(0xFFFCA5A5),
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(10.dp),
-                                fontFamily = MulishFontFamily
+                        )
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = btcAmountInput,
+                        onValueChange = { text ->
+                            val clean = text.filter { it.isDigit() || it == '.' }
+                            btcAmountInput = clean
+                            val btcVal = clean.toDoubleOrNull() ?: 0.0
+                            usdAmountInput = if (btcVal > 0.0 && effectiveRate > 0.0) {
+                                String.format(Locale.US, "%.2f", btcVal * effectiveRate)
+                            } else ""
+                        },
+                        label = { Text("Montant BTC (₿)", color = Color(0xFF94A3B8), fontSize = 11.5.sp) },
+                        placeholder = { Text("Ex: 0.0005", color = Color(0xFF64748B), fontSize = 12.sp) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = Color(0xFFF59E0B),
+                            unfocusedBorderColor = Color(0xFF334155),
+                            focusedContainerColor = Color(0xFF1E293B),
+                            unfocusedContainerColor = Color(0xFF1E293B)
+                        ),
+                        trailingIcon = {
+                            TextButton(onClick = {
+                                btcAmountInput = String.format(Locale.US, "%.8f", btcBalance)
+                                usdAmountInput = String.format(Locale.US, "%.2f", btcBalance * effectiveRate)
+                            }) {
+                                Text("MAX", color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (usdAmountInput.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "≈ $ $usdAmountInput USD",
+                            color = Color(0xFF38BDF8),
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 3. PIN Code
+                Text(
+                    text = "Code PIN (4 chiffres)",
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFE2E8F0),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = pinInput,
+                    onValueChange = {
+                        pinInput = it.filter { ch -> ch.isDigit() }.take(4)
+                    },
+                    placeholder = { Text("••••", color = Color(0xFF64748B)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    visualTransformation = if (isPinVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color(0xFFF59E0B),
+                        unfocusedBorderColor = Color(0xFF334155),
+                        focusedContainerColor = Color(0xFF1E293B),
+                        unfocusedContainerColor = Color(0xFF1E293B)
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = { isPinVisible = !isPinVisible }) {
+                            Icon(
+                                imageVector = if (isPinVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = "Afficher PIN",
+                                tint = Color(0xFF94A3B8),
+                                modifier = Modifier.size(18.dp)
                             )
                         }
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                    // Action Button
-                    val finalAmountBtc = btcAmountInput.toDoubleOrNull() ?: 0.0
-                    val canSubmit = addressInput.isNotBlank() &&
-                            finalAmountBtc > 0.0 &&
-                            pinInput.length == 4 &&
-                            !isLoading
+                // Submit Button
+                val finalAmountBtc = btcAmountInput.toDoubleOrNull() ?: 0.0
 
-                    Button(
-                        onClick = {
-                            onSendBtc(addressInput, finalAmountBtc, pinInput)
-                        },
-                        enabled = canSubmit,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFF59E0B),
-                            disabledContainerColor = Color(0xFF475569)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    ) {
-                        if (isLoading) {
-                            CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
-                        } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Default.Send, contentDescription = null, tint = Color.Black)
-                                Text(
-                                    text = "Confirmer l'envoi BTC",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
-                                    color = Color.Black
-                                )
-                            }
+                Button(
+                    onClick = {
+                        // Validate before call and show dedicated square dialog if invalid
+                        if (addressInput.isBlank()) {
+                            localStatusType = SquareStatusType.WARNING
+                            localStatusTitle = "Adresse Requise"
+                            localStatusMessage = "Veuillez saisir ou scanner une adresse Bitcoin valide."
+                            return@Button
+                        }
+                        if (finalAmountBtc <= 0.0) {
+                            localStatusType = SquareStatusType.WARNING
+                            localStatusTitle = "Montant Invalide"
+                            localStatusMessage = "Veuillez entrer un montant en BTC supérieur à zéro."
+                            return@Button
+                        }
+                        if (finalAmountBtc > btcBalance) {
+                            localStatusType = SquareStatusType.INSUFFICIENT_BALANCE
+                            localStatusTitle = "Solde Insuffisant"
+                            localStatusMessage = "Votre solde actuel (${String.format(Locale.US, "%.6f", btcBalance)} BTC) est inférieur au montant demandé (${String.format(Locale.US, "%.6f", finalAmountBtc)} BTC)."
+                            return@Button
+                        }
+                        if (pinInput.length != 4) {
+                            localStatusType = SquareStatusType.WARNING
+                            localStatusTitle = "Code PIN Incomplet"
+                            localStatusMessage = "Veuillez saisir votre code PIN CashPay à 4 chiffres."
+                            return@Button
+                        }
+
+                        onSendBtc(addressInput, finalAmountBtc, pinInput)
+                    },
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF59E0B),
+                        disabledContainerColor = Color(0xFF475569)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(Icons.Default.Send, contentDescription = null, tint = Color.Black, modifier = Modifier.size(18.dp))
+                            Text(
+                                text = "Confirmer l'envoi BTC",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = Color.Black
+                            )
                         }
                     }
                 }
@@ -554,7 +594,7 @@ fun SendBtcDialog(
             onQrScanned = { scanned ->
                 addressInput = scanned.trim().removePrefix("bitcoin:").substringBefore("?")
                 showQrScanner = false
-                Toast.makeText(context, "Adresse scannée avec succès !", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Adresse scannée !", Toast.LENGTH_SHORT).show()
             }
         )
     }
