@@ -75,7 +75,8 @@ data class CryptoExchangeRequest(
     @Json(name = "direction") val direction: String,
     @Json(name = "currency") val currency: String,
     @Json(name = "amount") val amount: Double,
-    @Json(name = "pin") val pin: String
+    @Json(name = "pin") val pin: String,
+    @Json(name = "country") val country: String? = null
 )
 
 @JsonClass(generateAdapter = true)

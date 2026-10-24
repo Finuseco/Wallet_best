@@ -824,6 +824,162 @@ class CashPayRepository(
         }
     }
 
+    suspend fun getUsdtAddress(): Result<com.example.data.model.UsdtAddressResponse> {
+        return kotlinx.coroutines.withContext(Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val response = apiService.getUsdtAddress()
+                if (response.isSuccessful && response.body() != null) {
+                    val body = response.body()!!
+                    Result.success(body)
+                } else {
+                    val rawErr = response.errorBody()?.string()
+                    val msg = when (response.code()) {
+                        401 -> "Session expirée. Veuillez vous reconnecter."
+                        503 -> "Conservation sécurisée des clés non configurée. Impossible de générer l'adresse USDT."
+                        500 -> extractErrorMessage(rawErr, "Échec de génération ou récupération de l'adresse USDT TRC20.")
+                        else -> extractErrorMessage(rawErr, "Erreur lors de la récupération de l'adresse USDT (${response.code()})")
+                    }
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception(e.message ?: "Erreur réseau lors de la récupération de l'adresse USDT.", e))
+            }
+        }
+    }
+
+    suspend fun getUsdtBalance(): Result<com.example.data.model.UsdtBalanceResponse> {
+        return kotlinx.coroutines.withContext(Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val response = apiService.getUsdtBalance()
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
+                } else {
+                    val rawErr = response.errorBody()?.string()
+                    val msg = when (response.code()) {
+                        401 -> "Session expirée. Veuillez vous reconnecter."
+                        404 -> "Adresse USDT non configurée."
+                        500 -> extractErrorMessage(rawErr, "Solde USDT temporairement indisponible.")
+                        else -> extractErrorMessage(rawErr, "Erreur lors de la consultation du solde USDT (${response.code()})")
+                    }
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception(e.message ?: "Erreur réseau lors de la récupération du solde USDT.", e))
+            }
+        }
+    }
+
+    suspend fun getUsdtDeposits(): Result<com.example.data.model.UsdtDepositsResponse> {
+        return kotlinx.coroutines.withContext(Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val response = apiService.getUsdtDeposits()
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
+                } else {
+                    val rawErr = response.errorBody()?.string()
+                    val msg = when (response.code()) {
+                        401 -> "Session expirée. Veuillez vous reconnecter."
+                        500 -> extractErrorMessage(rawErr, "Historique des dépôts USDT temporairement indisponible.")
+                        else -> extractErrorMessage(rawErr, "Erreur lors de la consultation des dépôts USDT (${response.code()})")
+                    }
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception(e.message ?: "Erreur réseau lors de la récupération des dépôts USDT.", e))
+            }
+        }
+    }
+
+    suspend fun transferUsdt(
+        recipientAddress: String,
+        amountUsdt: String,
+        pin: String
+    ): Result<com.example.data.model.UsdtTransferResponse> {
+        return kotlinx.coroutines.withContext(Dispatchers.IO) {
+            try {
+                ensureSessionToken()
+                val req = com.example.data.model.UsdtTransferRequest(
+                    amount = amountUsdt.trim(),
+                    currency = "USDT",
+                    recipientAddress = recipientAddress.trim(),
+                    pin = pin.trim()
+                )
+                val response = apiService.transferUsdt(req)
+                if (response.isSuccessful && response.body() != null) {
+                    val body = response.body()!!
+                    val isPending = response.code() == 202 || body.status?.equals("pending", ignoreCase = true) == true
+                    val parsedAmount = amountUsdt.toDoubleOrNull() ?: 0.0
+
+                    try {
+                        val nowFmt = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).apply {
+                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                        }.format(java.util.Date())
+                        val dateHuman = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+                        val refCode = body.txHash ?: body.transferId ?: "USDT-${System.currentTimeMillis()}"
+
+                        val debitTx = TransactionEntity(
+                            id = System.currentTimeMillis(),
+                            title = if (isPending) "Transfert USDT en cours (TRON)" else "Transfert USDT envoyé",
+                            recipient = recipientAddress.trim(),
+                            amount = parsedAmount,
+                            currency = "USDT",
+                            type = "USDT_TRANSFER",
+                            date = dateHuman,
+                            status = if (isPending) "pending" else (body.status ?: "completed"),
+                            reference = refCode,
+                            direction = "outgoing",
+                            displayKind = "service",
+                            displayName = "Transfert USDT (${recipientAddress.trim().take(6)}...${recipientAddress.trim().takeLast(4)})",
+                            displayAvatar = null,
+                            displayIcon = "currency_usdt",
+                            fee = 0.0,
+                            createdAt = nowFmt,
+                            otherUserFullName = "Réseau TRON TRC20 ($recipientAddress)",
+                            otherUserProfilePhoto = null,
+                            description = if (isPending) {
+                                "Transfert externe en cours de validation sur le réseau TRON vers $recipientAddress. Montant : $amountUsdt USDT. Réf: $refCode"
+                            } else {
+                                "Transfert USDT effectué avec succès vers $recipientAddress. Montant : $amountUsdt USDT. TXID: $refCode"
+                            },
+                            senderWalletId = null,
+                            receiverWalletId = recipientAddress.trim()
+                        )
+                        dao.insertTransaction(debitTx)
+
+                        val notif = NotificationEntity(
+                            id = System.currentTimeMillis(),
+                            title = if (isPending) "Transfert USDT en cours (TRON)" else "Transfert USDT envoyé",
+                            description = body.message ?: "Transfert de $amountUsdt USDT vers ${recipientAddress.take(8)}... soumis avec succès.",
+                            timestamp = dateHuman,
+                            read = false,
+                            type = "transaction",
+                            link = null
+                        )
+                        dao.insertNotification(notif)
+                    } catch (_: Exception) {}
+
+                    Result.success(body)
+                } else {
+                    val rawErr = response.errorBody()?.string()
+                    val msg = when (response.code()) {
+                        202 -> "Transfert USDT externe en cours de validation sur le réseau TRON."
+                        400 -> extractErrorMessage(rawErr, "Montant invalide, adresse non reconnue ou solde USDT insuffisant.")
+                        401 -> extractErrorMessage(rawErr, "Code PIN invalide ou session expirée.")
+                        404 -> extractErrorMessage(rawErr, "Destinataire ou adresse USDT introuvable.")
+                        500 -> extractErrorMessage(rawErr, "Erreur du serveur lors du transfert USDT.")
+                        else -> extractErrorMessage(rawErr, "Erreur lors du transfert USDT (${response.code()})")
+                    }
+                    Result.failure(Exception(msg))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception(e.message ?: "Erreur réseau lors du transfert USDT.", e))
+            }
+        }
+    }
+
     suspend fun exchangeCurrencies(
         amount: Double,
         fromCurrency: String,
@@ -834,17 +990,32 @@ class CashPayRepository(
             ensureSessionToken()
             val from = fromCurrency.uppercase().trim()
             val to = toCurrency.uppercase().trim()
-            val isCryptoOperation = from == "BTC" || to == "BTC"
+            val isBtcOperation = from == "BTC" || to == "BTC"
+            val isUsdtOperation = from == "USDT" || to == "USDT"
 
-            if (isCryptoOperation) {
-                val isBuyBtc = to == "BTC"
-                val direction = if (isBuyBtc) "BUY_BTC" else "SELL_BTC"
-                val currency = if (isBuyBtc) from else to
+            if (isBtcOperation || isUsdtOperation) {
+                val isUsdt = isUsdtOperation
+                val cryptoCode = if (isUsdt) "USDT" else "BTC"
+                val isBuy = to == cryptoCode
+                val direction = if (isUsdt) {
+                    if (isBuy) "BUY_USDT" else "SELL_USDT"
+                } else {
+                    if (isBuy) "BUY_BTC" else "SELL_BTC"
+                }
+                val fiatCurrency = if (isBuy) from else to
+                val userCountry: String = try {
+                    val p = dao.getUserProfileOnce()
+                    val c = p?.country
+                    if (!c.isNullOrBlank() && c.length == 2) c.uppercase() else "CD"
+                } catch (_: Exception) {
+                    "CD"
+                }
                 val cryptoReq = com.example.data.model.CryptoExchangeRequest(
                     direction = direction,
-                    currency = currency,
+                    currency = fiatCurrency,
                     amount = amount,
-                    pin = pin.trim()
+                    pin = pin.trim(),
+                    country = userCountry
                 )
                 val resp = try {
                     apiService.cryptoExchange(cryptoReq)
@@ -856,21 +1027,28 @@ class CashPayRepository(
                     val body = resp.body()!!
                     if (body.success) {
                         val d = body.data
+                        val defaultRate = if (isUsdt) 1.0 else 100000.0
                         val mapped = com.example.data.model.ExchangeResponse(
                             success = true,
-                            reference = body.reference ?: "BTC-EX-${System.currentTimeMillis()}",
+                            reference = body.reference ?: "${cryptoCode}-EX-${System.currentTimeMillis()}",
                             amount = d?.fiatAmount ?: body.amount ?: amount,
                             fromCurrency = from,
                             toCurrency = to,
-                            rate = d?.exchangeRate ?: body.rate ?: 100000.0,
-                            toAmount = d?.cryptoAmount ?: body.toAmount ?: (if (isBuyBtc) amount / 100000.0 else amount * 100000.0),
+                            rate = d?.exchangeRate ?: body.rate ?: defaultRate,
+                            toAmount = d?.cryptoAmount ?: body.toAmount ?: (if (isBuy) (if (isUsdt) amount else amount / defaultRate) else (if (isUsdt) amount else amount * defaultRate)),
                             fee = d?.fee ?: body.feeFlat ?: 0.0,
-                            message = body.message ?: "Échange BTC effectué avec succès !"
+                            message = body.message ?: "Échange $cryptoCode effectué avec succès !"
                         )
+                        if (isUsdt) {
+                            try { getUsdtBalance() } catch (_: Exception) {}
+                        }
                         return Result.success(mapped)
                     } else {
-                        return Result.failure(Exception(body.error ?: body.message ?: "Échec de l'échange de cryptomonnaie."))
+                        return Result.failure(Exception(body.error ?: body.message ?: "Échec de l'échange de $cryptoCode."))
                     }
+                } else {
+                    val errorMsg = extractErrorMessage(resp.errorBody()?.string(), "Échec de l'échange de $cryptoCode (${resp.code()}).")
+                    return Result.failure(Exception(errorMsg))
                 }
             }
 
@@ -2610,6 +2788,45 @@ class CashPayRepository(
                             toCurrency = to,
                             rate = 1.0,
                             quoteId = "same-currency"
+                        )
+                    )
+                }
+
+                val isBtc = from == "BTC" || to == "BTC"
+                val isUsdt = from == "USDT" || to == "USDT"
+                if (isBtc || isUsdt) {
+                    val rate: Double = if (isUsdt) {
+                        when {
+                            from == "USDT" && to == "USD" -> 1.0
+                            from == "USD" && to == "USDT" -> 1.0
+                            from == "USDT" && to == "CDF" -> 2850.0
+                            from == "CDF" && to == "USDT" -> 1.0 / 2850.0
+                            from == "USDT" && to == "EUR" -> 0.92
+                            from == "EUR" && to == "USDT" -> 1.08
+                            from == "BTC" && to == "USDT" -> 82500.0
+                            from == "USDT" && to == "BTC" -> 1.0 / 82500.0
+                            else -> 1.0
+                        }
+                    } else {
+                        when {
+                            from == "BTC" && to == "USD" -> 82500.0
+                            from == "USD" && to == "BTC" -> 1.0 / 82500.0
+                            from == "BTC" && to == "CDF" -> 82500.0 * 2850.0
+                            from == "CDF" && to == "BTC" -> 1.0 / (82500.0 * 2850.0)
+                            from == "BTC" && to == "EUR" -> 82500.0 * 0.92
+                            from == "EUR" && to == "BTC" -> 1.0 / (82500.0 * 0.92)
+                            else -> 82500.0
+                        }
+                    }
+                    val toAmt = amount * rate
+                    return@withContext Result.success(
+                        com.example.data.model.RealtimeQuoteDto(
+                            fromAmount = amount,
+                            fromCurrency = from,
+                            toAmount = toAmt,
+                            toCurrency = to,
+                            rate = rate,
+                            quoteId = "crypto-$from-$to"
                         )
                     )
                 }

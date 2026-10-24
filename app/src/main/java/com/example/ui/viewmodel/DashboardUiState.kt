@@ -60,7 +60,22 @@ data class MainUiState(
     val btcTransferError: String? = null,
     val btcTransferSuccess: Boolean = false,
     val btcTransferTxRef: String? = null,
-    val isLoansScreenOpen: Boolean = false
+    val isLoansScreenOpen: Boolean = false,
+    val usdtAddress: String? = null,
+    val usdtBalance: Double = 0.0,
+    val usdtOnChainBalance: Double? = null,
+    val isUsdtLoading: Boolean = false,
+    val usdtError: String? = null,
+    val usdtDeposits: List<com.example.data.model.UsdtDepositItem> = emptyList(),
+    val isUsdtDepositsLoading: Boolean = false,
+    val isReceiveUsdtDialogOpen: Boolean = false,
+    val isSendUsdtDialogOpen: Boolean = false,
+    val isUsdtDepositsDialogOpen: Boolean = false,
+    val isUsdtTransferLoading: Boolean = false,
+    val usdtTransferError: String? = null,
+    val usdtTransferSuccess: Boolean = false,
+    val usdtTransferPending: Boolean = false,
+    val usdtTransferTxRef: String? = null
 )
 
 data class CardsUiState(
@@ -601,6 +616,21 @@ data class DashboardUiState(
     val btcTransferSuccess: Boolean get() = main.btcTransferSuccess
     val btcTransferTxRef: String? get() = main.btcTransferTxRef
     val isLoansScreenOpen: Boolean get() = main.isLoansScreenOpen
+    val usdtAddress: String? get() = main.usdtAddress
+    val usdtBalance: Double get() = main.usdtBalance
+    val usdtOnChainBalance: Double? get() = main.usdtOnChainBalance
+    val isUsdtLoading: Boolean get() = main.isUsdtLoading
+    val usdtError: String? get() = main.usdtError
+    val usdtDeposits: List<com.example.data.model.UsdtDepositItem> get() = main.usdtDeposits
+    val isUsdtDepositsLoading: Boolean get() = main.isUsdtDepositsLoading
+    val isReceiveUsdtDialogOpen: Boolean get() = main.isReceiveUsdtDialogOpen
+    val isSendUsdtDialogOpen: Boolean get() = main.isSendUsdtDialogOpen
+    val isUsdtDepositsDialogOpen: Boolean get() = main.isUsdtDepositsDialogOpen
+    val isUsdtTransferLoading: Boolean get() = main.isUsdtTransferLoading
+    val usdtTransferError: String? get() = main.usdtTransferError
+    val usdtTransferSuccess: Boolean get() = main.usdtTransferSuccess
+    val usdtTransferPending: Boolean get() = main.usdtTransferPending
+    val usdtTransferTxRef: String? get() = main.usdtTransferTxRef
 
     // --- CARDS IMMUTABLE FIELDS ---
     val userCards: List<CardInfoDto> = cards.userCards

@@ -673,6 +673,8 @@ class DashboardViewModel(
     fun fetchWallet(userId: Long? = null) {
         val effectiveUserId = getEffectiveUserId(userId)
         updateMain { copy(isLoadingWallet = true, walletError = null) }
+        fetchUsdtBalance()
+        fetchUsdtAddress()
         viewModelScope.launch {
             val result = repository.getWallet(effectiveUserId)
             result.onSuccess { resp ->
@@ -902,6 +904,189 @@ class DashboardViewModel(
         ) }
         fetchExchangeRates()
         fetchRealtimeQuote(1.0)
+    }
+
+    fun openBuyUsdtDialog() {
+        val natCode = _uiState.value.walletResponse?.nationalCurrency?.code ?: "USD"
+        val fromCur = if (natCode != "USDT") natCode else "USD"
+        updateExchange { copy(
+            isExchangeDialogOpen = true,
+            exchangeFromCurrency = fromCur,
+            exchangeToCurrency = "USDT",
+            exchangeAmount = "",
+            exchangePin = "",
+            exchangeError = null,
+            exchangeSuccessResponse = null
+        ) }
+        fetchExchangeRates()
+        fetchRealtimeQuote(1.0)
+    }
+
+    fun openSellUsdtDialog() {
+        val natCode = _uiState.value.walletResponse?.nationalCurrency?.code ?: "USD"
+        val toCur = if (natCode != "USDT") natCode else "USD"
+        updateExchange { copy(
+            isExchangeDialogOpen = true,
+            exchangeFromCurrency = "USDT",
+            exchangeToCurrency = toCur,
+            exchangeAmount = "",
+            exchangePin = "",
+            exchangeError = null,
+            exchangeSuccessResponse = null
+        ) }
+        fetchExchangeRates()
+        fetchRealtimeQuote(1.0)
+    }
+
+    fun fetchUsdtAddress(forceRefresh: Boolean = false) {
+        if (!forceRefresh && !_uiState.value.usdtAddress.isNullOrBlank()) return
+        viewModelScope.launch {
+            repository.getUsdtAddress().onSuccess { resp ->
+                if (resp.address != null) {
+                    updateMain { copy(usdtAddress = resp.address, usdtError = null) }
+                }
+            }.onFailure { err ->
+                if (_uiState.value.usdtAddress.isNullOrBlank()) {
+                    updateMain { copy(usdtError = err.message) }
+                }
+            }
+        }
+    }
+
+    fun fetchUsdtBalance() {
+        viewModelScope.launch {
+            updateMain { copy(isUsdtLoading = true) }
+            repository.getUsdtBalance().onSuccess { resp ->
+                updateMain {
+                    copy(
+                        isUsdtLoading = false,
+                        usdtBalance = resp.balance,
+                        usdtOnChainBalance = resp.onChainBalance,
+                        usdtAddress = resp.address ?: usdtAddress,
+                        usdtError = null
+                    )
+                }
+            }.onFailure { err ->
+                updateMain {
+                    copy(
+                        isUsdtLoading = false,
+                        usdtError = err.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun fetchUsdtDeposits() {
+        viewModelScope.launch {
+            updateMain { copy(isUsdtDepositsLoading = true) }
+            repository.getUsdtDeposits().onSuccess { resp ->
+                updateMain {
+                    copy(
+                        isUsdtDepositsLoading = false,
+                        usdtDeposits = resp.deposits
+                    )
+                }
+            }.onFailure { _ ->
+                updateMain { copy(isUsdtDepositsLoading = false) }
+            }
+        }
+    }
+
+    fun openReceiveUsdtDialog() {
+        fetchUsdtAddress(forceRefresh = true)
+        updateMain { copy(isReceiveUsdtDialogOpen = true) }
+    }
+
+    fun closeReceiveUsdtDialog() {
+        updateMain { copy(isReceiveUsdtDialogOpen = false) }
+    }
+
+    fun openSendUsdtDialog() {
+        fetchUsdtBalance()
+        updateMain {
+            copy(
+                isSendUsdtDialogOpen = true,
+                usdtTransferError = null,
+                usdtTransferSuccess = false,
+                usdtTransferPending = false,
+                usdtTransferTxRef = null
+            )
+        }
+    }
+
+    fun closeSendUsdtDialog() {
+        updateMain {
+            copy(
+                isSendUsdtDialogOpen = false,
+                usdtTransferError = null,
+                usdtTransferSuccess = false,
+                usdtTransferPending = false,
+                usdtTransferTxRef = null
+            )
+        }
+    }
+
+    fun openUsdtDepositsDialog() {
+        fetchUsdtDeposits()
+        updateMain { copy(isUsdtDepositsDialogOpen = true) }
+    }
+
+    fun closeUsdtDepositsDialog() {
+        updateMain { copy(isUsdtDepositsDialogOpen = false) }
+    }
+
+    fun sendUsdt(recipientAddress: String, amountUsdt: String, pin: String) {
+        val effectiveUserId = getEffectiveUserId()
+        val trimmedAddress = recipientAddress.trim()
+        val trimmedAmount = amountUsdt.trim()
+        val trimmedPin = pin.trim()
+
+        if (trimmedAddress.isBlank() || (!trimmedAddress.startsWith("T") && trimmedAddress.length < 20)) {
+            updateMain { copy(usdtTransferError = "Veuillez entrer une adresse TRON (TRC-20) valide (commençant par T).") }
+            return
+        }
+        val parsed = trimmedAmount.toDoubleOrNull()
+        if (parsed == null || parsed <= 0.0) {
+            updateMain { copy(usdtTransferError = "Le montant USDT doit être supérieur à zéro.") }
+            return
+        }
+        if (trimmedPin.length < 4) {
+            updateMain { copy(usdtTransferError = "Veuillez saisir votre code PIN CashPay (4 chiffres).") }
+            return
+        }
+
+        updateMain { copy(isUsdtTransferLoading = true, usdtTransferError = null) }
+        viewModelScope.launch {
+            repository.transferUsdt(
+                recipientAddress = trimmedAddress,
+                amountUsdt = trimmedAmount,
+                pin = trimmedPin
+            ).onSuccess { resp ->
+                val isPending = resp.status?.equals("pending", ignoreCase = true) == true
+                val txRef = resp.txHash ?: resp.transferId ?: "USDT-${System.currentTimeMillis()}"
+                updateMain {
+                    copy(
+                        isUsdtTransferLoading = false,
+                        usdtTransferSuccess = !isPending,
+                        usdtTransferPending = isPending,
+                        usdtTransferTxRef = txRef,
+                        usdtTransferError = null
+                    )
+                }
+                fetchUsdtBalance()
+                fetchWallet(effectiveUserId)
+                loadTransactions(effectiveUserId)
+            }.onFailure { err ->
+                val msg = err.message ?: "Erreur lors du transfert USDT."
+                updateMain {
+                    copy(
+                        isUsdtTransferLoading = false,
+                        usdtTransferError = msg
+                    )
+                }
+            }
+        }
     }
 
     fun onRecipientChanged(v: String) = updateMain { copy(transferRecipient = v, transferError = null) }
@@ -3445,6 +3630,7 @@ agent = it.agent.copy(
                 // Refresh balance and transactions automatically
                 val effectiveUserId = getEffectiveUserId()
                 fetchWallet(effectiveUserId)
+                fetchUsdtBalance()
                 loadTransactions(effectiveUserId)
             }.onFailure { err ->
                 updateExchange { copy(isExchangeLoading = false,

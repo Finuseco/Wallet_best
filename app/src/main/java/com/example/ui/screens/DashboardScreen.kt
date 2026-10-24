@@ -482,7 +482,10 @@ fun DashboardScreen(
         onOpenReceiveBtc = { dashboardViewModel.openReceiveBtcDialog() },
         onOpenExchange = { dashboardViewModel.openExchangeDialog() },
         onOpenDeposit = { dashboardViewModel.openDepositDialog() },
-        onOpenWithdraw = { dashboardViewModel.openWithdrawalDialog() }
+        onOpenWithdraw = { dashboardViewModel.openWithdrawalDialog() },
+        onOpenSendUsdt = { dashboardViewModel.openSendUsdtDialog() },
+        onOpenReceiveUsdt = { dashboardViewModel.openReceiveUsdtDialog() },
+        onOpenUsdtDeposits = { dashboardViewModel.openUsdtDepositsDialog() }
     )
 
     // Agent Shopping Suite (Boutiques, Publication, Catalogue Public)
@@ -687,6 +690,7 @@ fun DashboardScreen(
     ExchangeDialog(
         isOpen = uiState.isExchangeDialogOpen,
         walletResponse = uiState.walletResponse,
+        usdtBalance = uiState.usdtBalance,
         exchangeRatesMap = uiState.exchangeRatesMap,
         realtimeQuoteRate = uiState.realtimeQuoteRate,
         realtimeQuoteAmount = uiState.realtimeQuoteAmount,
@@ -727,6 +731,38 @@ fun DashboardScreen(
         onSendBtc = { addr, amt, pin ->
             dashboardViewModel.sendBtc(addr, amt, pin)
         }
+    )
+
+    ReceiveUsdtDialog(
+        isOpen = uiState.isReceiveUsdtDialogOpen,
+        usdtAddress = uiState.usdtAddress,
+        isLoading = uiState.isUsdtLoading,
+        errorMessage = uiState.usdtError,
+        onRefreshAddress = { dashboardViewModel.fetchUsdtAddress(forceRefresh = true) },
+        onDismiss = { dashboardViewModel.closeReceiveUsdtDialog() }
+    )
+
+    SendUsdtDialog(
+        isOpen = uiState.isSendUsdtDialogOpen,
+        usdtBalance = uiState.usdtBalance,
+        onChainBalance = uiState.usdtOnChainBalance,
+        isLoading = uiState.isUsdtTransferLoading,
+        errorMessage = uiState.usdtTransferError,
+        success = uiState.usdtTransferSuccess,
+        isPending = uiState.usdtTransferPending,
+        txRef = uiState.usdtTransferTxRef,
+        onDismiss = { dashboardViewModel.closeSendUsdtDialog() },
+        onSendUsdt = { addr, amt, pin ->
+            dashboardViewModel.sendUsdt(addr, amt, pin)
+        }
+    )
+
+    UsdtDepositsDialog(
+        isOpen = uiState.isUsdtDepositsDialogOpen,
+        deposits = uiState.usdtDeposits,
+        isLoading = uiState.isUsdtDepositsLoading,
+        onRefresh = { dashboardViewModel.fetchUsdtDeposits() },
+        onDismiss = { dashboardViewModel.closeUsdtDepositsDialog() }
     )
 
     // International Transfer Claims Screen & Dialogs (Section Client)
@@ -2333,10 +2369,182 @@ private fun BalanceCardsCarousel(
                         }
                     }
                 }
+                4 -> {
+                    // Card 5: USDT TRC-20 (Réseau TRON)
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .height(188.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                        border = BorderStroke(1.2.dp, Color(0xFF26A17B).copy(alpha = 0.75f)),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF064E3B),
+                                            Color(0xFF042F2E),
+                                            Color(0xFF021B17)
+                                        )
+                                    )
+                                )
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "₮",
+                                fontSize = 120.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White.copy(alpha = 0.05f),
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = 10.dp, y = 20.dp)
+                            )
+
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = "Solde USDT",
+                                            fontFamily = MulishFontFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        IconButton(
+                                            onClick = { dashboardViewModel.toggleBalanceVisibility() },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                                contentDescription = "Afficher/Masquer",
+                                                tint = Color.White.copy(alpha = 0.85f),
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = Color(0xFF064E3B)
+                                    ) {
+                                        Text(
+                                            text = "TRC20 • TRON",
+                                            fontFamily = MulishFontFamily,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF26A17B),
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                        )
+                                    }
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF26A17B).copy(alpha = 0.25f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "₮",
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color(0xFF26A17B),
+                                            fontFamily = MulishFontFamily
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = if (uiState.isBalanceVisible) {
+                                                "${String.format(java.util.Locale.US, "%,.4f", uiState.usdtBalance)} USDT"
+                                            } else "•••••••• USDT",
+                                            fontFamily = MulishFontFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 22.sp,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            text = if (uiState.isBalanceVisible) {
+                                                "≈ $ ${String.format(java.util.Locale.US, "%,.2f", uiState.usdtBalance)} USD"
+                                            } else "•••• USD",
+                                            fontFamily = MulishFontFamily,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 12.sp,
+                                            color = Color.White.copy(alpha = 0.85f)
+                                        )
+                                        val onChainStatus = if (uiState.usdtOnChainBalance != null) {
+                                            "On-chain : ${String.format(java.util.Locale.US, "%,.2f", uiState.usdtOnChainBalance)} USDT"
+                                        } else {
+                                            "Solde blockchain indisponible"
+                                        }
+                                        Text(
+                                            text = onChainStatus,
+                                            fontFamily = MulishFontFamily,
+                                            fontSize = 10.sp,
+                                            color = if (uiState.usdtOnChainBalance != null) Color(0xFF26A17B) else Color(0xFFF59E0B)
+                                        )
+                                    }
+                                }
+
+                                // Quick Action Buttons (Recevoir, Envoyer, Acheter, Vendre, Dépôts)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    UsdtCardActionButton(
+                                        label = "Recevoir",
+                                        icon = Icons.Default.CallReceived,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openReceiveUsdtDialog() }
+
+                                    UsdtCardActionButton(
+                                        label = "Envoyer",
+                                        icon = Icons.Default.Send,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openSendUsdtDialog() }
+
+                                    UsdtCardActionButton(
+                                        label = "Acheter",
+                                        icon = Icons.Default.ShoppingCart,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openBuyUsdtDialog() }
+
+                                    UsdtCardActionButton(
+                                        label = "Vendre",
+                                        icon = Icons.Default.CurrencyExchange,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openSellUsdtDialog() }
+
+                                    UsdtCardActionButton(
+                                        label = "Dépôts",
+                                        icon = Icons.Default.History,
+                                        modifier = Modifier.weight(1f)
+                                    ) { dashboardViewModel.openUsdtDepositsDialog() }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        // Carousel Indicator Dots (4 dots for the 4 balance cards)
+        // Carousel Indicator Dots (5 dots for the 5 balance cards: CDF, USD, EUR, BTC, USDT)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2344,7 +2552,7 @@ private fun BalanceCardsCarousel(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            repeat(4) { i ->
+            repeat(5) { i ->
                 val isSelected = pagerState.currentPage == i
                 Box(
                     modifier = Modifier
@@ -2377,7 +2585,7 @@ private fun ToofanDashboardTab(
     onContactClick: (com.example.data.model.PhoneContact) -> Unit = {},
     onActionPlusClick: () -> Unit = {}
 ) {
-    val pagerState = rememberPagerState(pageCount = { 4 })
+    val pagerState = rememberPagerState(pageCount = { 5 })
     val coroutineScope = rememberCoroutineScope()
     val unreadNotifCount = remember(notifications) { notifications.count { !it.read } }
 
@@ -3084,6 +3292,46 @@ private fun BtcCardActionButton(
                 text = label,
                 fontFamily = MulishFontFamily,
                 fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+private fun UsdtCardActionButton(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(36.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF042F2E),
+        border = BorderStroke(1.dp, Color(0xFF26A17B).copy(alpha = 0.65f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color(0xFF26A17B),
+                modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = label,
+                fontFamily = MulishFontFamily,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 maxLines = 1

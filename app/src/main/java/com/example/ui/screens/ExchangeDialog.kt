@@ -42,6 +42,7 @@ import java.util.Locale
 fun ExchangeDialog(
     isOpen: Boolean,
     walletResponse: WalletResponse?,
+    usdtBalance: Double = 0.0,
     exchangeRatesMap: Map<String, Double> = emptyMap(),
     realtimeQuoteRate: Double? = null,
     realtimeQuoteAmount: Double? = null,
@@ -66,11 +67,11 @@ fun ExchangeDialog(
     if (!isOpen) return
 
     val nationalCode = walletResponse?.nationalCurrency?.code?.uppercase() ?: "CDF"
-    val availableCurrencies = remember(nationalCode) { listOf("USD", "EUR", nationalCode, "BTC") }
+    val availableCurrencies = remember(nationalCode) { listOf("USD", "EUR", nationalCode, "BTC", "USDT") }
     var showInfoDialog by remember { mutableStateOf(false) }
 
     // Source available balance
-    val availableSourceBalance = remember(walletResponse, fromCurrency, nationalCode) {
+    val availableSourceBalance = remember(walletResponse, fromCurrency, nationalCode, usdtBalance) {
         val fiatMap = walletResponse?.balances?.fiat ?: emptyMap()
         val cryptoList = walletResponse?.balances?.crypto ?: emptyList()
         val code = fromCurrency.uppercase()
@@ -80,6 +81,7 @@ fun ExchangeDialog(
             nationalCode -> fiatMap[nationalCode] ?: (fiatMap["CDF"] ?: (fiatMap["national"] ?: 0.0))
             "CDF" -> fiatMap["CDF"] ?: (fiatMap["national"] ?: 0.0)
             "BTC" -> cryptoList.find { it.currency.uppercase() == "BTC" }?.balance ?: (walletResponse?.bitcoin?.balance ?: 0.0)
+            "USDT" -> if (usdtBalance > 0.0) usdtBalance else (cryptoList.find { it.currency.uppercase() == "USDT" }?.balance ?: 0.0)
             else -> fiatMap[code] ?: 0.0
         }
     }
@@ -95,6 +97,19 @@ fun ExchangeDialog(
         } else if (from != "BTC" && to == "BTC") {
             val btcRate = exchangeRatesMap["BTC_${from}"] ?: exchangeRatesMap["BTC_USD"] ?: 82500.0
             if (btcRate > 0.0) 1.0 / btcRate else 0.000012
+        } else if (from == "USDT" && to != "USDT") {
+            if (to == "USD") 1.0
+            else exchangeRatesMap["USDT_${to}"] ?: exchangeRatesMap["USD_${to}"] ?: (if (to == "CDF") 2850.0 else 1.0)
+        } else if (from != "USDT" && to == "USDT") {
+            if (from == "USD") 1.0
+            else {
+                val rate = exchangeRatesMap["${from}_USDT"] ?: exchangeRatesMap["${from}_USD"]
+                if (rate != null && rate > 0.0) rate
+                else {
+                    val rev = exchangeRatesMap["USD_${from}"]
+                    if (rev != null && rev > 0.0) 1.0 / rev else (if (from == "CDF") 1.0 / 2850.0 else 1.0)
+                }
+            }
         } else if (from == to) {
             1.0
         } else if (realtimeQuoteRate != null && realtimeQuoteRate > 0.0) {
@@ -653,6 +668,9 @@ private fun formatAmount(value: Double, currency: String = ""): String {
     val formatter = NumberFormat.getNumberInstance(Locale.FRANCE).apply {
         if (currency.equals("BTC", ignoreCase = true)) {
             maximumFractionDigits = 8
+            minimumFractionDigits = 2
+        } else if (currency.equals("USDT", ignoreCase = true)) {
+            maximumFractionDigits = 6
             minimumFractionDigits = 2
         } else {
             maximumFractionDigits = 2

@@ -91,7 +91,10 @@ fun AnalyticsAppScreen(
     onOpenReceiveBtc: () -> Unit = {},
     onOpenExchange: () -> Unit = {},
     onOpenDeposit: () -> Unit = {},
-    onOpenWithdraw: () -> Unit = {}
+    onOpenWithdraw: () -> Unit = {},
+    onOpenSendUsdt: () -> Unit = {},
+    onOpenReceiveUsdt: () -> Unit = {},
+    onOpenUsdtDeposits: () -> Unit = {}
 ) {
     if (!isOpen) return
 
@@ -102,7 +105,6 @@ fun AnalyticsAppScreen(
     val flowFilter = uiState.analyticsFlowFilter
 
     var showCalculatorModal by remember { mutableStateOf(false) }
-    var showQuickActionModal by remember { mutableStateOf(false) }
     var showAlertModal by remember { mutableStateOf(false) }
     var reportExportFeedback by remember { mutableStateOf<String?>(null) }
 
@@ -143,6 +145,7 @@ fun AnalyticsAppScreen(
             when (tx.currency.uppercase()) {
                 "BTC" -> tx.amount * btcTelemetry.priceUsd
                 "CDF" -> tx.amount / 2850.0
+                "USDT" -> tx.amount
                 else -> tx.amount
             }
         }
@@ -153,6 +156,7 @@ fun AnalyticsAppScreen(
             when (tx.currency.uppercase()) {
                 "BTC" -> tx.amount * btcTelemetry.priceUsd
                 "CDF" -> tx.amount / 2850.0
+                "USDT" -> tx.amount
                 else -> tx.amount
             }
         }
@@ -163,18 +167,20 @@ fun AnalyticsAppScreen(
             when (tx.currency.uppercase()) {
                 "BTC" -> tx.fee * btcTelemetry.priceUsd
                 "CDF" -> tx.fee / 2850.0
+                "USDT" -> tx.fee
                 else -> tx.fee
             }
         }
     }
 
-    val consolidatedTotalUsd = remember(walletResponse, btcTelemetry.priceUsd) {
+    val consolidatedTotalUsd = remember(walletResponse, btcTelemetry.priceUsd, uiState.usdtBalance) {
         val fiatMap = walletResponse?.balances?.fiat ?: emptyMap()
         val usd = fiatMap["USD"] ?: 0.0
         val cdf = (fiatMap["CDF"] ?: 0.0) / 2850.0
         val eur = (fiatMap["EUR"] ?: 0.0) * 1.08
         val btcVal = (walletResponse?.bitcoin?.balance ?: 0.0) * btcTelemetry.priceUsd
-        usd + cdf + eur + btcVal
+        val usdtVal = uiState.usdtBalance
+        usd + cdf + eur + btcVal + usdtVal
     }
 
     val userBtcBalance = walletResponse?.bitcoin?.balance ?: 0.0
@@ -192,220 +198,106 @@ fun AnalyticsAppScreen(
 
     BackHandler { onDismiss() }
 
-    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = PrimaryNavy,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(PrimaryNavy)
-                    .padding(top = statusBarHeight)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = PrimaryNavy,
+                shadowElevation = 4.dp
             ) {
-                // TOP BAR COMPACTE EN PLEIN ÉCRAN (Bande haute touchant le réseau/status bar, en BLEU PRIMAIRE SANS BANDE NOIRE)
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = PrimaryNavy,
-                    shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
-                    shadowElevation = 8.dp
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        PrimaryNavyLight,
-                                        PrimaryNavy
-                                    )
-                                )
-                            )
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    // Header row: Back button, Title & Subtitle, Refresh button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            // Ligne 1 : Retour + Avatar + Identité utilisateur + Boutons de droite
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            IconButton(
+                                onClick = onDismiss,
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.12f))
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    IconButton(
-                                        onClick = onDismiss,
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .clip(CircleShape)
-                                            .background(Color.White.copy(alpha = 0.12f))
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = "Retour",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-
-                                    Box(
-                                        modifier = Modifier.size(42.dp)
-                                    ) {
-                                        if (!userProfile?.profilePhotoUrl.isNullOrBlank()) {
-                                            AsyncImage(
-                                                model = userProfile?.profilePhotoUrl,
-                                                contentDescription = "Avatar",
-                                                contentScale = ContentScale.Crop,
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .clip(CircleShape)
-                                                    .border(1.5.dp, NeumorphCyan, CircleShape)
-                                            )
-                                        } else {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .clip(CircleShape)
-                                                    .background(PrimaryNavyLight)
-                                                    .border(1.5.dp, NeumorphCyan, CircleShape),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                val initials = (userProfile?.fullName ?: "Patrick")
-                                                    .trim()
-                                                    .split(" ")
-                                                    .mapNotNull { it.firstOrNull()?.toString() }
-                                                    .take(2)
-                                                    .joinToString("")
-                                                    .uppercase()
-                                                    .ifBlank { "PL" }
-                                                Text(initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                            }
-                                        }
-
-                                        // Pastille verte en ligne
-                                        Box(
-                                            modifier = Modifier
-                                                .size(10.dp)
-                                                .align(Alignment.BottomEnd)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFF10B981))
-                                                .border(1.5.dp, PrimaryNavy, CircleShape)
-                                        )
-                                    }
-
-                                    Column {
-                                        Text(
-                                            text = "Bienvenue",
-                                            fontSize = 11.sp,
-                                            color = Color(0xFF94A3B8),
-                                            fontFamily = MulishFontFamily
-                                        )
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
-                                                text = userProfile?.fullName ?: "Patrick Lubanda",
-                                                fontSize = 14.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White,
-                                                fontFamily = MulishFontFamily,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Icon(
-                                                imageVector = Icons.Default.CheckCircle,
-                                                contentDescription = "Vérifié",
-                                                tint = NeumorphCyan,
-                                                modifier = Modifier.size(13.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(10.dp),
-                                        color = Color.White.copy(alpha = 0.12f)
-                                    ) {
-                                        Text(
-                                            text = "FR",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = onRefreshMarket,
-                                        modifier = Modifier
-                                            .size(34.dp)
-                                            .clip(CircleShape)
-                                            .background(Color.White.copy(alpha = 0.12f))
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Refresh,
-                                            contentDescription = "Actualiser",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Retour",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Column {
+                                Text(
+                                    text = "Analytique",
+                                    fontFamily = MulishFontFamily,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 20.sp,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "CashPay • Bitcoin • USDT TRC-20",
+                                    fontFamily = MulishFontFamily,
+                                    fontSize = 11.sp,
+                                    color = NeumorphTextSecondary
+                                )
+                            }
+                        }
 
-                            // Ligne 2 : Sous-titre discret et indicateur en direct du marché
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                        IconButton(
+                            onClick = onRefreshMarket,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.12f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Actualiser",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    // Clean Period Selector
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        listOf("1J", "1S", "1M", "3M", "1A", "Tout").forEach { period ->
+                            val isSelected = selectedPeriod == period
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { onPeriodSelected(period) },
+                                color = if (isSelected) NeumorphCyan else Color.White.copy(alpha = 0.08f),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(20.dp)
-                                            .clip(CircleShape)
-                                            .background(NeumorphCyan.copy(alpha = 0.2f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ShowChart,
-                                            contentDescription = null,
-                                            tint = NeumorphCyan,
-                                            modifier = Modifier.size(12.dp)
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = "Analytique & Marché Boursier",
-                                        fontFamily = MulishFontFamily,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 12.sp,
-                                        color = Color.White.copy(alpha = 0.9f)
-                                    )
-                                }
-
-                                val isPos = btcTelemetry.change24hPercent >= 0
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = if (isPos) NeumorphGreen.copy(alpha = 0.2f) else NeumorphRed.copy(alpha = 0.2f),
-                                    border = BorderStroke(1.dp, if (isPos) NeumorphGreen.copy(alpha = 0.5f) else NeumorphRed.copy(alpha = 0.5f))
-                                ) {
-                                    Text(
-                                       text = "BTC ${if (isPos) "+" else ""}${String.format(Locale.US, "%.2f", btcTelemetry.change24hPercent)}%",
-                                        color = if (isPos) NeumorphGreen else NeumorphRed,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
+                                Text(
+                                    text = period,
+                                    fontFamily = MulishFontFamily,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 11.sp,
+                                    color = if (isSelected) PrimaryNavy else Color.White,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 5.dp)
+                                )
                             }
                         }
                     }
@@ -413,7 +305,52 @@ fun AnalyticsAppScreen(
             }
         },
         bottomBar = {
-            // Footer Navigation Surface...
+            Surface(
+                color = PrimaryNavy,
+                shadowElevation = 8.dp,
+                border = BorderStroke(1.dp, Color(0xFF1E2A44)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    AnalyticsNavItem(
+                        label = "Synthèse",
+                        icon = Icons.Default.AccountBalanceWallet,
+                        isSelected = selectedTab == 0,
+                        onClick = { onTabSelected(0) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    AnalyticsNavItem(
+                        label = "Flux",
+                        icon = Icons.Default.Insights,
+                        isSelected = selectedTab == 1,
+                        onClick = { onTabSelected(1) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    AnalyticsNavItem(
+                        label = "Marché",
+                        icon = Icons.Default.TrendingUp,
+                        isSelected = selectedTab == 2,
+                        onClick = { onTabSelected(2) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    AnalyticsNavItem(
+                        label = "Rapports",
+                        icon = Icons.Default.Assessment,
+                        isSelected = selectedTab == 3,
+                        onClick = { onTabSelected(3) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
     ) { innerPadding ->
         LazyColumn(
@@ -435,8 +372,135 @@ fun AnalyticsAppScreen(
                                 totalUsd = consolidatedTotalUsd,
                                 userProfile = userProfile,
                                 walletResponse = walletResponse,
-                                btcRate = btcTelemetry.priceUsd
+                                btcRate = btcTelemetry.priceUsd,
+                                usdtBalance = uiState.usdtBalance
                             )
+                        }
+
+                        item {
+                            // Cartes de Portefeuilles Crypto (Bitcoin & USDT TRC20) avec actions rapides
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                // Carte Bitcoin
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .clickable { onTabSelected(2) },
+                                    color = NeumorphSurface,
+                                    border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.5f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text("Bitcoin (BTC)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Icon(Icons.Default.CurrencyBitcoin, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(16.dp))
+                                        }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "${String.format(Locale.US, "%.6f", userBtcBalance)} ₿",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            text = "≈ $ ${String.format(Locale.US, "%,.2f", userBtcUsdEquivalent)} USD",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF94A3B8)
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Button(
+                                                onClick = onOpenReceiveBtc,
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E0B).copy(alpha = 0.2f)),
+                                                shape = RoundedCornerShape(8.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Text("Recevoir", fontSize = 9.sp, color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold)
+                                            }
+                                            Button(
+                                                onClick = onOpenSendBtc,
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E0B).copy(alpha = 0.2f)),
+                                                shape = RoundedCornerShape(8.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Text("Envoyer", fontSize = 9.sp, color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Carte USDT TRC20
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .clickable { onTabSelected(2) },
+                                    color = NeumorphSurface,
+                                    border = BorderStroke(1.dp, Color(0xFF26A17B).copy(alpha = 0.5f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text("USDT (TRC20)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text("₮", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color(0xFF26A17B))
+                                        }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "${String.format(Locale.US, "%,.2f", uiState.usdtBalance)} ₮",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            text = if (uiState.usdtOnChainBalance != null) {
+                                                "On-chain : ${String.format(Locale.US, "%,.2f", uiState.usdtOnChainBalance)}"
+                                            } else {
+                                                "Solde on-chain N/D"
+                                            },
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF94A3B8)
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Button(
+                                                onClick = onOpenReceiveUsdt,
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A17B).copy(alpha = 0.2f)),
+                                                shape = RoundedCornerShape(8.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Text("Recevoir", fontSize = 9.sp, color = Color(0xFF26A17B), fontWeight = FontWeight.Bold)
+                                            }
+                                            Button(
+                                                onClick = onOpenSendUsdt,
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A17B).copy(alpha = 0.2f)),
+                                                shape = RoundedCornerShape(8.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Text("Envoyer", fontSize = 9.sp, color = Color(0xFF26A17B), fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         item {
@@ -474,12 +538,77 @@ fun AnalyticsAppScreen(
                         }
 
                         item {
-                            // Carte Porte-monnaie Virtuel Neumorphique
-                            NeumorphicVirtualWalletBadge(
-                                walletId = userProfile?.walletId ?: "WAL-•••• •••• ••••",
-                                holderName = userProfile?.fullName ?: "Titulaire CashPay",
-                                walletResponse = walletResponse
-                            )
+                            // Indicateur Analytique du Flux Net (Entrées vs Sorties)
+                            val netFlow = totalIncomingUsd - totalOutgoingUsd
+                            val isNetPositive = netFlow >= 0
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                color = NeumorphSurface,
+                                border = BorderStroke(1.dp, NeumorphBorderLight)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Flux Financier Net",
+                                            fontFamily = MulishFontFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            color = Color.White
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = if (isNetPositive) NeumorphGreen.copy(alpha = 0.2f) else NeumorphRed.copy(alpha = 0.2f)
+                                        ) {
+                                            Text(
+                                                text = if (isNetPositive) "EXCÉDENTAIRE" else "DÉFICITAIRE",
+                                                fontFamily = MulishFontFamily,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 10.sp,
+                                                color = if (isNetPositive) NeumorphGreen else NeumorphRed,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.Bottom
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = "${if (isNetPositive) "+" else "-"}$ ${String.format(Locale.US, "%,.2f", kotlin.math.abs(netFlow))}",
+                                                fontFamily = MulishFontFamily,
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 22.sp,
+                                                color = if (isNetPositive) NeumorphGreen else NeumorphRed
+                                            )
+                                            Text(
+                                                text = "Différentiel sur la période (${selectedPeriod})",
+                                                fontFamily = MulishFontFamily,
+                                                fontSize = 11.sp,
+                                                color = NeumorphTextSecondary
+                                            )
+                                        }
+                                        Button(
+                                            onClick = { onTabSelected(1) },
+                                            colors = ButtonDefaults.buttonColors(containerColor = NeumorphCyan.copy(alpha = 0.15f)),
+                                            shape = RoundedCornerShape(10.dp),
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                        ) {
+                                            Text("Détail des flux", color = NeumorphCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         item {
@@ -750,6 +879,119 @@ fun AnalyticsAppScreen(
                         }
 
                         item {
+                            // Synthèse USDT TRC-20 sur le réseau TRON
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                color = NeumorphSurface,
+                                border = BorderStroke(1.dp, Color(0xFF26A17B).copy(alpha = 0.5f))
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFF26A17B).copy(alpha = 0.2f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text("₮", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF26A17B))
+                                            }
+                                            Column {
+                                                Text("Tether USDT • TRC-20", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
+                                                Text("Réseau TRON (TRC20)", fontSize = 10.sp, color = Color(0xFF26A17B))
+                                            }
+                                        }
+
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = Color(0xFF26A17B).copy(alpha = 0.2f)
+                                        ) {
+                                            Text(
+                                                text = "1 USDT = $1.00 USD",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFF26A17B),
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Text("Solde CashPay", fontSize = 10.sp, color = Color(0xFF94A3B8))
+                                            Text("${String.format(Locale.US, "%,.4f", uiState.usdtBalance)} USDT", fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, color = Color.White)
+                                        }
+                                        Column(horizontalAlignment = Alignment.End) {
+                                            Text("Solde Blockchain", fontSize = 10.sp, color = Color(0xFF94A3B8))
+                                            Text(
+                                                text = if (uiState.usdtOnChainBalance != null) {
+                                                    "${String.format(Locale.US, "%,.4f", uiState.usdtOnChainBalance)} USDT"
+                                                } else {
+                                                    "Solde blockchain indisponible"
+                                                },
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp,
+                                                color = if (uiState.usdtOnChainBalance != null) Color(0xFF26A17B) else Color(0xFFF59E0B)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Button(
+                                            onClick = onOpenReceiveUsdt,
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A17B)),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Icon(Icons.Default.CallReceived, contentDescription = null, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Recevoir", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Button(
+                                            onClick = onOpenSendUsdt,
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A17B)),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Envoyer", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Button(
+                                            onClick = onOpenUsdtDeposits,
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Dépôts", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
                             // Répartition par Catégories
                             NeumorphicCategoryBreakdownCard(
                                 transactions = transactions,
@@ -801,36 +1043,6 @@ fun AnalyticsAppScreen(
             )
         }
 
-        // Modale d'Action Rapide Centrale (+)
-        if (showQuickActionModal) {
-            AnalyticsQuickActionModal(
-                onDismiss = { showQuickActionModal = false },
-                onBuyBtc = {
-                    showQuickActionModal = false
-                    onOpenDeposit()
-                },
-                onSellBtc = {
-                    showQuickActionModal = false
-                    onOpenWithdraw()
-                },
-                onSendBtc = {
-                    showQuickActionModal = false
-                    onOpenSendBtc()
-                },
-                onReceiveBtc = {
-                    showQuickActionModal = false
-                    onOpenReceiveBtc()
-                },
-                onCalculator = {
-                    showQuickActionModal = false
-                    showCalculatorModal = true
-                },
-                onExportReport = {
-                    showQuickActionModal = false
-                    reportExportFeedback = "Relevé des activités généré avec succès"
-                }
-            )
-        }
 
         // Modale Alertes de Marché
         if (showAlertModal) {
@@ -865,89 +1077,6 @@ fun AnalyticsAppScreen(
                     }
                 }
             )
-        }
-
-        // Bottom Bar Footer Navigation
-        Surface(
-            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
-            color = PrimaryNavy,
-            shadowElevation = 14.dp,
-            border = BorderStroke(1.dp, Color(0xFF1E2A44)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(bottom = 6.dp)
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    AnalyticsNavItem(
-                        label = "Synthèse",
-                        icon = Icons.Default.AccountBalanceWallet,
-                        isSelected = selectedTab == 0,
-                        onClick = { onTabSelected(0) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    AnalyticsNavItem(
-                        label = "Flux",
-                        icon = Icons.Default.Insights,
-                        isSelected = selectedTab == 1,
-                        onClick = { onTabSelected(1) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.weight(1.1f))
-                    AnalyticsNavItem(
-                        label = "Marché",
-                        icon = Icons.Default.TrendingUp,
-                        isSelected = selectedTab == 2,
-                        onClick = { onTabSelected(2) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    AnalyticsNavItem(
-                        label = "Rapports",
-                        icon = Icons.Default.Assessment,
-                        isSelected = selectedTab == 3,
-                        onClick = { onTabSelected(3) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .offset(y = (-14).dp)
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clickable { showQuickActionModal = true },
-                        shape = CircleShape,
-                        color = NeumorphCyan,
-                        border = BorderStroke(2.dp, Color.White),
-                        shadowElevation = 8.dp
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Actions Rapides",
-                                tint = PrimaryNavy,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -1151,7 +1280,8 @@ private fun NeumorphicTotalPortfolioCard(
     totalUsd: Double,
     userProfile: UserProfileEntity?,
     walletResponse: WalletResponse?,
-    btcRate: Double
+    btcRate: Double,
+    usdtBalance: Double
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -1186,7 +1316,7 @@ private fun NeumorphicTotalPortfolioCard(
                         color = Color.White
                     )
                     Text(
-                        text = "Équivalent net consolidé (USD, CDF & BTC)",
+                        text = "CashPay • Bitcoin • USDT TRC-20",
                         fontFamily = MulishFontFamily,
                         fontSize = 11.sp,
                         color = NeumorphCyan
@@ -1195,17 +1325,17 @@ private fun NeumorphicTotalPortfolioCard(
 
                 Box(
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(46.dp)
                         .clip(CircleShape)
                         .background(NeumorphSurfaceElevated)
-                        .border(2.dp, NeumorphCyan.copy(alpha = 0.6f), CircleShape),
+                        .border(1.5.dp, NeumorphCyan.copy(alpha = 0.6f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Person,
+                        imageVector = Icons.Default.AccountBalanceWallet,
                         contentDescription = null,
                         tint = NeumorphCyan,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -1216,30 +1346,32 @@ private fun NeumorphicTotalPortfolioCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 val fiat = walletResponse?.balances?.fiat ?: emptyMap()
-                PortfolioCurrencyPill(label = "USD", value = String.format(Locale.US, "$ %,.2f", fiat["USD"] ?: 0.0), color = NeumorphGreen)
-                PortfolioCurrencyPill(label = "CDF", value = String.format(Locale.US, "%,.0f FC", fiat["CDF"] ?: 0.0), color = NeumorphCyan)
-                PortfolioCurrencyPill(label = "BTC", value = String.format(Locale.US, "%.5f ₿", walletResponse?.bitcoin?.balance ?: 0.0), color = NeumorphBlue)
+                PortfolioCurrencyPill(label = "USD", value = String.format(Locale.US, "$ %,.2f", fiat["USD"] ?: 0.0), color = NeumorphGreen, modifier = Modifier.weight(1f))
+                PortfolioCurrencyPill(label = "CDF", value = String.format(Locale.US, "%,.0f FC", fiat["CDF"] ?: 0.0), color = NeumorphCyan, modifier = Modifier.weight(1f))
+                PortfolioCurrencyPill(label = "BTC", value = String.format(Locale.US, "%.5f ₿", walletResponse?.bitcoin?.balance ?: 0.0), color = NeumorphBlue, modifier = Modifier.weight(1f))
+                PortfolioCurrencyPill(label = "USDT", value = String.format(Locale.US, "%,.2f ₮", usdtBalance), color = Color(0xFF26A17B), modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-private fun PortfolioCurrencyPill(label: String, value: String, color: Color) {
+private fun PortfolioCurrencyPill(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = NeumorphSurfaceElevated,
-        border = BorderStroke(1.dp, color.copy(alpha = 0.35f))
+        border = BorderStroke(1.dp, color.copy(alpha = 0.35f)),
+        modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = color)
-            Text(value, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+            Text(value, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1)
         }
     }
 }
@@ -2134,14 +2266,17 @@ private fun NeumorphicCategoryBreakdownCard(
             .sumOf { it.amount }
         val bills = transactions.filter { it.type.contains("TV", ignoreCase = true) || it.type.contains("REGIDESO", ignoreCase = true) || it.type.contains("SNEL", ignoreCase = true) }
             .sumOf { it.amount }
+        val usdt = transactions.filter { it.currency.uppercase() == "USDT" }
+            .sumOf { it.amount }
         val btc = transactions.filter { it.currency.uppercase() == "BTC" }
             .sumOf { it.amount * btcRate }
-        val transfers = transactions.filter { it.type == "TR" || it.type.contains("TRANSFER", ignoreCase = true) }
+        val transfers = transactions.filter { (it.type == "TR" || it.type.contains("TRANSFER", ignoreCase = true)) && it.currency.uppercase() != "BTC" && it.currency.uppercase() != "USDT" }
             .sumOf { it.amount }
 
         listOf(
             Triple("Transferts & Envois", transfers, NeumorphCyan),
-            Triple("Bitcoin & Crypto", btc, NeumorphBlue),
+            Triple("Bitcoin (BTC)", btc, NeumorphBlue),
+            Triple("Tether USDT (TRC-20)", usdt, Color(0xFF26A17B)),
             Triple("Factures & Services", bills, NeumorphGreen),
             Triple("Achats & Commerces", shopping, Color(0xFF8B5CF6))
         )

@@ -76,6 +76,18 @@ interface CashPayApiService {
     @POST("api/v1/transfers")
     suspend fun transferBtc(@Body request: com.example.data.model.BtcTransferRequest): Response<com.example.data.model.BtcTransferResponse>
 
+    @POST("api/v1/transfers")
+    suspend fun transferUsdt(@Body request: com.example.data.model.UsdtTransferRequest): Response<com.example.data.model.UsdtTransferResponse>
+
+    @POST("api/v1/crypto/usdt-trc20/address")
+    suspend fun getUsdtAddress(): Response<com.example.data.model.UsdtAddressResponse>
+
+    @GET("api/v1/crypto/usdt-trc20/balance")
+    suspend fun getUsdtBalance(): Response<com.example.data.model.UsdtBalanceResponse>
+
+    @GET("api/v1/crypto/usdt-trc20/deposits")
+    suspend fun getUsdtDeposits(): Response<com.example.data.model.UsdtDepositsResponse>
+
     @POST("api/v1/exchange")
     suspend fun exchange(@Body request: ExchangeRequest): Response<ExchangeResponse>
 
