@@ -401,6 +401,7 @@ data class ClaimsUiState(
     val selectedClaimDetail: com.example.data.model.InternationalTransferClaimDto? = null,
     val isClaimDetailDialogOpen: Boolean = false,
     val isClaimDetailLoading: Boolean = false,
+    val claimDetailError: String? = null,
     val isSubmittingClaim: Boolean = false,
     val newClaimError: String? = null,
     val newClaimSuccessMessage: String? = null,
@@ -876,6 +877,7 @@ data class DashboardUiState(
     val claimsError: String? = claims.claimsError
     val selectedClaimDetail: com.example.data.model.InternationalTransferClaimDto? = claims.selectedClaimDetail
     val isClaimDetailDialogOpen: Boolean = claims.isClaimDetailDialogOpen
+    val claimDetailError: String? = claims.claimDetailError
     val isClaimDetailLoading: Boolean = claims.isClaimDetailLoading
     val isSubmittingClaim: Boolean = claims.isSubmittingClaim
     val newClaimError: String? = claims.newClaimError

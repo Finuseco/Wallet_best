@@ -3720,11 +3720,14 @@ agent = it.agent.copy(
     }
 
     fun loadInternationalClaims() {
+        val userId = getEffectiveUserId()
         updateClaims { copy(isClaimsLoading = true, claimsError = null) }
         viewModelScope.launch {
             val result = repository.getInternationalClaims()
+            if (getEffectiveUserId() != userId) return@launch
             result.onSuccess { resp ->
-                updateClaims { copy(isClaimsLoading = false, claimsList = resp.claims, claimsError = null) }
+                if (resp.success) updateClaims { copy(isClaimsLoading = false, claimsList = resp.claims, claimsError = null) }
+                else updateClaims { copy(isClaimsLoading = false, claimsError = resp.error ?: "Liste des réclamations indisponible.") }
             }.onFailure { err ->
                 updateClaims { copy(isClaimsLoading = false, claimsError = err.message ?: "Impossible de récupérer vos réclamations.") }
             }
@@ -3747,7 +3750,7 @@ agent = it.agent.copy(
         senderCountry: String,
         receiveInCurrency: String
     ) {
-        if (provider.isBlank() || trackingNumber.isBlank() || expectedAmount <= 0.0 ||
+        if (provider.isBlank() || trackingNumber.isBlank() || !expectedAmount.isFinite() || expectedAmount <= 0.0 ||
             expectedCurrency.isBlank() || senderCountry.isBlank() || receiveInCurrency.isBlank()) {
             updateClaims { copy(newClaimError = "Veuillez remplir tous les champs obligatoires.") }
             return
@@ -3794,24 +3797,29 @@ agent = it.agent.copy(
         }
     }
 
+    private var claimDetailVersion = 0
     fun openClaimDetail(claim: com.example.data.model.InternationalTransferClaimDto) {
-        updateClaims { copy(selectedClaimDetail = claim, isClaimDetailDialogOpen = true, isClaimDetailLoading = true) }
+        val version = ++claimDetailVersion
+        val userId = getEffectiveUserId()
+        updateClaims { copy(selectedClaimDetail = claim, isClaimDetailDialogOpen = true, isClaimDetailLoading = true, claimDetailError = null) }
         viewModelScope.launch {
             val result = repository.getInternationalClaimDetail(claim.id)
-            result.onSuccess { resp ->
-                if (resp.claim != null) {
-                    updateClaims { copy(selectedClaimDetail = resp.claim, isClaimDetailLoading = false) }
+            if (version != claimDetailVersion || getEffectiveUserId() != userId) return@launch
+            result.onSuccess { response ->
+                if (response.success && response.claim != null) {
+                    updateClaims { copy(selectedClaimDetail = response.claim, isClaimDetailLoading = false, claimDetailError = null) }
                 } else {
-                    updateClaims { copy(isClaimDetailLoading = false) }
+                    updateClaims { copy(isClaimDetailLoading = false, claimDetailError = response.error ?: "Détail de réclamation indisponible.") }
                 }
-            }.onFailure {
-                updateClaims { copy(isClaimDetailLoading = false) }
+            }.onFailure { error ->
+                updateClaims { copy(isClaimDetailLoading = false, claimDetailError = error.message ?: "Impossible de vérifier le statut actuel. Réessayez.") }
             }
         }
     }
 
     fun closeClaimDetail() {
-        updateClaims { copy(isClaimDetailDialogOpen = false, selectedClaimDetail = null) }
+        claimDetailVersion++
+        updateClaims { copy(isClaimDetailDialogOpen = false, selectedClaimDetail = null, claimDetailError = null) }
     }
 
     // --- REFERRALS & REWARDS (Programme de Parrainage) ---

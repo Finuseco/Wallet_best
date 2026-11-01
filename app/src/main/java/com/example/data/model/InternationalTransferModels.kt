@@ -38,8 +38,17 @@ data class InternationalTransferClaimDto(
             else -> provider?.replace("_", " ")?.replaceFirstChar { it.uppercase() } ?: "Transfert International"
         }
 
+    val effectiveStatus: String
+        get() = when (processingStatus?.lowercase()?.trim()) {
+            "reserved" -> "reserved"
+            "disputed" -> "disputed"
+            "paid" -> "completed"
+            "rejected" -> "rejected"
+            else -> status?.lowercase()?.trim().orEmpty()
+        }
+
     val statusDisplayName: String
-        get() = when (status?.lowercase()?.trim().orEmpty()) {
+        get() = when (effectiveStatus) {
             "reserved" -> "En traitement par un agent"
             "disputed" -> "En litige — fonds réservés"
             "pending" -> "En attente"
@@ -53,10 +62,10 @@ data class InternationalTransferClaimDto(
         }
 
     val isPendingOrProcessing: Boolean
-        get() = (status?.lowercase()?.trim().orEmpty()) in listOf("pending", "processing", "approved", "processing_payment", "reserved", "disputed")
+        get() = effectiveStatus in listOf("pending", "processing", "approved", "processing_payment", "reserved", "disputed")
 
     val isTerminal: Boolean
-        get() = (status?.lowercase()?.trim().orEmpty()) in listOf("completed", "rejected", "failed")
+        get() = effectiveStatus in listOf("completed", "rejected", "failed")
 }
 
 @JsonClass(generateAdapter = true)

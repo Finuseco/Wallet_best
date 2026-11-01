@@ -814,6 +814,8 @@ fun DashboardScreen(
             isOpen = true,
             claim = uiState.selectedClaimDetail,
             isLoading = uiState.isClaimDetailLoading,
+            errorMessage = uiState.claimDetailError,
+            onRetry = { uiState.selectedClaimDetail?.let { dashboardViewModel.openClaimDetail(it) } },
             onDismiss = { dashboardViewModel.closeClaimDetail() }
         )
     }
