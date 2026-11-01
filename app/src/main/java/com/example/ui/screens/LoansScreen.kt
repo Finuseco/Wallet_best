@@ -27,6 +27,7 @@ fun LoansScreen(
     viewModel: DashboardViewModel,
     onBack: () -> Unit
 ) {
+    LoanConfirmationDialog(uiState, viewModel)
     Scaffold(
         topBar = {
             TopAppBar(

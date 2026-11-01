@@ -35,6 +35,13 @@ class DashboardViewModel(
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+    private val _commerceScanReview = MutableStateFlow<String?>(null)
+    val commerceScanReview: StateFlow<String?> = _commerceScanReview.asStateFlow()
+    fun closeCommerceScanReview() { _commerceScanReview.value = null }
+    private fun showCommerceScanReview(raw: String) {
+        updatePayScan { copy(isPayScanOpen = false, isInterpreting = false, showConfirmPaymentDialog = false) }
+        _commerceScanReview.value = raw
+    }
 
     fun updateMain(transform: MainUiState.() -> MainUiState) = _uiState.update { it.copy(main = it.main.transform()) }
     fun updateCards(transform: CardsUiState.() -> CardsUiState) = _uiState.update { it.copy(cards = it.cards.transform()) }
@@ -53,8 +60,12 @@ class DashboardViewModel(
     fun updateCpk(transform: CpkUiState.() -> CpkUiState) = _uiState.update { it.copy(cpk = it.cpk.transform()) }
     fun updatePayScan(transform: PayScanUiState.() -> PayScanUiState) = _uiState.update { it.copy(payscan = it.payscan.transform()) }
     fun updateAnalytics(transform: AnalyticsUiState.() -> AnalyticsUiState) = _uiState.update { it.copy(analytics = it.analytics.transform()) }
-    fun openLoansScreen() = updateMain { copy(isLoansScreenOpen = true) }
-    fun closeLoansScreen() = updateMain { copy(isLoansScreenOpen = false) }
+    fun openLoansScreen() {
+        closeLoanConfirmation()
+        updateMain { copy(isLoansScreenOpen = true) }
+        fetchLoanOffer(); fetchActiveLoan(); fetchLoanHistory()
+    }
+    fun closeLoansScreen() { closeLoanConfirmation(); updateMain { copy(isLoansScreenOpen = false) } }
 
     fun openAnalyticsScreen() {
         updateAnalytics { copy(isAnalyticsOpen = true) }
@@ -1865,7 +1876,39 @@ main = it.main.copy(
     }
 
     // --- LOANS MODULE ACTIONS ---
+    private val _loanConfirmation=kotlinx.coroutines.flow.MutableStateFlow(com.example.ui.screens.LoanConfirmationState())
+    val loanConfirmation=_loanConfirmation.asStateFlow()
+    private var loanReviewVersion=0
+    fun closeLoanConfirmation(){loanReviewVersion++;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState()}
+    fun reviewLoanRequest(){
+        val state=_uiState.value;val amount=state.loanRequestAmount.toDoubleOrNull()
+        if(amount==null||!amount.isFinite()||amount<=0){updateLoans{copy(loanRequestError="Montant invalide.")};return}
+        val version=++loanReviewVersion;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(loading=true)
+        updateLoans{copy(loanRequestError=null,loanRepayError=null,repayInstallmentError=null)}
+        viewModelScope.launch{repository.loanApplicationQuote(state.loanCurrency,amount,state.loanRequestDuration).onSuccess{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(application=it)}.onFailure{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(error=it.message)}}
+    }
+    fun reviewLoanRepayment(loanId:Long,installmentId:Long?=null){
+        val version=++loanReviewVersion;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(loading=true)
+        updateLoans{copy(loanRequestError=null,loanRepayError=null,repayInstallmentError=null)}
+        val amount=if(installmentId==null)_uiState.value.loanRepayAmount.toDoubleOrNull() else null
+        viewModelScope.launch{repository.loanPaymentQuote(loanId,amount,installmentId).onSuccess{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(payment=it)}.onFailure{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(error=it.message)}}
+    }
+    fun confirmReviewedLoan(){
+        val state=_uiState.value;if(state.isRequestingLoan||state.isRepayingLoan||state.isRepayInstallmentLoading)return
+        val review=_loanConfirmation.value
+        review.application?.let{submitLoanRequest(acceptedTerms=it);return}
+        review.payment?.let{if(it.installmentId==null)submitLoanRepayment(it.loanId,acceptedPayment=it) else submitInstallmentRepayment(it.loanId,it.installmentId,acceptedPayment=it)}
+    }
+
+    suspend fun resolveCommerceScan(request:com.example.data.model.ScanRequest)=repository.resolveScan(request)
+    suspend fun payCommerceScan(token:String,pin:String)=repository.payScan(token,pin)
+    fun refreshAfterCommercePayment() {
+        updatePayScan { copy(basketItems = emptyList(), currentPosSaleData = null, showConfirmPaymentDialog = false, showSuccessReceiptDialog = false, completedTransaction = null) }
+        fetchWallet(); loadTransactions()
+    }
+
     fun openLoansDialog() {
+        closeLoanConfirmation()
         updateLoans { copy(isLoansDialogOpen = true,
                 loanSelectedTab = 0,
                 loanRequestAmount = "",
@@ -1883,6 +1926,7 @@ main = it.main.copy(
     }
 
     fun closeLoansDialog() {
+        closeLoanConfirmation()
         updateLoans { copy(isLoansDialogOpen = false) }
     }
 
@@ -1905,15 +1949,23 @@ main = it.main.copy(
         updateLoans { copy(loanRepayAmount = amount, loanRepayError = null) }
     }
 
+    fun setLoanCurrency(currency: String) {
+        if(currency !in listOf("USD","EUR","CDF") || _uiState.value.isRequestingLoan)return
+        updateLoans { copy(loanCurrency=currency,loanOffer=null,loanOfferError=null) }
+        fetchLoanOffer()
+    }
+
     fun fetchLoanOffer() {
-        val currency = _uiState.value.withdrawalCurrency // standard currency
+        val currency = _uiState.value.loanCurrency
         updateLoans { copy(isLoadingLoanOffer = true, loanOfferError = null) }
         viewModelScope.launch {
             repository.getLoanOffer(currency)
                 .onSuccess { resp ->
+                    if(_uiState.value.loanCurrency!=currency)return@onSuccess
                     if (resp.success && resp.offer != null) {
                         updateLoans { copy(isLoadingLoanOffer = false,
                                 loanOffer = resp.offer,
+                                loanRequestDuration = if(resp.offer.durations.contains(loanRequestDuration)) loanRequestDuration else resp.offer.durations.firstOrNull() ?: 3,
                                 loanOfferError = null) }
                     } else {
                         updateLoans { copy(isLoadingLoanOffer = false,
@@ -1921,6 +1973,7 @@ main = it.main.copy(
                     }
                 }
                 .onFailure { err ->
+                    if(_uiState.value.loanCurrency!=currency)return@onFailure
                     updateLoans { copy(isLoadingLoanOffer = false,
                             loanOfferError = err.message ?: "Erreur réseau.") }
                 }
@@ -1934,7 +1987,7 @@ main = it.main.copy(
                 .onSuccess { resp ->
                     updateLoans { copy(isLoadingActiveLoan = false,
                             activeLoan = if (resp.success) resp.loan else null,
-                            activeLoanError = null) }
+                            activeLoanError = if(resp.success) null else resp.error ?: "Chargement du crédit non confirmé.") }
                 }
                 .onFailure { err ->
                     updateLoans { copy(isLoadingActiveLoan = false,
@@ -1950,7 +2003,7 @@ main = it.main.copy(
                 .onSuccess { resp ->
                     updateLoans { copy(isLoadingLoanHistory = false,
                             loanHistory = if (resp.success) resp.loans else emptyList(),
-                            loanHistoryError = null) }
+                            loanHistoryError = if(resp.success) null else resp.error ?: "Historique indisponible.") }
                 }
                 .onFailure { err ->
                     updateLoans { copy(isLoadingLoanHistory = false,
@@ -1959,11 +2012,16 @@ main = it.main.copy(
         }
     }
 
-    fun submitLoanRequest(userId: Long? = null) {
+    fun submitLoanRequest(userId: Long? = null,acceptedTerms:com.example.data.model.LoanApplicationQuote?=null) {
         val effectiveUserId = getEffectiveUserId(userId)
         val state = _uiState.value
+        if(state.isRequestingLoan)return
+        val offer=state.loanOffer
+        if(offer==null || !offer.eligible || state.loanRequestDuration !in offer.durations){
+            updateLoans { copy(loanRequestError="Chargez une offre valide et choisissez une durée proposée.") };return
+        }
         val amount = state.loanRequestAmount.toDoubleOrNull() ?: 0.0
-        if (amount <= 0.0) {
+        if (!amount.isFinite() || amount <= 0.0) {
             updateLoans { copy(loanRequestError = "Le montant doit être supérieur à zéro.") }
             return
         }
@@ -1972,16 +2030,19 @@ main = it.main.copy(
         viewModelScope.launch {
             repository.requestLoan(
                 amount = amount,
-                currency = "USD", // default
+                currency = offer.currency,
                 durationMonths = state.loanRequestDuration,
-                repaymentFrequency = "monthly",
-                installmentCount = state.loanRequestDuration
+                repaymentFrequency = if(state.loanRequestDuration==1) "weekly" else if(state.loanRequestDuration==3) "monthly" else "quarterly",
+                installmentCount = if(state.loanRequestDuration==1) 4 else if(state.loanRequestDuration==3) 3 else state.loanRequestDuration/3,
+                acceptedTerms=acceptedTerms
             ).onSuccess { resp ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onSuccess
                 if (resp.success) {
                     updateLoans { copy(isRequestingLoan = false,
                             loanRequestSuccess = true,
                             loanRequestAmount = "",
                             loanRequestError = null) }
+                    _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(receipt="Demande enregistrée. Le crédit sera versé uniquement après approbation.")
                     fetchActiveLoan()
                     fetchLoanHistory()
                     fetchWallet(effectiveUserId) // update wallet balance
@@ -1990,30 +2051,34 @@ main = it.main.copy(
                             loanRequestError = resp.error ?: "Erreur lors de la demande.") }
                 }
             }.onFailure { err ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onFailure
                 updateLoans { copy(isRequestingLoan = false,
                         loanRequestError = err.message ?: "Erreur réseau.") }
             }
         }
     }
 
-    fun submitLoanRepayment(loanId: Long, userId: Long? = null) {
+    fun submitLoanRepayment(loanId: Long, userId: Long? = null,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null) {
+        if(_uiState.value.isRepayingLoan || _uiState.value.isRepayInstallmentLoading)return
         val effectiveUserId = getEffectiveUserId(userId)
         val state = _uiState.value
-        val amount = state.loanRepayAmount.toDoubleOrNull() ?: 0.0
-        if (amount <= 0.0) {
+        val amount = acceptedPayment?.amount ?: state.loanRepayAmount.toDoubleOrNull() ?: 0.0
+        if (!amount.isFinite() || amount <= 0.0) {
             updateLoans { copy(loanRepayError = "Le montant doit être supérieur à zéro.") }
             return
         }
 
         updateLoans { copy(isRepayingLoan = true, loanRepayError = null, loanRepaySuccess = false) }
         viewModelScope.launch {
-            repository.repayLoan(loanId, amount)
+            repository.repayLoan(loanId, amount,acceptedPayment)
                 .onSuccess { resp ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onSuccess
                     if (resp.success) {
                         updateLoans { copy(isRepayingLoan = false,
                                 loanRepaySuccess = true,
                                 loanRepayAmount = "",
                                 loanRepayError = null) }
+                        _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(receipt="Remboursement confirmé : ${resp.paid} ${resp.currency}. Frais : ${resp.fee}. Dette restante : ${resp.debtAfter}. Référence : ${resp.reference}.")
                         fetchActiveLoan()
                         fetchLoanHistory()
                         fetchWallet(effectiveUserId)
@@ -2023,22 +2088,26 @@ main = it.main.copy(
                     }
                 }
                 .onFailure { err ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onFailure
                     updateLoans { copy(isRepayingLoan = false,
                             loanRepayError = err.message ?: "Erreur réseau.") }
                 }
         }
     }
 
-    fun submitInstallmentRepayment(loanId: Long, installmentId: Long, userId: Long? = null) {
+    fun submitInstallmentRepayment(loanId: Long, installmentId: Long, userId: Long? = null,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null) {
+        if(_uiState.value.isRepayingLoan || _uiState.value.isRepayInstallmentLoading)return
         val effectiveUserId = getEffectiveUserId(userId)
         updateLoans { copy(isRepayInstallmentLoading = true, repayInstallmentError = null, loanInstallmentSuccess = false) }
         viewModelScope.launch {
-            repository.repayLoanInstallment(loanId, installmentId)
+            repository.repayLoanInstallment(loanId, installmentId,acceptedPayment)
                 .onSuccess { resp ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onSuccess
                     if (resp.success) {
                         updateLoans { copy(isRepayInstallmentLoading = false,
                                 loanInstallmentSuccess = true,
                                 repayInstallmentError = null) }
+                        _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(receipt="Échéance remboursée : ${resp.paid} ${resp.currency}. Frais : ${resp.fee}. Dette restante : ${resp.remaining}. Référence : ${resp.reference}.")
                         fetchActiveLoan()
                         fetchLoanHistory()
                         fetchWallet(effectiveUserId)
@@ -2048,6 +2117,7 @@ main = it.main.copy(
                     }
                 }
                 .onFailure { err ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onFailure
                     updateLoans { copy(isRepayInstallmentLoading = false,
                             repayInstallmentError = err.message ?: "Erreur réseau.") }
                 }
@@ -4859,7 +4929,7 @@ agent = it.agent.copy(
         return com.example.data.model.PosSaleData(
             type = "POS_SALE",
             sellerWalletId = sellerWallet,
-            amount = if (total > 0) Math.round(total * 100.0) / 100.0 else 1.0,
+            amount = Math.round(total * 100.0) / 100.0,
             currency = payCurrency,
             paymentCurrency = payCurrency,
             saleReference = "POS_${System.currentTimeMillis().toString().takeLast(8)}",
@@ -4906,222 +4976,36 @@ agent = it.agent.copy(
 
     fun processPayScanInput(scannedRaw: String) {
         val cleaned = scannedRaw.trim()
-        if (cleaned.isBlank()) {
-            updatePayScan { copy(scanError = "Code vide ou illisible.") }
-            return
-        }
-
-        updatePayScan {
-            copy(
-                isInterpreting = true,
-                scanError = null,
-                scanSuccessMessage = null
-            )
-        }
-
+        if (cleaned.isBlank()) { updatePayScan { copy(scanError = "Code vide ou illisible.") }; return }
+        updatePayScan { copy(isInterpreting = true, scanError = null, scanSuccessMessage = null) }
         viewModelScope.launch {
-            val result = repository.scanPayInterpret(cleaned)
-            result.onSuccess { response ->
-                val scanObj = response.scan ?: com.example.data.model.ScanResultData(type = "UNKNOWN", value = cleaned)
-                val type = (scanObj.type ?: scanObj.nestedData?.type ?: "UNKNOWN").uppercase()
-
-                updatePayScan {
-                    copy(
-                        isInterpreting = false,
-                        lastInterpretedResult = scanObj
-                    )
+            repository.resolveScan(com.example.data.model.ScanRequest(value = cleaned)).onSuccess { response ->
+                val result = response.scan
+                if (result == null) { updatePayScan { copy(isInterpreting = false, scanError = "Réponse de scan incomplète.") }; return@onSuccess }
+                when {
+                    result.type == "WALLET" && !result.walletId.isNullOrBlank() -> {
+                        updatePayScan { copy(isInterpreting = false) }
+                        onRecipientChanged(result.walletId); openTransferDialog(); searchTransferRecipient()
+                    }
+                    result.type == "PRODUCTS" && _uiState.value.payscan.currentMode == PayScanMode.SUPERMARKET_BASKET && result.products.size == 1 -> {
+                        val product = result.products.single()
+                        val cart = _uiState.value.payscan.basketItems
+                        if (cart.any { !it.sellerWalletId.isNullOrBlank() && it.sellerWalletId != product.sellerWalletId }) {
+                            updatePayScan { copy(isInterpreting = false, scanError = "Terminez le panier du magasin actuel avant de changer de vendeur.") }; return@onSuccess
+                        }
+                        val existing = cart.find { it.id == product.id }
+                        val quantity = (existing?.quantity ?: 0) + 1
+                        if (quantity > product.stock || !product.price.isFinite() || product.price <= 0) {
+                            updatePayScan { copy(isInterpreting = false, scanError = "Stock ou prix du catalogue indisponible.") }; return@onSuccess
+                        }
+                        val apparel = isApparelKeyword(product.name)
+                        val item = PayScanCartItem(id = product.id, barcode = cleaned, name = product.name, unitPrice = product.price, currency = product.currency, quantity = quantity, boutiqueName = product.boutiqueName, sellerWalletId = product.sellerWalletId, isApparel = apparel)
+                        updatePayScan { copy(isInterpreting = false, basketItems = cart.filterNot { it.id == product.id } + item, lastScannedApparelItem = if (apparel) item else null, showApparelTreatmentSheet = apparel, scanSuccessMessage = "Article vérifié dans le catalogue : ${product.name}") }
+                    }
+                    else -> showCommerceScanReview(cleaned)
                 }
-
-                when (type) {
-                    "WALLET" -> {
-                        val walletId = scanObj.walletId ?: scanObj.nestedData?.walletId ?: cleaned
-                        updatePayScan {
-                            copy(scanSuccessMessage = "Portefeuille détecté : $walletId")
-                        }
-                        onRecipientChanged(walletId)
-                        openTransferDialog()
-                        searchTransferRecipient()
-                    }
-
-                    "POS_SALE" -> {
-                        val saleObj = scanObj.nestedData ?: scanObj
-                        val sellerWallet = saleObj.sellerWalletId ?: _uiState.value.payscan.defaultSellerWalletId
-                        val amount = saleObj.amount ?: 0.0
-                        val currency = saleObj.currency ?: "USD"
-                        val boutique = saleObj.boutiqueName ?: "Commerce Partenaire"
-                        val items = (saleObj.items ?: emptyList()).map {
-                            com.example.ui.viewmodel.PayScanCartItem(
-                                id = it.id ?: "ITEM_${System.currentTimeMillis()}",
-                                barcode = it.barcode,
-                                name = it.name.ifBlank { "Article POS" },
-                                unitPrice = it.sellingPrice,
-                                currency = it.currency ?: currency,
-                                quantity = it.quantity,
-                                boutiqueName = boutique,
-                                sellerWalletId = sellerWallet
-                            )
-                        }
-
-                        val saleData = com.example.data.model.PosSaleData(
-                            type = "POS_SALE",
-                            sellerWalletId = sellerWallet,
-                            amount = amount,
-                            currency = currency,
-                            paymentCurrency = saleObj.paymentCurrency ?: currency,
-                            saleReference = saleObj.saleReference ?: "POS_${System.currentTimeMillis().toString().takeLast(6)}",
-                            boutiqueName = boutique,
-                            sellerName = saleObj.sellerName ?: "Vendeur",
-                            items = saleObj.items ?: emptyList()
-                        )
-
-                        updatePayScan {
-                            copy(
-                                basketItems = if (items.isNotEmpty()) items else basketItems,
-                                currentPosSaleData = saleData,
-                                showConfirmPaymentDialog = true,
-                                scanSuccessMessage = "Vente POS détectée ($boutique - $amount $currency)"
-                            )
-                        }
-                    }
-
-                    "PAYMENT_REQUEST" -> {
-                        val req = scanObj.nestedData ?: scanObj
-                        val recipient = req.recipient ?: cleaned
-                        val amount = req.amount ?: 0.0
-                        val currency = req.currency ?: "USD"
-
-                        val saleData = com.example.data.model.PosSaleData(
-                            type = "POS_SALE",
-                            sellerWalletId = recipient,
-                            amount = amount,
-                            currency = currency,
-                            paymentCurrency = currency,
-                            boutiqueName = "Demande de paiement",
-                            sellerName = recipient,
-                            items = listOf(
-                                com.example.data.model.PosSaleItemDto(
-                                    id = "REQ_1",
-                                    name = "Paiement direct",
-                                    quantity = 1,
-                                    sellingPrice = amount,
-                                    currency = currency
-                                )
-                            )
-                        )
-
-                        updatePayScan {
-                            copy(
-                                currentPosSaleData = saleData,
-                                showConfirmPaymentDialog = true,
-                                scanSuccessMessage = "Demande de paiement de $amount $currency pour $recipient"
-                            )
-                        }
-                    }
-
-                    "PRODUCT", "BARCODE" -> {
-                        val barcodeOrId = scanObj.productId ?: scanObj.barcode ?: scanObj.value ?: cleaned
-                        handleScannedProduct(barcodeOrId)
-                    }
-
-                    else -> {
-                        if (cleaned.matches(Regex("^[A-Z]{2}\\d{10}$")) || cleaned.startsWith("CP-")) {
-                            onRecipientChanged(cleaned)
-                            openTransferDialog()
-                            searchTransferRecipient()
-                        } else {
-                            handleScannedProduct(cleaned)
-                        }
-                    }
-                }
-            }.onFailure {
-                handleLocalFallbackScan(cleaned)
-            }
+            }.onFailure { error -> updatePayScan { copy(isInterpreting = false, scanError = error.message ?: "Scan non confirmé par le serveur.") } }
         }
-    }
-
-    private fun handleLocalFallbackScan(cleaned: String) {
-        updatePayScan { copy(isInterpreting = false) }
-
-        if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
-            try {
-                val json = org.json.JSONObject(cleaned)
-                val type = json.optString("type", "").uppercase()
-                if (type == "POS_SALE") {
-                    val sellerWallet = json.optString("sellerWalletId", "CD0100000001")
-                    val amount = json.optDouble("amount", 0.0)
-                    val currency = json.optString("currency", "USD")
-                    val boutique = json.optString("boutiqueName", "Commerce")
-                    val itemsJson = json.optJSONArray("items")
-                    val itemsList = mutableListOf<com.example.data.model.PosSaleItemDto>()
-                    if (itemsJson != null) {
-                        for (i in 0 until itemsJson.length()) {
-                            val itObj = itemsJson.optJSONObject(i)
-                            if (itObj != null) {
-                                itemsList.add(
-                                    com.example.data.model.PosSaleItemDto(
-                                        id = itObj.optString("id", "ITEM_$i"),
-                                        name = itObj.optString("name", "Article"),
-                                        quantity = itObj.optInt("quantity", 1),
-                                        sellingPrice = itObj.optDouble("sellingPrice", 0.0),
-                                        barcode = itObj.optString("barcode", null)
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    val posData = com.example.data.model.PosSaleData(
-                        type = "POS_SALE",
-                        sellerWalletId = sellerWallet,
-                        amount = amount,
-                        currency = currency,
-                        paymentCurrency = json.optString("paymentCurrency", currency),
-                        saleReference = json.optString("saleReference", "POS_${System.currentTimeMillis().toString().takeLast(6)}"),
-                        boutiqueName = boutique,
-                        sellerName = json.optString("sellerName", "Vendeur"),
-                        items = itemsList
-                    )
-                    updatePayScan {
-                        copy(
-                            currentPosSaleData = posData,
-                            showConfirmPaymentDialog = true,
-                            scanSuccessMessage = "Vente POS détectée ($boutique - $amount $currency)"
-                        )
-                    }
-                    return
-                } else if (type == "PAYMENT_REQUEST") {
-                    val recipient = json.optString("recipient", "")
-                    val amount = json.optDouble("amount", 0.0)
-                    val currency = json.optString("currency", "USD")
-                    val posData = com.example.data.model.PosSaleData(
-                        type = "POS_SALE",
-                        sellerWalletId = recipient,
-                        amount = amount,
-                        currency = currency,
-                        paymentCurrency = currency,
-                        boutiqueName = "Demande de paiement",
-                        sellerName = recipient,
-                        items = listOf(com.example.data.model.PosSaleItemDto(name = "Paiement demandé", quantity = 1, sellingPrice = amount))
-                    )
-                    updatePayScan {
-                        copy(
-                            currentPosSaleData = posData,
-                            showConfirmPaymentDialog = true,
-                            scanSuccessMessage = "Demande de $amount $currency reçue."
-                        )
-                    }
-                    return
-                }
-            } catch (_: Exception) {}
-        }
-
-        if (cleaned.matches(Regex("^[A-Z]{2}\\d{10}$")) || cleaned.startsWith("CP-")) {
-            onRecipientChanged(cleaned)
-            openTransferDialog()
-            searchTransferRecipient()
-            return
-        }
-
-        handleScannedProduct(cleaned)
     }
 
     fun closeApparelTreatmentSheet() {
@@ -5183,158 +5067,22 @@ agent = it.agent.copy(
         return keywords.any { lower.contains(it) } || lower.startsWith("vet") || lower.startsWith("cloth")
     }
 
-    private fun handleScannedProduct(barcodeOrId: String) {
-        viewModelScope.launch {
-            val catalogProducts = _uiState.value.shopping.shoppingProducts
-            val matchingInCatalog = catalogProducts.find {
-                it.barcode.equals(barcodeOrId, ignoreCase = true) ||
-                it.rawId?.toString().equals(barcodeOrId, ignoreCase = true)
+    fun reviewPosPayment() {
+        updatePayScan { copy(showConfirmPaymentDialog = false, scanError = null) }
+        // The authenticated backend prices the real catalogue before any PIN is requested.
+        val sale = _uiState.value.payscan.currentPosSaleData ?: buildPosSaleDataFromBasket()
+        val seller = sale.items.firstOrNull()?.let { first -> _uiState.value.payscan.basketItems.find { it.id == first.id }?.sellerWalletId } ?: sale.sellerWalletId
+        val scan = org.json.JSONObject().put("type", "POS_SALE").put("sellerWalletId", seller)
+        val items = org.json.JSONArray()
+        sale.items.forEach { item ->
+            if (item.id.isNullOrBlank() || item.quantity < 1) {
+                updatePayScan { copy(scanError = "Rescannez les articles pour obtenir leurs identifiants de catalogue.") }; return
             }
-
-            if (matchingInCatalog != null) {
-                val price = matchingInCatalog.sellingPrice
-                val name = matchingInCatalog.name.ifBlank { "Article #$barcodeOrId" }
-                val curr = matchingInCatalog.currency.ifBlank { "USD" }
-                val categoryId = matchingInCatalog.categoryId
-                val isClothing = categoryId == "cat-vetements" || isApparelKeyword(name)
-                addCartItem(
-                    barcode = barcodeOrId,
-                    name = name,
-                    price = price,
-                    currency = curr,
-                    categoryId = if (isClothing) "cat-vetements" else categoryId,
-                    categoryName = if (isClothing) "Vêtements & Mode" else "Article Catalogue",
-                    isApparel = isClothing
-                )
-                return@launch
-            }
-
-            val lookupRes = repository.lookupScannedProduct(productId = barcodeOrId, barcode = barcodeOrId)
-            lookupRes.onSuccess { resp ->
-                val lk = resp.lookup
-                val name = lk?.name ?: "Article #$barcodeOrId"
-                val price = lk?.sellingPrice ?: -1.0
-                val curr = lk?.currency ?: "USD"
-                val isClothing = isApparelKeyword(name)
-                addCartItem(
-                    barcode = barcodeOrId,
-                    name = name,
-                    price = price,
-                    currency = curr,
-                    categoryId = if (isClothing) "cat-vetements" else "cat-divers",
-                    categoryName = if (isClothing) "Vêtements & Mode" else "Produit Validé",
-                    isApparel = isClothing
-                )
-            }.onFailure {
-                // Reject unknown products rather than defaulting to hardcoded prices
-                updatePayScan {
-                    copy(
-                        isInterpreting = false,
-                        scanError = "Produit non reconnu dans le catalogue."
-                    )
-                }
-            }
+            items.put(org.json.JSONObject().put("id", item.id).put("quantity", item.quantity))
         }
-    }
-
-    private fun addCartItem(
-        barcode: String,
-        name: String,
-        price: Double,
-        currency: String,
-        categoryId: String = "cat-divers",
-        categoryName: String = "Article",
-        isApparel: Boolean = false
-    ) {
-        val existing = _uiState.value.payscan.basketItems.find { it.barcode == barcode || it.name == name }
-        if (existing != null) {
-            updateBasketItemQuantity(existing.id, existing.quantity + 1)
-        } else {
-            val item = com.example.ui.viewmodel.PayScanCartItem(
-                id = "ITEM_${System.currentTimeMillis()}",
-                barcode = barcode,
-                name = name,
-                unitPrice = if (price > 0) price else 1.0,
-                currency = currency,
-                quantity = 1,
-                boutiqueName = _uiState.value.payscan.defaultBoutiqueName,
-                sellerWalletId = _uiState.value.payscan.defaultSellerWalletId,
-                categoryId = categoryId,
-                categoryName = categoryName,
-                treatmentInfo = if (isApparel) "Prêt-à-porter • Traitement textile & caisse" else null,
-                isApparel = isApparel,
-                size = if (isApparel) "M" else null
-            )
-            val successMsg = if (isApparel) {
-                "👗 Vêtement détecté : $name ($price $currency) — Traitement prêt-à-porter activé !"
-            } else {
-                "Ajouté au panier : $name ($price $currency)"
-            }
-            updatePayScan {
-                copy(
-                    basketItems = basketItems + item,
-                    scanSuccessMessage = successMsg,
-                    lastScannedApparelItem = if (isApparel) item else null,
-                    showApparelTreatmentSheet = isApparel
-                )
-            }
-        }
-    }
-
-    fun executePosPayment(pin: String) {
-        if (!pin.matches(Regex("^\\d{4}$"))) {
-            updatePayScan { copy(scanError = "Le code PIN doit comporter exactement 4 chiffres.") }
-            return
-        }
-
-        val saleData = _uiState.value.payscan.currentPosSaleData ?: buildPosSaleDataFromBasket()
-        if (saleData.items.isEmpty() && saleData.amount <= 0.0) {
-            updatePayScan { copy(scanError = "Le montant ou le panier est vide.") }
-            return
-        }
-
-        updatePayScan {
-            copy(
-                isProcessingPayment = true,
-                scanError = null,
-                scanSuccessMessage = null
-            )
-        }
-
-        viewModelScope.launch {
-            val result = repository.processPosSale(pin, saleData)
-            result.onSuccess { resp ->
-                val details = resp.transaction ?: com.example.data.model.PosTransactionDetails(
-                    type = "POS_SALE",
-                    saleReference = saleData.saleReference,
-                    sellerWalletId = saleData.sellerWalletId,
-                    amount = saleData.amount,
-                    currency = saleData.currency,
-                    paymentCurrency = saleData.paymentCurrency,
-                    boutiqueName = saleData.boutiqueName,
-                    sellerName = saleData.sellerName,
-                    createdAt = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.FRANCE).format(java.util.Date())
-                )
-
-                updatePayScan {
-                    copy(
-                        isProcessingPayment = false,
-                        showConfirmPaymentDialog = false,
-                        showSuccessReceiptDialog = true,
-                        completedTransaction = details,
-                        basketItems = emptyList(),
-                        scanSuccessMessage = resp.message ?: "Paiement POS effectué avec succès !"
-                    )
-                }
-            }.onFailure { err ->
-                updatePayScan {
-                    copy(
-                        isProcessingPayment = false,
-                        scanError = err.message ?: "Échec du paiement POS. Veuillez réessayer."
-                    )
-                }
-            }
-        }
+        if (items.length() == 0) { updatePayScan { copy(scanError = "Scannez la demande de paiement ou un article du catalogue.") }; return }
+        scan.put("items", items)
+        showCommerceScanReview(scan.toString())
     }
 
     // Aliases for compatibility

@@ -1323,19 +1323,11 @@ fun ClaimDetailDialog(
                             }
                         }
 
+                        claim.netAmount?.let { Text("Montant net : ${formatMoney(it)} ${claim.receiveInCurrency}", color = Color.White) }
                         if (!claim.rejectionReason.isNullOrBlank()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Motif :", color = ClaimsRed, fontSize = 12.5.sp, fontFamily = MulishFontFamily)
-                                Text(
-                                    text = claim.rejectionReason,
-                                    color = ClaimsRed,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp,
-                                    fontFamily = MulishFontFamily
-                                )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("Motif et consignes de l’agence", color = ClaimsRed, fontWeight = FontWeight.Bold)
+                                Text(claim.rejectionReason, color = Color.White, fontSize = 13.sp)
                             }
                         }
                     }

@@ -48,10 +48,9 @@ class NotificationWebSocketClient(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d("NotificationWS", "Message WebSocket reçu: $text")
                 try {
                     val notif = adapter.fromJson(text)
-                    if (notif != null) {
+                    if (notif != null && notif.id > 0L) {
                         onNotificationReceived(notif)
                     }
                 } catch (e: Exception) {

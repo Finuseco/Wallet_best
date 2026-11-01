@@ -1987,7 +1987,8 @@ class CashPayRepository(
         currency: String,
         durationMonths: Int,
         repaymentFrequency: String = "monthly",
-        installmentCount: Int
+        installmentCount: Int,
+        acceptedTerms:com.example.data.model.LoanApplicationQuote?=null
     ): Result<com.example.data.model.LoanRequestResponse> {
         return try {
             val req = com.example.data.model.LoanRequest(
@@ -1995,7 +1996,8 @@ class CashPayRepository(
                 currency = currency,
                 durationMonths = durationMonths,
                 repaymentFrequency = repaymentFrequency,
-                installmentCount = installmentCount
+                installmentCount = installmentCount,
+                acceptedTerms=acceptedTerms
             )
             val response = apiService.requestLoan(req)
             if (response.isSuccessful && response.body() != null) {
@@ -2009,9 +2011,9 @@ class CashPayRepository(
         }
     }
 
-    suspend fun repayLoan(loanId: Long, amount: Double): Result<com.example.data.model.LoanRepayResponse> {
+    suspend fun repayLoan(loanId: Long, amount: Double,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null): Result<com.example.data.model.LoanRepayResponse> {
         return try {
-            val req = com.example.data.model.LoanRepayRequest(loanId, amount)
+            val req = com.example.data.model.LoanRepayRequest(loanId, amount,acceptedPayment)
             val response = apiService.repayLoan(req)
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
@@ -2024,9 +2026,9 @@ class CashPayRepository(
         }
     }
 
-    suspend fun repayLoanInstallment(loanId: Long, installmentId: Long): Result<com.example.data.model.LoanRepayInstallmentResponse> {
+    suspend fun repayLoanInstallment(loanId: Long, installmentId: Long,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null): Result<com.example.data.model.LoanRepayInstallmentResponse> {
         return try {
-            val req = com.example.data.model.LoanRepayInstallmentRequest(loanId, installmentId)
+            val req = com.example.data.model.LoanRepayInstallmentRequest(loanId, installmentId,acceptedPayment)
             val response = apiService.repayLoanInstallment(req)
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
@@ -4044,5 +4046,24 @@ class CashPayRepository(
             }
         }
     }
+
+    suspend fun resolveScan(request:com.example.data.model.ScanRequest):Result<com.example.data.model.ScanResponse> = try {
+        ensureSessionToken();val response=apiService.resolveScan(request);val body=response.body()
+        if(response.isSuccessful&&body?.success==true)Result.success(body) else Result.failure(Exception(body?.error?:extractErrorMessage(response.errorBody()?.string(),"Scan non confirmé.")))
+    }catch(e:Exception){Result.failure(e)}
+    suspend fun payScan(token:String,pin:String):Result<com.example.data.model.ScanPaymentResponse> = try {
+        ensureSessionToken();val response=apiService.payScan(com.example.data.model.ScanPaymentRequest(token,pin));val body=response.body()
+        if(response.isSuccessful&&body?.success==true)Result.success(body) else Result.failure(Exception(body?.error?:extractErrorMessage(response.errorBody()?.string(),"Paiement non confirmé. Ne recommencez pas avec un nouveau devis sans vérifier l’historique.")))
+    }catch(e:Exception){Result.failure(e)}
+
+    suspend fun loanApplicationQuote(currency:String,amount:Double,duration:Int):Result<com.example.data.model.LoanApplicationQuote> = try{
+        ensureSessionToken();val response=apiService.loanApplicationQuote(currency,amount,duration);val body=response.body()
+        if(response.isSuccessful&&body?.success==true&&body.quote!=null)Result.success(body.quote) else Result.failure(Exception(body?.error?:extractErrorMessage(response.errorBody()?.string(),"Conditions indisponibles.")))
+    }catch(e:Exception){Result.failure(e)}
+    suspend fun loanPaymentQuote(id:Long,amount:Double?,installment:Long?):Result<com.example.data.model.LoanPaymentQuote> = try{
+        ensureSessionToken();val response=apiService.loanPaymentQuote(id,amount,installment);val body=response.body()
+        if(response.isSuccessful&&body?.success==true&&body.quote!=null)Result.success(body.quote) else Result.failure(Exception(body?.error?:extractErrorMessage(response.errorBody()?.string(),"Devis indisponible.")))
+    }catch(e:Exception){Result.failure(e)}
+
 }
 

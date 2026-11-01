@@ -37,6 +37,15 @@ import retrofit2.http.Query
 
 interface CashPayApiService {
 
+    @GET("api/v1/loans/offer")
+    suspend fun loanApplicationQuote(@Query("currency") currency:String,@Query("amount") amount:Double,@Query("durationMonths") duration:Int):Response<com.example.data.model.LoanApplicationQuoteResponse>
+    @GET("api/v1/loans/repay")
+    suspend fun loanPaymentQuote(@Query("loanId") loanId:Long,@Query("amount") amount:Double?,@Query("installmentId") installmentId:Long?):Response<com.example.data.model.LoanPaymentQuoteResponse>
+    @POST("api/v1/scanpay/scan")
+    suspend fun resolveScan(@Body request:com.example.data.model.ScanRequest):Response<com.example.data.model.ScanResponse>
+    @POST("api/v1/scanpay/payment")
+    suspend fun payScan(@Body request:com.example.data.model.ScanPaymentRequest):Response<com.example.data.model.ScanPaymentResponse>
+
     @GET("api/v1/countries")
     suspend fun getCountries(): Response<CountriesResponse>
 
