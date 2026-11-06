@@ -258,6 +258,15 @@ interface CashPayApiService {
         @Body request: com.example.data.model.ForgotPinResetDto
     ): Response<com.example.data.model.ForgotPinResetResponse>
 
+    @GET("api/v1/agent/subscription/fees")
+    suspend fun agentSubscriptionFee(@Query("plan") plan:String): Response<com.example.data.model.AgentFeeResponse>
+
+    @POST("api/v1/auth/change-pin")
+    suspend fun changeWalletPin(@Body request:com.example.data.model.WalletPinRequest): Response<com.example.data.model.WalletPinResponse>
+
+    @POST("api/v1/agent/loan-repayment")
+    suspend fun agentLoanWorkflow(@Body request:Map<String, @JvmSuppressWildcards Any>): Response<com.example.data.model.AgentLoanWorkflowResponse>
+
     @POST("api/v1/agent/activate")
     suspend fun activateAgent(
         @Body request: com.example.data.model.ActivateAgentRequest

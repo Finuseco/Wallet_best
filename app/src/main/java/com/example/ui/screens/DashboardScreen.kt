@@ -370,6 +370,9 @@ fun DashboardScreen(
         plan = uiState.agentPlan,
         pin = uiState.agentPin,
         isLoading = uiState.isActivatingAgent,
+        fee = uiState.agentSubscriptionFee,
+        feeLoading = uiState.isLoadingAgentFee,
+        onRetryFee = { dashboardViewModel.fetchAgentSubscriptionFee() },
         errorMessage = uiState.activateAgentError,
         successMessage = uiState.activateAgentSuccessMessage,
         onPlanChange = { dashboardViewModel.setAgentPlan(it) },
@@ -930,6 +933,7 @@ fun DashboardScreen(
         )
     }
 
+    if(uiState.isWalletPinOpen) WalletPinDialog(dashboardViewModel)
     // Edit Profile Dialog (with real CashPay PIN check)
     if (uiState.isEditProfileOpen) {
         ToofanEditProfileDialog(
@@ -937,6 +941,7 @@ fun DashboardScreen(
             userProfile = userProfile,
             onDismiss = { dashboardViewModel.closeEditProfileDialog() },
             onFullNameChange = { dashboardViewModel.onEditFullNameChanged(it) },
+            onPhoneChange = { dashboardViewModel.onEditPhoneChanged(it) },
             onCityChange = { dashboardViewModel.onEditCityChanged(it) },
             onProfessionChange = { dashboardViewModel.onEditProfessionChanged(it) },
             onAddressChange = { dashboardViewModel.onEditAddressChanged(it) },
@@ -948,54 +953,11 @@ fun DashboardScreen(
     val pendingCommerceScan by dashboardViewModel.commerceScanReview.collectAsState()
     pendingCommerceScan?.let { raw -> ScanPurchaseDialog(raw, dashboardViewModel) { dashboardViewModel.closeCommerceScanReview() } }
     commerceScan?.let { raw -> ScanPurchaseDialog(raw,dashboardViewModel){commerceScan=null} }
-    // Live Camera QR Scanner Dialog with instant automatic search
-    if (showQrScannerDialog) {
-        QrScannerDialog(
-            onBarcodeScanned = if(qrScanTarget=="transfer") { raw -> commerceScan=org.json.JSONObject().put("type","BARCODE").put("barcode",raw).toString();showQrScannerDialog=false } else null,
-            onDismissRequest = { 
-                showQrScannerDialog = false 
-                qrScanTarget = "transfer"
-            },
-            scanMode = when (qrScanTarget) {
-                "pos_sale" -> "PRODUCT"
-                "payment_request" -> "PAYMENT_REQUEST"
-                else -> "TRANSFER"
-            },
-            onQrScanned = { result ->
-                val commerce = try { org.json.JSONObject(result).optString("type") in listOf("PRODUCT","POS_SALE","PAYMENT_REQUEST") } catch(_:Exception) { false }
-                if(qrScanTarget=="transfer" && commerce){commerceScan=result;showQrScannerDialog=false;return@QrScannerDialog}
-                val cleaned = extractRecipientFromQr(result)
-                when (qrScanTarget) {
-                    "agent_withdraw" -> {
-                        dashboardViewModel.setAgentWithdrawClientRef(cleaned)
-                        dashboardViewModel.searchAndIdentifyClientForWithdraw()
-                    }
-                    "agent_deposit" -> {
-                        dashboardViewModel.setAgentDepositClientRef(cleaned)
-                        dashboardViewModel.searchAndIdentifyClientForDeposit()
-                    }
-                    "agent_loan" -> {
-                        dashboardViewModel.setAgentLoanClientRef(cleaned)
-                        dashboardViewModel.searchAgentLoanTarget()
-                    }
-                    "pos_sale" -> {
-                        // Product Scan Mode
-                        dashboardViewModel.processProductScan(cleaned)
-                    }
-                    "payment_request" -> {
-                        // Payment Request Mode
-                        dashboardViewModel.processPaymentRequestScan(cleaned)
-                    }
-                    else -> {
-                        dashboardViewModel.onRecipientChanged(cleaned)
-                        dashboardViewModel.openTransferDialog()
-                        dashboardViewModel.searchTransferRecipient()
-                    }
-                }
-                showQrScannerDialog = false
-                qrScanTarget = "transfer"
-            }
-        )
+    // Every result is resolved by Cashpay Web before being used as a recipient or price.
+    if(showQrScannerDialog){
+        QrScannerDialog(onDismissRequest={showQrScannerDialog=false;qrScanTarget="transfer"},scanMode=when(qrScanTarget){"pos_sale"->"PRODUCT";"payment_request"->"PAYMENT_REQUEST";else->"TRANSFER"},
+            onBarcodeScanned={ raw -> dashboardViewModel.handleScannedCode(org.json.JSONObject().put("type","BARCODE").put("barcode",raw).toString(),qrScanTarget);showQrScannerDialog=false },
+            onQrScanned={ raw -> dashboardViewModel.handleScannedCode(raw,qrScanTarget);showQrScannerDialog=false })
     }
 
     // PayScan Comprehensive Visual Codes & POS System (All Users)
@@ -4431,6 +4393,7 @@ private fun ToofanSecurityTab(
     userProfile: UserProfileEntity?,
     onToggleBiometrics: (Boolean) -> Unit,
     onEditProfile: () -> Unit,
+    onChangeWalletPin: () -> Unit,
     onLogout: () -> Unit
 ) {
     var isBiometricActive by remember { mutableStateOf(session?.biometricEnabled ?: true) }
@@ -4538,8 +4501,8 @@ private fun ToofanSecurityTab(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     ToofanButton(
-                        title = "Tester modification profil avec PIN",
-                        onClick = onEditProfile
+                        title = "Modifier mon code PIN",
+                        onClick = onChangeWalletPin
                     )
                 }
             }
@@ -4573,6 +4536,7 @@ private fun ToofanEditProfileDialog(
     userProfile: UserProfileEntity?,
     onDismiss: () -> Unit,
     onFullNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
     onCityChange: (String) -> Unit,
     onProfessionChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
@@ -4592,7 +4556,7 @@ private fun ToofanEditProfileDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -4608,6 +4572,7 @@ private fun ToofanEditProfileDialog(
                     placeholder = "Nom complet"
                 )
 
+                ToofanInputField(value=uiState.editPhone,onValueChange=onPhoneChange,placeholder="Téléphone avec indicatif international")
                 ToofanInputField(
                     value = uiState.editCity,
                     onValueChange = onCityChange,
@@ -4629,7 +4594,9 @@ private fun ToofanEditProfileDialog(
                 ToofanInputField(
                     value = uiState.editPinConfirmation,
                     onValueChange = onPinChange,
-                    placeholder = "Code PIN CashPay"
+                    placeholder = "Code PIN CashPay",
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword)
                 )
 
                 if (uiState.editErrorMessage != null) {
@@ -5052,6 +5019,7 @@ fun ToofanCardsAndSecurityTab(
                 userProfile = userProfile,
                 onToggleBiometrics = { dashboardViewModel.toggleBiometrics(it) },
                 onEditProfile = { dashboardViewModel.openEditProfileDialog(userProfile) },
+                onChangeWalletPin = { dashboardViewModel.openWalletPin() },
                 onLogout = onLogout
             )
         }

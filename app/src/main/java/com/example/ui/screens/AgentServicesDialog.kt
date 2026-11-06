@@ -1535,6 +1535,7 @@ private fun AgentWithdrawModal(
                     }
                 }
             } else if (uiState.agentWithdrawStep == 3) {
+                uiState.agentWithdrawPreview?.let { quote -> Text("Montant : ${quote.amount} ${quote.currency} · Frais : ${quote.fee} · Total débité du client : ${quote.totalDebit}") }
                 // Étape 3 : Choix du Canal
                 Text(
                     text = "Choisissez le canal pour envoyer l'OTP au client :",
@@ -1544,7 +1545,7 @@ private fun AgentWithdrawModal(
                     color = Color(0xFF475569)
                 )
 
-                val channels = uiState.agentWithdrawOtpChannels.ifEmpty { listOf("sms", "whatsapp", "app") }
+                val channels = uiState.agentWithdrawOtpChannels.ifEmpty { listOf("sms", "whatsapp", "email") }
                 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     channels.forEach { code ->
@@ -1895,6 +1896,7 @@ private fun AgentLoanModal(
                         shape = RoundedCornerShape(8.dp)
                     )
 
+                    uiState.agentLoanFee?.let { fee -> Text("Frais : $fee ${uiState.agentLoanCurrency} · Débit agent : ${uiState.agentLoanTotalDebit} ${uiState.agentLoanCurrency}") }
                     OutlinedTextField(
                         value = uiState.agentLoanPin,
                         onValueChange = { if (it.length <= 4) onPinChange(it) },
@@ -1926,7 +1928,7 @@ private fun AgentLoanModal(
                         if (uiState.isAgentLoanRepayLoading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
                         } else {
-                            Text("Confirmer le Remboursement", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold)
+                            Text(if(uiState.agentLoanFee==null) "Vérifier le montant et les frais" else "Confirmer le Remboursement", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

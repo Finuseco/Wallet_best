@@ -588,7 +588,7 @@ fun PayScanDialog(
                                     color = Color.LightGray
                                 )
                                 Text(
-                                    text = String.format(java.util.Locale.US, "%.2f %s", basketTotalInSelected, paymentCurrency),
+                                    text = if(basketTotalInSelected.isFinite()) String.format(java.util.Locale.US, "%.2f %s", basketTotalInSelected, paymentCurrency) else "Devis serveur requis",
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = ToofanGreen
@@ -603,7 +603,7 @@ fun PayScanDialog(
                                     color = Color.Gray
                                 )
                                 Text(
-                                    text = if (paymentCurrency == "USD") "≈ ${String.format(java.util.Locale.US, "%,.0f CDF", totalCdf)}"
+                                    text = if (!totalCdf.isFinite() || !totalUsd.isFinite()) "Taux indisponible" else if (paymentCurrency == "USD") "≈ ${String.format(java.util.Locale.US, "%,.0f CDF", totalCdf)}"
                                            else "≈ ${String.format(java.util.Locale.US, "%.2f USD", totalUsd)}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
@@ -853,7 +853,7 @@ fun PayScanDialog(
                             ) {
                                 Text("Total Panier :", color = Color.LightGray, fontSize = 14.sp)
                                 Text(
-                                    text = String.format(java.util.Locale.US, "%.2f %s", basketTotal, paymentCurrency),
+                                    text = if(basketTotal.isFinite()) String.format(java.util.Locale.US, "%.2f %s", basketTotal, paymentCurrency) else "Devis serveur requis",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
                                     color = ToofanGreen

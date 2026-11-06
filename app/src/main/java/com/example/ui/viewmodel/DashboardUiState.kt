@@ -8,6 +8,8 @@ data class MainUiState(
     val selectedTab: Int = 0, // 0: Accueil / Wallet, 1: Profil Complet & Données, 2: Sécurité & PIN
     val isEditProfileOpen: Boolean = false,
     val editFullName: String = "",
+    val editPhone: String = "",
+    val isWalletPinOpen: Boolean = false,
     val editCity: String = "",
     val editProfession: String = "",
     val editAddress: String = "",
@@ -44,6 +46,8 @@ data class MainUiState(
     val isDarkMode: Boolean = false,
     val isActivateAgentDialogOpen: Boolean = false,
     val agentPlan: String = "promo",
+    val agentSubscriptionFee: Double? = null,
+    val isLoadingAgentFee: Boolean = false,
     val agentPin: String = "",
     val isActivatingAgent: Boolean = false,
     val activateAgentError: String? = null,
@@ -226,8 +230,11 @@ data class AgentSuiteUiState(
     val agentWithdrawError: String? = null,
     val agentWithdrawSuccess: AgentWithdrawResponse? = null,
     val agentWithdrawOperationId: String? = null,
+    val agentWithdrawPreview: WithdrawActionResponse? = null,
     val agentWithdrawOtpChannels: List<String> = emptyList(),
     val agentLoanStep: Int = 1,
+    val agentLoanFee: Double? = null,
+    val agentLoanTotalDebit: Double? = null,
     val agentLoanClientRef: String = "",
     val agentLoanTarget: AgentLoanTargetResponse? = null,
     val isAgentSearchingLoan: Boolean = false,
@@ -566,6 +573,8 @@ data class DashboardUiState(
     // --- MAIN IMMUTABLE FIELDS ---
     val selectedTab: Int = main.selectedTab
     val isEditProfileOpen: Boolean = main.isEditProfileOpen
+    val editPhone: String = main.editPhone
+    val isWalletPinOpen: Boolean = main.isWalletPinOpen
     val editFullName: String = main.editFullName
     val editCity: String = main.editCity
     val editProfession: String = main.editProfession
@@ -602,6 +611,8 @@ data class DashboardUiState(
     val notificationsError: String? = main.notificationsError
     val isDarkMode: Boolean = main.isDarkMode
     val isActivateAgentDialogOpen: Boolean = main.isActivateAgentDialogOpen
+    val agentSubscriptionFee: Double? = main.agentSubscriptionFee
+    val isLoadingAgentFee: Boolean = main.isLoadingAgentFee
     val agentPlan: String = main.agentPlan
     val agentPin: String = main.agentPin
     val isActivatingAgent: Boolean = main.isActivatingAgent
@@ -779,8 +790,11 @@ data class DashboardUiState(
     val isAgentWithdrawLoading: Boolean = agent.isAgentWithdrawLoading
     val agentWithdrawError: String? = agent.agentWithdrawError
     val agentWithdrawSuccess: AgentWithdrawResponse? = agent.agentWithdrawSuccess
+    val agentWithdrawPreview: WithdrawActionResponse? = agent.agentWithdrawPreview
     val agentWithdrawOperationId: String? = agent.agentWithdrawOperationId
     val agentWithdrawOtpChannels: List<String> = agent.agentWithdrawOtpChannels
+    val agentLoanFee: Double? = agent.agentLoanFee
+    val agentLoanTotalDebit: Double? = agent.agentLoanTotalDebit
     val agentLoanStep: Int = agent.agentLoanStep
     val agentLoanClientRef: String = agent.agentLoanClientRef
     val agentLoanTarget: AgentLoanTargetResponse? = agent.agentLoanTarget
