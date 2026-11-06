@@ -352,7 +352,7 @@ fun AgentShoppingDialog(
                     .padding(paddingValues)
                     .background(Color(0xFF0B1120))
             ) {
-                if ((uiState.isShoppingLoading || uiState.isLoadingShoppingBoutiques) && uiState.shoppingBoutiques.isEmpty() && uiState.shoppingProducts.isEmpty()) {
+                if (uiState.isLoadingShoppingBoutiques && uiState.shoppingBoutiques.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = Color(0xFFFF6600))
                     }
@@ -738,11 +738,7 @@ private fun BoutiquesTabContent(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column {
                     Text(
                         text = "Vos Boutiques Shopping",

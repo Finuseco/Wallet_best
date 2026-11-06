@@ -206,6 +206,12 @@ fun DashboardScreen(
     var showDigitalServicesComingSoonDialog by remember { mutableStateOf(false) }
     var isAgentCustomerListOpen by remember { mutableStateOf(false) }
 
+    // Loans are an exclusive destination, not a sibling competing with dashboard overlays.
+    if (uiState.isLoansScreenOpen) {
+        LoansScreen(uiState, dashboardViewModel) { dashboardViewModel.closeLoansScreen() }
+        return
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Color(0xFF000E38),
@@ -654,14 +660,6 @@ fun DashboardScreen(
         )
     }
 
-    // Loans / Crédit Screen
-    if (uiState.isLoansScreenOpen) {
-        LoansScreen(
-            uiState = uiState,
-            viewModel = dashboardViewModel,
-            onBack = { dashboardViewModel.closeLoansScreen() }
-        )
-    }
 
     // Withdrawal Dialog
     if (uiState.isWithdrawalDialogOpen) {
@@ -6515,7 +6513,7 @@ fun ContactsPageDialog(
     }
 
     LaunchedEffect(hasContactPermission) {
-        if (hasContactPermission && uiState.contactsList.isEmpty()) {
+        if (hasContactPermission) {
             readAndSyncPhoneContacts(context, dashboardViewModel)
         }
     }
@@ -6755,7 +6753,7 @@ fun ContactsPageDialog(
                                         color = SuccessGreen
                                     )
                                     Text(
-                                        text = "Actifs",
+                                        text = "Identifiés",
                                         fontFamily = MulishFontFamily,
                                         fontSize = 11.sp,
                                         color = Color(0xFF38BDF8),
@@ -6870,22 +6868,14 @@ private fun ContactItemCard(
                         .border(1.5.dp, SuccessGreen, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
+                    val initials = contact.name.trim().split(Regex("\\s+")).take(2)
+                        .mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("")
+                    Text(initials, fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold,
+                        color = SuccessGreen, fontSize = 16.sp)
                     val photoUrl = contact.publicProfile?.profilePhotoUrl ?: contact.publicProfile?.profilePhoto
                     if (!photoUrl.isNullOrBlank()) {
-                        AsyncImage(
-                            model = resolveAvatarUrl(photoUrl),
-                            contentDescription = contact.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().clip(CircleShape)
-                        )
-                    } else {
-                        Text(
-                            text = contact.name.take(2).uppercase(),
-                            fontFamily = MulishFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            color = SuccessGreen,
-                            fontSize = 16.sp
-                        )
+                        AsyncImage(model = resolveAvatarUrl(photoUrl), contentDescription = contact.name,
+                            contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().clip(CircleShape))
                     }
                 }
 
@@ -6910,7 +6900,7 @@ private fun ContactItemCard(
                         }
                     }
                     Text(
-                        text = "${contact.publicProfile?.fullName.orEmpty()} · ${contact.publicProfile?.walletId.orEmpty()}",
+                        text = listOfNotNull(contact.publicProfile?.fullName?.takeIf { it.isNotBlank() }, contact.publicProfile?.walletId?.takeIf { it.isNotBlank() }).joinToString(" · "),
                         maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         fontFamily = MulishFontFamily,
                         fontSize = 12.sp,
@@ -6968,7 +6958,7 @@ private fun OtherContactItemCard(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            text = contact.name.take(2).uppercase(),
+                            text = contact.name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString(""),
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF94A3B8),
@@ -7762,7 +7752,7 @@ fun MiniPublicProfileDialog(
                     } else {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
-                                text = contact.name.take(2).uppercase(),
+                                text = contact.name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString(""),
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 22.sp,

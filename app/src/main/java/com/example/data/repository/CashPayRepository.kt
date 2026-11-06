@@ -52,7 +52,8 @@ class CashPayRepository(
             if (newToken.isNotBlank() && !newToken.startsWith("token_")) {
                 CoroutineScope(Dispatchers.IO).launch {
                     val sess = dao.getSessionOnce()
-                    if (sess != null) {
+                    if (sess != null && com.example.data.remote.ApiClient.sessionToken == newToken &&
+                        (com.example.data.remote.ApiClient.currentUserId == null || com.example.data.remote.ApiClient.currentUserId == sess.userId)) {
                         dao.saveSession(sess.copy(sessionToken = newToken))
                     }
                 }
@@ -61,11 +62,8 @@ class CashPayRepository(
     }
 
     private suspend fun ensureSessionToken() {
-        val currentToken = com.example.data.remote.ApiClient.sessionToken
-        if (!currentToken.isNullOrBlank() && !currentToken.startsWith("token_")) {
-            return
-        }
-
+        val activeToken = com.example.data.remote.ApiClient.sessionToken
+        val activeUserId = com.example.data.remote.ApiClient.currentUserId
         val sess = dao.getSessionOnce()
         val profile = dao.getUserProfileOnce()
 
@@ -75,19 +73,22 @@ class CashPayRepository(
         com.example.data.remote.ApiClient.currentPhone = profile?.phone ?: sess?.phone
         com.example.data.remote.ApiClient.currentUserRole = profile?.role
 
+        if (sess != null && activeUserId == sess.userId && com.example.data.remote.ApiClient.isCashPayToken(activeToken)) return
+
         val savedToken = sess?.sessionToken
-        if (!savedToken.isNullOrBlank() && !savedToken.startsWith("token_")) {
+        if (com.example.data.remote.ApiClient.isCashPayToken(savedToken)) {
             com.example.data.remote.ApiClient.sessionToken = savedToken
             return
         }
 
         val cookieToken = com.example.data.remote.ApiClient.getStoredCookieToken()
-        if (!cookieToken.isNullOrBlank() && !cookieToken.startsWith("token_")) {
+        if (com.example.data.remote.ApiClient.isCashPayToken(cookieToken)) {
             com.example.data.remote.ApiClient.sessionToken = cookieToken
             sess?.let { dao.saveSession(it.copy(sessionToken = cookieToken)) }
             return
         }
 
+        com.example.data.remote.ApiClient.sessionToken = null
         // Active refresh via GET api/v1/auth/me?phone=...
         val phone = sess?.phone ?: profile?.phone
         if (!phone.isNullOrBlank()) {
@@ -98,7 +99,7 @@ class CashPayRepository(
                     ?: meResp.headers()["token"]
                     ?: meResp.headers()["x-access-token"]
                     ?: com.example.data.remote.ApiClient.getStoredCookieToken()
-                if (!tokenFromHeader.isNullOrBlank() && !tokenFromHeader.startsWith("token_")) {
+                if (com.example.data.remote.ApiClient.isCashPayToken(tokenFromHeader)) {
                     com.example.data.remote.ApiClient.sessionToken = tokenFromHeader
                     sess?.let { dao.saveSession(it.copy(sessionToken = tokenFromHeader)) }
                 }
@@ -607,7 +608,7 @@ class CashPayRepository(
         try {
             wsClient.disconnect()
         } catch (_: Exception) {}
-        com.example.data.remote.ApiClient.sessionToken = null
+        com.example.data.remote.ApiClient.clearSession()
         dao.clearSession()
         dao.clearUserProfile()
         dao.clearTransactions()
@@ -2302,10 +2303,10 @@ class CashPayRepository(
         return try {
             ensureSessionToken()
             val response = apiService.getShoppingProducts()
-            if (response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body()?.success == true) {
                 Result.success(response.body()!!)
             } else {
-                val msg = extractErrorMessage(response.errorBody()?.string(), "Impossible de charger les produits Shopping.")
+                val msg = response.body()?.error ?: extractErrorMessage(response.errorBody()?.string(), "Impossible de charger les produits Shopping.")
                 Result.failure(Exception(msg))
             }
         } catch (e: Exception) {
@@ -2398,6 +2399,12 @@ class CashPayRepository(
             val payload = org.json.JSONObject(raw)
             if (!payload.optBoolean("success") || !payload.has("boutiques")) {
                 error(payload.optString("error").ifBlank { "Réponse boutiques non confirmée" })
+            }
+            val owner = payload.optJSONObject("account")
+            val expectedUser = dao.getSessionOnce()?.userId
+            if (owner != null && expectedUser != null && owner.optLong("id", -1) != expectedUser) {
+                com.example.data.remote.ApiClient.clearSession()
+                error("La session ne correspond pas au compte connecté. Reconnectez-vous.")
             }
             Result.success(com.example.data.model.BoutiquesResponse(success = true,
                 boutiquesList = com.example.data.model.parseBoutiquesFromJson(raw)))
