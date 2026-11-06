@@ -28,6 +28,7 @@ fun LoansScreen(
     viewModel: DashboardViewModel,
     onBack: () -> Unit
 ) {
+    androidx.activity.compose.BackHandler(onBack = onBack)
     LoanConfirmationDialog(uiState, viewModel)
     Scaffold(
         topBar = {

@@ -642,6 +642,15 @@ fun DashboardScreen(
         )
     }
 
+    // Loans Dialog Modal
+    if (uiState.isLoansDialogOpen) {
+        LoansDialog(
+            uiState = uiState,
+            viewModel = dashboardViewModel,
+            onDismiss = { dashboardViewModel.closeLoansDialog() }
+        )
+    }
+
     // Loans / Crédit Screen
     if (uiState.isLoansScreenOpen) {
         LoansScreen(
@@ -3008,7 +3017,7 @@ private fun ToofanDashboardTab(
                         bgColor = BrandBlue,
                         icon = Icons.Default.MonetizationOn,
                         modifier = Modifier.weight(1f),
-                        onClick = { dashboardViewModel.openLoansDialog() }
+                        onClick = { dashboardViewModel.openLoansScreen() }
                     )
                     ToofanActionSquare(
                         title = if (isAgentUser) "Espace\nAgent" else "PayScan\nPanier/POS",
@@ -5112,14 +5121,6 @@ fun ToofanCardsAndSecurityTab(
         )
     }
 
-    // Loans Dialog Modal
-    if (uiState.isLoansDialogOpen) {
-        LoansDialog(
-            uiState = uiState,
-            viewModel = dashboardViewModel,
-            onDismiss = { dashboardViewModel.closeLoansDialog() }
-        )
-    }
 }
 
 @Composable
@@ -6643,7 +6644,7 @@ fun ContactsPageDialog(
                 OutlinedTextField(
                     value = uiState.searchContactQuery,
                     onValueChange = { dashboardViewModel.setContactSearchQuery(it) },
-                    placeholder = { Text("Rechercher par nom, 9 chiffres ou Wallet ID...", color = Color(0xFF64748B), fontFamily = MulishFontFamily, fontSize = 13.sp) },
+                    placeholder = { Text("Nom, numéro ou ID Wallet...", color = Color(0xFF64748B), fontFamily = MulishFontFamily, fontSize = 13.sp) },
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
                     },
@@ -6659,6 +6660,12 @@ fun ContactsPageDialog(
                     ),
                     shape = RoundedCornerShape(14.dp)
                 )
+
+                if (hasContactPermission) {
+                    TextButton(enabled = !uiState.isLoadingContacts, onClick = {
+                        readAndSyncPhoneContacts(context, dashboardViewModel)
+                    }) { Text("Actualiser les contacts", color = SuccessGreen) }
+                }
 
                 if (!hasContactPermission) {
                     Surface(
@@ -6694,7 +6701,7 @@ fun ContactsPageDialog(
                                 color = Color.White
                             )
                             Text(
-                                text = "CashPay analyse automatiquement les 9 derniers chiffres de vos contacts pour détecter instantanément ceux qui possèdent déjà un compte CashPay.",
+                                text = "Autorisez la lecture du répertoire pour retrouver vos contacts CashPay avec leur numéro complet et leur pays.",
                                 fontFamily = MulishFontFamily,
                                 fontSize = 13.sp,
                                 textAlign = TextAlign.Center,
@@ -6719,31 +6726,12 @@ fun ContactsPageDialog(
                             }
                         }
                     }
-                } else if (uiState.isLoadingContacts) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = SuccessGreen)
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Text(
-                                text = "Recherche en temps réel des comptes CashPay...",
-                                fontFamily = MulishFontFamily,
-                                fontSize = 13.sp,
-                                color = SuccessGreen,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Analyse des 9 derniers chiffres des contacts",
-                                fontFamily = MulishFontFamily,
-                                fontSize = 11.sp,
-                                color = Color(0xFF94A3B8)
-                            )
-                        }
-                    }
                 } else {
+                    if (uiState.isLoadingContacts) {
+                        androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = SuccessGreen)
+                        Text("Détection des comptes en cours…", color = Color(0xFF94A3B8), fontSize = 12.sp)
+                    }
+                    uiState.contactsError?.let { error -> Text(error, color = Color(0xFFFCA5A5), fontSize = 12.sp) }
                     val filtered = remember(uiState.contactsList, uiState.searchContactQuery) {
                         if (uiState.searchContactQuery.isBlank()) uiState.contactsList else {
                             val q = uiState.searchContactQuery.trim().lowercase()
@@ -6781,7 +6769,7 @@ fun ContactsPageDialog(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
                         if (cashPayContacts.isNotEmpty()) {
@@ -6792,7 +6780,7 @@ fun ContactsPageDialog(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = "⭐ Comptes CashPay Détectés (${cashPayContacts.size})",
+                                        text = "Comptes CashPay (${cashPayContacts.size})",
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp,
@@ -6887,15 +6875,15 @@ private fun ContactItemCard(
     onSendClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(0.dp),
         color = Color(0xFF0B1228),
-        shadowElevation = 2.dp,
+        shadowElevation = 0.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -6917,7 +6905,7 @@ private fun ContactItemCard(
                     val photoUrl = contact.publicProfile?.profilePhotoUrl ?: contact.publicProfile?.profilePhoto
                     if (!photoUrl.isNullOrBlank()) {
                         AsyncImage(
-                            model = photoUrl,
+                            model = resolveAvatarUrl(photoUrl),
                             contentDescription = contact.name,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize().clip(CircleShape)
@@ -6933,10 +6921,11 @@ private fun ContactItemCard(
                     }
                 }
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = contact.name,
+                            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
@@ -6953,11 +6942,13 @@ private fun ContactItemCard(
                         }
                     }
                     Text(
-                        text = "ID : ${contact.publicProfile?.walletId ?: contact.phone}",
+                        text = "${contact.publicProfile?.fullName.orEmpty()} · ${contact.publicProfile?.walletId.orEmpty()}",
+                        maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         fontFamily = MulishFontFamily,
                         fontSize = 12.sp,
                         color = Color(0xFF94A3B8)
                     )
+                    Text(contact.phone, color = Color(0xFF94A3B8), fontSize = 12.sp)
                 }
             }
 
@@ -6985,7 +6976,7 @@ private fun OtherContactItemCard(
 ) {
     val context = LocalContext.current
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(0.dp),
         color = Color(0xFF0B1228),
         shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
@@ -6993,11 +6984,12 @@ private fun OtherContactItemCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
@@ -7017,9 +7009,10 @@ private fun OtherContactItemCard(
                     }
                 }
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = contact.name,
+                            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
@@ -7037,7 +7030,11 @@ private fun OtherContactItemCard(
                 shape = RoundedCornerShape(12.dp),
                 color = Color(0xFF3B82F6).copy(alpha = 0.2f),
                 modifier = Modifier.clickable {
-                    Toast.makeText(context, "Invitation CashPay envoyée à ${contact.name}", Toast.LENGTH_SHORT).show()
+                    val invite = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(android.content.Intent.EXTRA_TEXT, "Rejoins-moi sur CashPay : https://app.cashpay-all.com")
+                    }
+                    context.startActivity(android.content.Intent.createChooser(invite, "Inviter ${contact.name}"))
                 }
             ) {
                 Text(

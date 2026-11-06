@@ -259,6 +259,8 @@ data class AgentSuiteUiState(
 )
 
 data class ShoppingUiState(
+    val isLoadingShoppingBoutiques: Boolean = false,
+    val shoppingBoutiquesError: String? = null,
     val isAgentShoppingDialogOpen: Boolean = false,
     val shoppingActiveTab: Int = 0,
     val isShoppingLoading: Boolean = false,
@@ -812,6 +814,8 @@ data class DashboardUiState(
     // --- SHOPPING IMMUTABLE FIELDS ---
     val isAgentShoppingDialogOpen: Boolean = shopping.isAgentShoppingDialogOpen
     val shoppingActiveTab: Int = shopping.shoppingActiveTab
+    val isLoadingShoppingBoutiques: Boolean = shopping.isLoadingShoppingBoutiques
+    val shoppingBoutiquesError: String? = shopping.shoppingBoutiquesError
     val isShoppingLoading: Boolean = shopping.isShoppingLoading
     val shoppingError: String? = shopping.shoppingError
     val shoppingSuccessMessage: String? = shopping.shoppingSuccessMessage

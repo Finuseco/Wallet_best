@@ -1417,72 +1417,35 @@ main = it.main.copy(
     }
 
     // Lookup on RAW phone contacts (Gmail, Phone, SIM)
+    private var contactsSyncJob: kotlinx.coroutines.Job? = null
+
     fun syncContacts(rawContacts: List<Pair<String, String>>) {
-        if (rawContacts.isEmpty()) return
-        updateContacts { copy(isLoadingContacts = true, contactsError = null) }
-
-        viewModelScope.launch {
+        contactsSyncJob?.cancel()
+        val allContacts = rawContacts.mapNotNull { (name, rawPhone) ->
+            val phone = rawPhone.trim()
+            val digits = phone.filter { it.isDigit() }
+            if (digits.length !in 7..15) null else com.example.data.model.PhoneContact(
+                name = name.ifBlank { phone }, phone = phone,
+                normalizedPhone = phone.replace(Regex("[^0-9+]"), ""), lastNineDigits = digits.takeLast(9))
+        }.distinctBy { it.normalizedPhone }.sortedBy { it.name.lowercase() }
+        updateContacts { copy(contactsList = allContacts, isLoadingContacts = allContacts.isNotEmpty(), contactsError = null) }
+        if (allContacts.isEmpty()) return
+        contactsSyncJob = viewModelScope.launch {
             try {
-                // Map ALL contacts from SIM, Gmail, and Phone storage so none are lost
-                val allContacts = rawContacts.map { (name, rawPhone) ->
-                    val cleaned = rawPhone.replace(Regex("[^0-9+]"), "")
-                    var normalized = cleaned
-                    if (cleaned.startsWith("0")) {
-                        normalized = "243" + cleaned.substring(1)
-                    } else if (!cleaned.startsWith("+") && !cleaned.startsWith("243") && cleaned.length == 9) {
-                        normalized = "243" + cleaned
-                    }
-                    normalized = normalized.replace("+", "")
-
-                    com.example.data.model.PhoneContact(
-                        name = name,
-                        phone = rawPhone,
-                        normalizedPhone = normalized,
-                        lastNineDigits = if (normalized.length >= 9) normalized.takeLast(9) else normalized,
-                        isCashPayUser = false,
-                        publicProfile = null
-                    )
+                val resolved = mutableMapOf<String, com.example.data.model.PublicProfileDto>()
+                for (batch in allContacts.chunked(250)) {
+                    val response = repository.resolveContacts(batch.map { it.phone }).getOrThrow()
+                    for (contact in response) if (contact.found && contact.profile != null) resolved[contact.phone] = contact.profile
+                    updateContacts { copy(contactsList = allContacts.map { contact ->
+                        val profile = resolved[contact.phone]
+                        contact.copy(isCashPayUser = profile != null, publicProfile = profile)
+                    }.distinctBy { it.publicProfile?.walletId ?: it.normalizedPhone }.sortedWith(compareByDescending<com.example.data.model.PhoneContact> { it.isCashPayUser }.thenBy { it.name.lowercase() })) }
                 }
-
-                // Immediately display all device & Gmail & SIM contacts in UI
-                updateContacts { copy(isLoadingContacts = false,
-                        contactsList = allContacts) }
-
-                // Concurrently resolve CashPay network status for top contacts in parallel batches
-                val lookupBatch = allContacts.take(200)
-                val resolvedMap = kotlinx.coroutines.coroutineScope {
-                    lookupBatch.map { contact ->
-                        async {
-                            try {
-                                val searchResult = repository.searchProfileByPhone(contact.lastNineDigits)
-                                val profile = searchResult.getOrNull()
-                                if (profile != null && profile.success && profile.found && profile.profile != null) {
-                                    contact.lastNineDigits to profile.profile
-                                } else null
-                            } catch (_: Exception) {
-                                null
-                            }
-                        }
-                    }.awaitAll().filterNotNull().toMap()
-                }
-
-                if (resolvedMap.isNotEmpty()) {
-                    val updatedList = allContacts.map { contact ->
-                        val matched = resolvedMap[contact.lastNineDigits]
-                        if (matched != null) {
-                            contact.copy(isCashPayUser = true, publicProfile = matched)
-                        } else {
-                            contact
-                        }
-                    }
-                    updateContacts { copy(contactsList = updatedList.sortedWith(
-                                compareByDescending<com.example.data.model.PhoneContact> { c -> c.isCashPayUser }
-                                    .thenBy { c -> c.name.lowercase() }
-                            )) }
-                }
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e
             } catch (e: Exception) {
-                updateContacts { copy(isLoadingContacts = false,
-                        contactsError = "Synchronisation impossible. Vérifiez votre connexion.") }
+                updateContacts { copy(contactsError = "Détection incomplète. Vérifiez votre connexion puis actualisez.") }
+            } finally {
+                if (kotlinx.coroutines.currentCoroutineContext()[kotlinx.coroutines.Job]?.isActive == true) updateContacts { copy(isLoadingContacts = false) }
             }
         }
     }
@@ -2464,27 +2427,12 @@ main = it.main.copy(
     }
 
     fun fetchShoppingBoutiques() {
-        val hadBoutiques = _uiState.value.shoppingBoutiques.isNotEmpty()
-        if (!hadBoutiques) {
-            updateShopping { copy(isShoppingLoading = true, shoppingError = null) }
-        }
+        updateShopping { copy(isLoadingShoppingBoutiques = true, shoppingBoutiquesError = null) }
         viewModelScope.launch {
-            val result = repository.getShoppingBoutiques()
-            result.onSuccess { res ->
-                val currentBoutiques = _uiState.value.shoppingBoutiques
-                val combined = (currentBoutiques + res.boutiques).distinctBy {
-                    if (it.id.isNotBlank()) it.id else it.name
-                }
-                updateShopping { copy(
-                    isShoppingLoading = false,
-                    shoppingBoutiques = if (combined.isNotEmpty()) combined else res.boutiques,
-                    shoppingError = null
-                ) }
+            repository.getShoppingBoutiques().onSuccess { res ->
+                updateShopping { copy(isLoadingShoppingBoutiques = false, shoppingBoutiques = res.boutiques, shoppingBoutiquesError = null) }
             }.onFailure { err ->
-                updateShopping { copy(
-                    isShoppingLoading = false,
-                    shoppingError = if (shoppingBoutiques.isEmpty()) err.message else null
-                ) }
+                updateShopping { copy(isLoadingShoppingBoutiques = false, shoppingBoutiquesError = err.message ?: "Impossible de charger vos boutiques.") }
             }
         }
     }
@@ -2574,15 +2522,7 @@ main = it.main.copy(
         viewModelScope.launch {
             val result = repository.getShoppingProducts()
             result.onSuccess { res ->
-                val currentBoutiques = _uiState.value.shoppingBoutiques
-                val merged = (currentBoutiques + res.boutiques).distinctBy {
-                    if (it.id.isNotBlank()) it.id else it.name
-                }
-                updateShopping { copy(
-                    isShoppingLoading = false,
-                    shoppingProducts = res.products,
-                    shoppingBoutiques = if (merged.isNotEmpty()) merged else shoppingBoutiques
-                ) }
+                updateShopping { copy(isShoppingLoading = false, shoppingProducts = res.products, shoppingError = null) }
             }.onFailure { err ->
                 updateShopping { copy(
                     isShoppingLoading = false,

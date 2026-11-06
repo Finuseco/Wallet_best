@@ -37,6 +37,9 @@ import retrofit2.http.Query
 
 interface CashPayApiService {
 
+    @POST("api/v1/contacts/resolve")
+    suspend fun resolveContacts(@Body request: com.example.data.model.ContactResolveRequest): Response<com.example.data.model.ContactResolveResponse>
+
     @GET("api/v1/loans/offer")
     suspend fun loanApplicationQuote(@Query("currency") currency:String,@Query("amount") amount:Double,@Query("durationMonths") duration:Int):Response<com.example.data.model.LoanApplicationQuoteResponse>
     @GET("api/v1/loans/repay")

@@ -352,9 +352,14 @@ fun AgentShoppingDialog(
                     .padding(paddingValues)
                     .background(Color(0xFF0B1120))
             ) {
-                if (uiState.isShoppingLoading && uiState.shoppingBoutiques.isEmpty() && uiState.shoppingProducts.isEmpty()) {
+                if ((uiState.isShoppingLoading || uiState.isLoadingShoppingBoutiques) && uiState.shoppingBoutiques.isEmpty() && uiState.shoppingProducts.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = Color(0xFFFF6600))
+                    }
+                } else if (uiState.shoppingBoutiquesError != null && uiState.shoppingBoutiques.isEmpty()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(uiState.shoppingBoutiquesError ?: "Chargement des boutiques impossible.", color = Color.White)
+                        Button(onClick = onRefresh) { Text("Réessayer") }
                     }
                 } else {
                     when (uiState.shoppingActiveTab) {

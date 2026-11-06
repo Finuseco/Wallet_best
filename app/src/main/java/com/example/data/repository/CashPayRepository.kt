@@ -1698,39 +1698,12 @@ class CashPayRepository(
 
     suspend fun searchProfileByPhone(phone: String): Result<com.example.data.model.PublicProfileResponse> {
         return try {
-            val digits = phone.filter { it.isDigit() }
-            val queryPhone = if (digits.length >= 9) digits.takeLast(9) else digits
-            val candidates = mutableListOf<String>()
-            if (digits.isNotBlank()) {
-                candidates.add(digits)
-                candidates.add("+$digits")
+            ensureSessionToken()
+            val response = apiService.searchProfileByPhone(phone.trim())
+            if (!response.isSuccessful) {
+                return Result.failure(Exception(extractErrorMessage(response.errorBody()?.string(), "Recherche du contact indisponible")))
             }
-            if (queryPhone.length == 9) {
-                candidates.add("243$queryPhone")
-                candidates.add("+243$queryPhone")
-                candidates.add(queryPhone)
-                candidates.add("0$queryPhone")
-            }
-
-            var matchedResponse: retrofit2.Response<com.example.data.model.PublicProfileResponse>? = null
-            for (candidate in candidates.distinct()) {
-                try {
-                    val resp = apiService.searchProfileByPhone(candidate)
-                    if (resp.isSuccessful && resp.body()?.found == true && resp.body()?.profile != null) {
-                        matchedResponse = resp
-                        break
-                    }
-                } catch (_: Exception) {}
-            }
-
-            if (matchedResponse == null && digits.isNotBlank()) {
-                try {
-                    val searchResp = apiService.searchProfile(digits)
-                    if (searchResp.isSuccessful && searchResp.body()?.found == true && searchResp.body()?.profile != null) {
-                        matchedResponse = searchResp
-                    }
-                } catch (_: Exception) {}
-            }
+            val matchedResponse = response.takeIf { it.body()?.success == true && it.body()?.found == true && it.body()?.profile != null }
 
             if (matchedResponse != null && matchedResponse.isSuccessful && matchedResponse.body() != null) {
                 val body = matchedResponse.body()!!
@@ -1942,6 +1915,7 @@ class CashPayRepository(
     // --- LOANS MODULE ---
     suspend fun getLoanOffer(currency: String): Result<com.example.data.model.LoanOfferResponse> {
         return try {
+            ensureSessionToken()
             val response = apiService.getLoanOffer(currency)
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
@@ -1956,6 +1930,7 @@ class CashPayRepository(
 
     suspend fun getLoanCurrent(): Result<com.example.data.model.LoanCurrentResponse> {
         return try {
+            ensureSessionToken()
             val response = apiService.getLoanCurrent()
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
@@ -1970,6 +1945,7 @@ class CashPayRepository(
 
     suspend fun getLoanHistory(): Result<com.example.data.model.LoanHistoryResponse> {
         return try {
+            ensureSessionToken()
             val response = apiService.getLoanHistory()
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
@@ -1991,6 +1967,7 @@ class CashPayRepository(
         acceptedTerms:com.example.data.model.LoanApplicationQuote?=null
     ): Result<com.example.data.model.LoanRequestResponse> {
         return try {
+            ensureSessionToken()
             val req = com.example.data.model.LoanRequest(
                 amount = amount,
                 currency = currency,
@@ -2013,6 +1990,7 @@ class CashPayRepository(
 
     suspend fun repayLoan(loanId: Long, amount: Double,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null): Result<com.example.data.model.LoanRepayResponse> {
         return try {
+            ensureSessionToken()
             val req = com.example.data.model.LoanRepayRequest(loanId, amount,acceptedPayment)
             val response = apiService.repayLoan(req)
             if (response.isSuccessful && response.body() != null) {
@@ -2028,6 +2006,7 @@ class CashPayRepository(
 
     suspend fun repayLoanInstallment(loanId: Long, installmentId: Long,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null): Result<com.example.data.model.LoanRepayInstallmentResponse> {
         return try {
+            ensureSessionToken()
             val req = com.example.data.model.LoanRepayInstallmentRequest(loanId, installmentId,acceptedPayment)
             val response = apiService.repayLoanInstallment(req)
             if (response.isSuccessful && response.body() != null) {
@@ -2382,87 +2361,32 @@ class CashPayRepository(
         }
     }
 
-    suspend fun getShoppingBoutiques(): Result<com.example.data.model.BoutiquesResponse> {
-        return try {
-            ensureSessionToken()
-            val profile = dao.getUserProfileOnce()
-            val sess = dao.getSessionOnce()
-            val walletId = profile?.walletId ?: sess?.walletId ?: com.example.data.remote.ApiClient.currentWalletId
-            val allBoutiques = mutableListOf<com.example.data.model.BoutiqueDto>()
-
-            // 1. Try GET /api/v1/shopping/boutiques
-            try {
-                val response = apiService.getShoppingBoutiques(walletId = walletId)
-                if (response.isSuccessful && response.body() != null) {
-                    val raw = response.body()!!.string()
-                    val parsed = com.example.data.model.parseBoutiquesFromJson(raw)
-                    allBoutiques.addAll(parsed)
-                }
-            } catch (e: Exception) {
-                android.util.Log.w("CashPayShopping", "Shopping boutiques fetch: ${e.message}")
+    suspend fun getShoppingBoutiques(): Result<com.example.data.model.BoutiquesResponse> = try {
+        ensureSessionToken()
+        val response = apiService.getShoppingBoutiques()
+        if (!response.isSuccessful) {
+            Result.failure(Exception(extractErrorMessage(response.errorBody()?.string(), "Impossible de charger vos boutiques")))
+        } else {
+            val raw = response.body()?.string() ?: error("Réponse boutiques vide")
+            val payload = org.json.JSONObject(raw)
+            if (!payload.optBoolean("success") || !payload.has("boutiques")) {
+                error(payload.optString("error").ifBlank { "Réponse boutiques non confirmée" })
             }
-
-            // 2. If empty, try GET /api/v1/agent/boutiques
-            if (allBoutiques.isEmpty()) {
-                try {
-                    val agentBoutiquesResp = apiService.getAgentBoutiques(walletId = walletId)
-                    if (agentBoutiquesResp.isSuccessful && agentBoutiquesResp.body() != null) {
-                        val raw = agentBoutiquesResp.body()!!.string()
-                        val parsed = com.example.data.model.parseBoutiquesFromJson(raw)
-                        allBoutiques.addAll(parsed)
-                    }
-                } catch (_: Exception) {}
-            }
-
-            // 3. Fallback: Check Agent's Public Profile (searchProfileByWallet returns agent.boutiques)
-            if (allBoutiques.isEmpty() && !walletId.isNullOrBlank()) {
-                try {
-                    val profRes = searchProfileByWallet(walletId)
-                    profRes.getOrNull()?.profile?.boutiques?.let {
-                        if (it.isNotEmpty()) allBoutiques.addAll(it)
-                    }
-                } catch (_: Exception) {}
-            }
-
-            // 4. Fallback: Extract existing boutiques from agent products context
-            if (allBoutiques.isEmpty()) {
-                try {
-                    val prodsRes = getShoppingProducts()
-                    prodsRes.getOrNull()?.let { ctx ->
-                        if (ctx.boutiques.isNotEmpty()) {
-                            allBoutiques.addAll(ctx.boutiques)
-                        } else {
-                            val extracted = ctx.products.mapNotNull { p ->
-                                p.boutique?.let { b ->
-                                    com.example.data.model.BoutiqueDto(
-                                        rawId = b.id ?: p.boutiqueId,
-                                        directName = b.name ?: p.boutiqueName ?: "Boutique",
-                                        address = b.address,
-                                        whatsappPublicNumber = b.whatsappPublicNumber
-                                    )
-                                }
-                            }
-                            allBoutiques.addAll(extracted)
-                        }
-                    }
-                } catch (_: Exception) {}
-            }
-
-            // Deduplicate boutiques by ID or Name
-            val distinctBoutiques = allBoutiques.distinctBy {
-                if (it.id.isNotBlank()) it.id else it.name
-            }
-
-            Result.success(
-                com.example.data.model.BoutiquesResponse(
-                    success = true,
-                    boutiquesList = distinctBoutiques
-                )
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
+            Result.success(com.example.data.model.BoutiquesResponse(success = true,
+                boutiquesList = com.example.data.model.parseBoutiquesFromJson(raw)))
         }
-    }
+    } catch (e: kotlinx.coroutines.CancellationException) { throw e
+    } catch (e: Exception) { Result.failure(e) }
+
+    suspend fun resolveContacts(phones: List<String>): Result<List<com.example.data.model.ResolvedContact>> = try {
+        ensureSessionToken()
+        val response = apiService.resolveContacts(com.example.data.model.ContactResolveRequest(phones))
+        val body = response.body()
+        if (!response.isSuccessful || body?.success != true) {
+            Result.failure(Exception(body?.error ?: extractErrorMessage(response.errorBody()?.string(), "Détection des contacts indisponible")))
+        } else Result.success(body.contacts)
+    } catch (e: kotlinx.coroutines.CancellationException) { throw e
+    } catch (e: Exception) { Result.failure(e) }
 
     suspend fun createBoutique(name: String, address: String? = null, whatsappNumber: String? = null): Result<com.example.data.model.BoutiqueResponse> {
         return try {
