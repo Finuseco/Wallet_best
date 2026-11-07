@@ -15,6 +15,9 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
     private const val BASE_URL = "https://app.cashpay-all.com/"
+    // Format filter only. Authentication and signature validation remain on CashPay Web.
+    fun isCashPayToken(value: String?): Boolean = value != null &&
+        Regex("[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+").matches(value)
 
     @Volatile
     var sessionToken: String? = null
@@ -41,13 +44,14 @@ object ApiClient {
 
     val cookieJar = object : CookieJar {
         override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-            val hostMap = cookieStore.getOrPut(url.host) { mutableMapOf() }
+            if (url.host != "app.cashpay-all.com" || !url.isHttps) return
+            val hostMap = cookieStore.getOrPut(url.host) { ConcurrentHashMap() }
             for (c in cookies) {
                 hostMap[c.name] = c
                 val nameLower = c.name.lowercase()
-                if (nameLower == "cashpay-token" || nameLower == "token" || nameLower.contains("session")) {
+                if (nameLower == "cashpay-token" || nameLower == "token") {
                     val tokenVal = c.value
-                    if (tokenVal.isNotBlank() && !tokenVal.startsWith("token_")) {
+                    if (c.expiresAt > System.currentTimeMillis() && isCashPayToken(tokenVal)) {
                         sessionToken = tokenVal
                         onTokenUpdated?.invoke(tokenVal)
                     }
@@ -56,6 +60,7 @@ object ApiClient {
         }
 
         override fun loadForRequest(url: HttpUrl): List<Cookie> {
+            if (url.host != "app.cashpay-all.com" || !url.isHttps) return emptyList()
             val hostMap = cookieStore[url.host] ?: return emptyList()
             val now = System.currentTimeMillis()
             return hostMap.values.filter { it.expiresAt > now }
@@ -64,10 +69,19 @@ object ApiClient {
 
     fun getStoredCookieToken(): String? {
         val hostMap = cookieStore["app.cashpay-all.com"] ?: return null
-        return hostMap["cashpay-token"]?.value
-            ?: hostMap["token"]?.value
-            ?: hostMap["next-auth.session-token"]?.value
-            ?: hostMap.values.firstOrNull { it.name.contains("token", ignoreCase = true) }?.value
+        val now = System.currentTimeMillis()
+        return listOf("cashpay-token", "token").firstNotNullOfOrNull { name ->
+            hostMap[name]?.takeIf { it.expiresAt > now }?.value?.takeIf { isCashPayToken(it) }
+        }
+    }
+
+    fun clearSession() {
+        sessionToken = null
+        currentWalletId = null
+        currentUserId = null
+        currentPhone = null
+        currentUserRole = null
+        cookieStore.clear()
     }
 
     private val moshi = Moshi.Builder()
@@ -75,15 +89,16 @@ object ApiClient {
         .build()
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = if (com.example.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
     }
 
     private val authInterceptor = Interceptor { chain ->
         val original = chain.request()
+        if (original.url.host != "app.cashpay-all.com" || !original.url.isHttps) return@Interceptor chain.proceed(original)
         val builder = original.newBuilder()
 
         val rawToken = sessionToken ?: tokenProvider?.invoke()
-        val isValidToken = !rawToken.isNullOrBlank() && !rawToken.startsWith("token_")
+        val isValidToken = isCashPayToken(rawToken)
 
         builder.addHeader("Accept", "application/json")
         builder.addHeader("User-Agent", "CashPay-Android/2.0")
@@ -125,28 +140,12 @@ object ApiClient {
             ?: response.header("x-access-token")
             ?: response.header("Authorization")?.removePrefix("Bearer ")?.trim()
 
-        if (!headerToken.isNullOrBlank() && !headerToken.startsWith("token_")) {
+        if (isCashPayToken(headerToken)) {
             sessionToken = headerToken
-            onTokenUpdated?.invoke(headerToken)
+            onTokenUpdated?.invoke(headerToken!!)
         }
 
-        // Capture cookie if the server sends Set-Cookie
-        val cookies = response.headers("Set-Cookie")
-        for (cookie in cookies) {
-            if (cookie.contains("cashpay-token=")) {
-                val extracted = cookie.substringAfter("cashpay-token=").substringBefore(";")
-                if (extracted.isNotBlank() && !extracted.startsWith("token_")) {
-                    sessionToken = extracted
-                    onTokenUpdated?.invoke(extracted)
-                }
-            } else if (cookie.contains("token=")) {
-                val extracted = cookie.substringAfter("token=").substringBefore(";")
-                if (extracted.isNotBlank() && !extracted.startsWith("token_") && sessionToken == null) {
-                    sessionToken = extracted
-                    onTokenUpdated?.invoke(extracted)
-                }
-            }
-        }
+        // CookieJar handles exact CashPay cookie names; unrelated session cookies are never credentials.
 
         response
     }

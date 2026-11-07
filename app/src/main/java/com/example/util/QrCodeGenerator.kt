@@ -73,7 +73,7 @@ object QrCodeGenerator {
      */
     fun decodeQrBitmap(bitmap: Bitmap): String? {
         // Ensure bitmap is in software memory (ARGB_8888) to prevent crashes on hardware bitmaps
-        val safeBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+        val safeBitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && bitmap.config == Bitmap.Config.HARDWARE) {
             bitmap.copy(Bitmap.Config.ARGB_8888, false) ?: bitmap
         } else {
             bitmap
@@ -202,6 +202,21 @@ object QrCodeGenerator {
         } catch (e: Exception) {
             null
         }
+    }
+
+    /** Preserve the decoded format so a product barcode cannot become a wallet recipient. */
+    fun decodeBarcodeBitmap(bitmap: Bitmap): com.google.zxing.Result? {
+        val safe = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && bitmap.config == Bitmap.Config.HARDWARE) bitmap.copy(Bitmap.Config.ARGB_8888, false) ?: return null else bitmap
+        return try {
+            val width = safe.width; val height = safe.height
+            val pixels = IntArray(width * height)
+            safe.getPixels(pixels, 0, width, 0, 0, width, height)
+            val luma = ByteArray(pixels.size) { index ->
+                val color = pixels[index]
+                (((color shr 16 and 255) * 306 + (color shr 8 and 255) * 601 + (color and 255) * 117) shr 10).toByte()
+            }
+            BarcodeDecoder.decodeResult(luma, width, height)
+        } finally { if (safe !== bitmap) safe.recycle() }
     }
 
     private fun decodeSingleBitmap(bmp: Bitmap, hints: Map<DecodeHintType, Any>): String? {

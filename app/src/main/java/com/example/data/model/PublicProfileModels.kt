@@ -49,3 +49,12 @@ data class PhoneContact(
     val isCashPayUser: Boolean = false,
     val publicProfile: PublicProfileDto? = null
 )
+
+@JsonClass(generateAdapter = true)
+data class ContactResolveRequest(val phoneNumbers: List<String>)
+
+@JsonClass(generateAdapter = true)
+data class ResolvedContact(val phone: String, val found: Boolean, val profile: PublicProfileDto? = null)
+
+@JsonClass(generateAdapter = true)
+data class ContactResolveResponse(val success: Boolean, val contacts: List<ResolvedContact> = emptyList(), val error: String? = null)

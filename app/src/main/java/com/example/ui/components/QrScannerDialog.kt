@@ -80,7 +80,8 @@ fun QrScannerDialog(
     onDismissRequest: () -> Unit,
     onQrScanned: (result: String) -> Unit,
     scanMode: String = "TRANSFER", // "TRANSFER", "PRODUCT", "PAYMENT_REQUEST"
-    prefillTarget: String? = null
+    prefillTarget: String? = null,
+    onBarcodeScanned: ((String) -> Unit)? = null
 ) {
     val title = when (scanMode) {
         "PRODUCT" -> "Scanner un produit"
@@ -112,6 +113,17 @@ fun QrScannerDialog(
     var isAnalyzingImage by remember { mutableStateOf(false) }
     var imageAnalysisError by remember { mutableStateOf<String?>(null) }
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+    val detected = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
+    val executor = remember { Executors.newSingleThreadExecutor() }
+    val cameraUseCases = remember { mutableListOf<androidx.camera.core.UseCase>() }
+    var providerForCleanup by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            detected.set(true)
+            executor.shutdownNow()
+            providerForCleanup?.unbind(*cameraUseCases.toTypedArray())
+        }
+    }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -128,9 +140,7 @@ fun QrScannerDialog(
 
                     var sampleSize = 1
                     val maxDim = maxOf(boundsOptions.outWidth, boundsOptions.outHeight)
-                    if (maxDim > 2400) {
-                        sampleSize = 2
-                    }
+                    while (maxDim / sampleSize > 2048) sampleSize *= 2
 
                     val decodeOptions = BitmapFactory.Options().apply {
                         inSampleSize = sampleSize
@@ -141,12 +151,14 @@ fun QrScannerDialog(
                     }
 
                     if (bitmap != null) {
-                        val decoded = QrCodeGenerator.decodeQrBitmap(bitmap)
+                        val decodedResult = QrCodeGenerator.decodeBarcodeBitmap(bitmap)
+                        val decoded = decodedResult?.text ?: QrCodeGenerator.decodeQrBitmap(bitmap)
+                        bitmap.recycle()
                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                             isAnalyzingImage = false
                             if (!decoded.isNullOrBlank()) {
                                 scannedResult = decoded
-                                onQrScanned(decoded)
+                                if (decodedResult != null && decodedResult.barcodeFormat !in listOf(com.google.zxing.BarcodeFormat.QR_CODE, com.google.zxing.BarcodeFormat.DATA_MATRIX) && onBarcodeScanned != null) onBarcodeScanned(decoded) else onQrScanned(decoded)
                                 onDismissRequest()
                             } else {
                                 imageAnalysisError = "Aucun code détecté sur cette capture. Assurez-vous que le QR code ou code-barres est net et visible."
@@ -294,7 +306,9 @@ fun QrScannerDialog(
                                 val previewView = PreviewView(ctx)
                                 val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
                                 cameraProviderFuture.addListener({
+                                    if (executor.isShutdown) return@addListener
                                     val cameraProvider = cameraProviderFuture.get()
+                                    providerForCleanup = cameraProvider
                                     val preview = Preview.Builder().build().also {
                                         it.setSurfaceProvider(previewView.surfaceProvider)
                                     }
@@ -304,65 +318,30 @@ fun QrScannerDialog(
                                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                                         .build()
 
-                                    // Real camera analyzer with complete 1D & 2D formats (QR, EAN-13, EAN-8, Code 128, Code 39, UPC-A, UPC-E, Data Matrix, ITF)
-                                    val reader = com.google.zxing.MultiFormatReader().apply {
-                                        setHints(
-                                            mapOf(
-                                                com.google.zxing.DecodeHintType.POSSIBLE_FORMATS to listOf(
-                                                    com.google.zxing.BarcodeFormat.QR_CODE,
-                                                    com.google.zxing.BarcodeFormat.EAN_13,
-                                                    com.google.zxing.BarcodeFormat.EAN_8,
-                                                    com.google.zxing.BarcodeFormat.CODE_128,
-                                                    com.google.zxing.BarcodeFormat.CODE_39,
-                                                    com.google.zxing.BarcodeFormat.UPC_A,
-                                                    com.google.zxing.BarcodeFormat.UPC_E,
-                                                    com.google.zxing.BarcodeFormat.DATA_MATRIX,
-                                                    com.google.zxing.BarcodeFormat.ITF
-                                                ),
-                                                com.google.zxing.DecodeHintType.TRY_HARDER to true
-                                            )
-                                        )
-                                    }
-
-                                    imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor()) { imageProxy ->
+                                    imageAnalysis.setAnalyzer(executor) { imageProxy ->
                                         try {
-                                            if (scannedResult == null) {
+                                            if (!detected.get()) {
                                                 val plane = imageProxy.planes[0]
-                                                val buffer = plane.buffer
-                                                val data = ByteArray(buffer.remaining())
-                                                buffer.get(data)
-                                                val rowStride = plane.rowStride
-                                                val width = imageProxy.width
-                                                val height = imageProxy.height
-
-                                                val source = com.google.zxing.PlanarYUVLuminanceSource(
-                                                    data, rowStride, height, 0, 0, width, height, false
-                                                )
-                                                val binaryBitmap = com.google.zxing.BinaryBitmap(
-                                                    com.google.zxing.common.HybridBinarizer(source)
-                                                )
-                                                val result = try {
-                                                    reader.decodeWithState(binaryBitmap)
-                                                } catch (_: Exception) {
-                                                    null
-                                                } finally {
-                                                    reader.reset()
-                                                }
-
-                                                if (result != null && scannedResult == null) {
-                                                    val text = result.text
-                                                    scannedResult = text
-                                                    android.os.Handler(android.os.Looper.getMainLooper()).post {
-                                                        onQrScanned(text)
-                                                        onDismissRequest()
+                                                val buffer = plane.buffer.duplicate()
+                                                val data = ByteArray(buffer.remaining()); buffer.get(data)
+                                                val width = imageProxy.width; val height = imageProxy.height
+                                                val pixels = ByteArray(width * height)
+                                                if ((height - 1) * plane.rowStride + (width - 1) * plane.pixelStride < data.size) {
+                                                    for (y in 0 until height) for (x in 0 until width) pixels[y * width + x] = data[y * plane.rowStride + x * plane.pixelStride]
+                                                    val result = com.example.util.BarcodeDecoder.decodeResult(pixels, width, height)
+                                                    if (result != null && detected.compareAndSet(false, true)) android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                                        if (!executor.isShutdown) {
+                                                            scannedResult = result.text
+                                                            if (result.barcodeFormat !in listOf(com.google.zxing.BarcodeFormat.QR_CODE, com.google.zxing.BarcodeFormat.DATA_MATRIX) && onBarcodeScanned != null) onBarcodeScanned(result.text) else onQrScanned(result.text)
+                                                            onDismissRequest()
+                                                        }
                                                     }
                                                 }
                                             }
                                         } catch (_: Exception) {
-                                        } finally {
-                                            imageProxy.close()
-                                        }
+                                        } finally { imageProxy.close() }
                                     }
+                                    cameraUseCases.clear(); cameraUseCases.add(preview); cameraUseCases.add(imageAnalysis)
 
                                     try {
                                         cameraProvider.unbindAll()

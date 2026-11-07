@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.runtime.collectAsState
 import android.content.Context
 import android.content.pm.PackageManager
 import android.provider.ContactsContract
@@ -196,6 +197,7 @@ fun DashboardScreen(
     var showSettingsModal by remember { mutableStateOf(false) }
     var showQrDialog by remember { mutableStateOf(false) }
     var showQrScannerDialog by remember { mutableStateOf(false) }
+    var commerceScan by remember { mutableStateOf<String?>(null) }
     var qrScanTarget by remember { mutableStateOf("transfer") } // "transfer", "agent_deposit", "agent_withdraw", "agent_loan"
     var selectedContactForProfile by remember { mutableStateOf<com.example.data.model.PhoneContact?>(null) }
 
@@ -203,6 +205,12 @@ fun DashboardScreen(
     var showStarlinkManager by remember { mutableStateOf(false) }
     var showDigitalServicesComingSoonDialog by remember { mutableStateOf(false) }
     var isAgentCustomerListOpen by remember { mutableStateOf(false) }
+
+    // Loans are an exclusive destination, not a sibling competing with dashboard overlays.
+    if (uiState.isLoansScreenOpen) {
+        LoansScreen(uiState, dashboardViewModel) { dashboardViewModel.closeLoansScreen() }
+        return
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -368,6 +376,9 @@ fun DashboardScreen(
         plan = uiState.agentPlan,
         pin = uiState.agentPin,
         isLoading = uiState.isActivatingAgent,
+        fee = uiState.agentSubscriptionFee,
+        feeLoading = uiState.isLoadingAgentFee,
+        onRetryFee = { dashboardViewModel.fetchAgentSubscriptionFee() },
         errorMessage = uiState.activateAgentError,
         successMessage = uiState.activateAgentSuccessMessage,
         onPlanChange = { dashboardViewModel.setAgentPlan(it) },
@@ -640,14 +651,15 @@ fun DashboardScreen(
         )
     }
 
-    // Loans / Crédit Screen
-    if (uiState.isLoansScreenOpen) {
-        LoansScreen(
+    // Loans Dialog Modal
+    if (uiState.isLoansDialogOpen) {
+        LoansDialog(
             uiState = uiState,
             viewModel = dashboardViewModel,
-            onBack = { dashboardViewModel.closeLoansScreen() }
+            onDismiss = { dashboardViewModel.closeLoansDialog() }
         )
     }
+
 
     // Withdrawal Dialog
     if (uiState.isWithdrawalDialogOpen) {
@@ -812,6 +824,8 @@ fun DashboardScreen(
             isOpen = true,
             claim = uiState.selectedClaimDetail,
             isLoading = uiState.isClaimDetailLoading,
+            errorMessage = uiState.claimDetailError,
+            onRetry = { uiState.selectedClaimDetail?.let { dashboardViewModel.openClaimDetail(it) } },
             onDismiss = { dashboardViewModel.closeClaimDetail() }
         )
     }
@@ -917,6 +931,7 @@ fun DashboardScreen(
         )
     }
 
+    if(uiState.isWalletPinOpen) WalletPinDialog(dashboardViewModel)
     // Edit Profile Dialog (with real CashPay PIN check)
     if (uiState.isEditProfileOpen) {
         ToofanEditProfileDialog(
@@ -924,6 +939,7 @@ fun DashboardScreen(
             userProfile = userProfile,
             onDismiss = { dashboardViewModel.closeEditProfileDialog() },
             onFullNameChange = { dashboardViewModel.onEditFullNameChanged(it) },
+            onPhoneChange = { dashboardViewModel.onEditPhoneChanged(it) },
             onCityChange = { dashboardViewModel.onEditCityChanged(it) },
             onProfessionChange = { dashboardViewModel.onEditProfessionChanged(it) },
             onAddressChange = { dashboardViewModel.onEditAddressChanged(it) },
@@ -932,51 +948,14 @@ fun DashboardScreen(
         )
     }
 
-    // Live Camera QR Scanner Dialog with instant automatic search
-    if (showQrScannerDialog) {
-        QrScannerDialog(
-            onDismissRequest = { 
-                showQrScannerDialog = false 
-                qrScanTarget = "transfer"
-            },
-            scanMode = when (qrScanTarget) {
-                "pos_sale" -> "PRODUCT"
-                "payment_request" -> "PAYMENT_REQUEST"
-                else -> "TRANSFER"
-            },
-            onQrScanned = { result ->
-                val cleaned = extractRecipientFromQr(result)
-                when (qrScanTarget) {
-                    "agent_withdraw" -> {
-                        dashboardViewModel.setAgentWithdrawClientRef(cleaned)
-                        dashboardViewModel.searchAndIdentifyClientForWithdraw()
-                    }
-                    "agent_deposit" -> {
-                        dashboardViewModel.setAgentDepositClientRef(cleaned)
-                        dashboardViewModel.searchAndIdentifyClientForDeposit()
-                    }
-                    "agent_loan" -> {
-                        dashboardViewModel.setAgentLoanClientRef(cleaned)
-                        dashboardViewModel.searchAgentLoanTarget()
-                    }
-                    "pos_sale" -> {
-                        // Product Scan Mode
-                        dashboardViewModel.processProductScan(cleaned)
-                    }
-                    "payment_request" -> {
-                        // Payment Request Mode
-                        dashboardViewModel.processPaymentRequestScan(cleaned)
-                    }
-                    else -> {
-                        dashboardViewModel.onRecipientChanged(cleaned)
-                        dashboardViewModel.openTransferDialog()
-                        dashboardViewModel.searchTransferRecipient()
-                    }
-                }
-                showQrScannerDialog = false
-                qrScanTarget = "transfer"
-            }
-        )
+    val pendingCommerceScan by dashboardViewModel.commerceScanReview.collectAsState()
+    pendingCommerceScan?.let { raw -> ScanPurchaseDialog(raw, dashboardViewModel) { dashboardViewModel.closeCommerceScanReview() } }
+    commerceScan?.let { raw -> ScanPurchaseDialog(raw,dashboardViewModel){commerceScan=null} }
+    // Every result is resolved by Cashpay Web before being used as a recipient or price.
+    if(showQrScannerDialog){
+        QrScannerDialog(onDismissRequest={showQrScannerDialog=false;qrScanTarget="transfer"},scanMode=when(qrScanTarget){"pos_sale"->"PRODUCT";"payment_request"->"PAYMENT_REQUEST";else->"TRANSFER"},
+            onBarcodeScanned={ raw -> dashboardViewModel.handleScannedCode(org.json.JSONObject().put("type","BARCODE").put("barcode",raw).toString(),qrScanTarget);showQrScannerDialog=false },
+            onQrScanned={ raw -> dashboardViewModel.handleScannedCode(raw,qrScanTarget);showQrScannerDialog=false })
     }
 
     // PayScan Comprehensive Visual Codes & POS System (All Users)
@@ -2998,7 +2977,7 @@ private fun ToofanDashboardTab(
                         bgColor = BrandBlue,
                         icon = Icons.Default.MonetizationOn,
                         modifier = Modifier.weight(1f),
-                        onClick = { dashboardViewModel.openLoansDialog() }
+                        onClick = { dashboardViewModel.openLoansScreen() }
                     )
                     ToofanActionSquare(
                         title = if (isAgentUser) "Espace\nAgent" else "PayScan\nPanier/POS",
@@ -4412,6 +4391,7 @@ private fun ToofanSecurityTab(
     userProfile: UserProfileEntity?,
     onToggleBiometrics: (Boolean) -> Unit,
     onEditProfile: () -> Unit,
+    onChangeWalletPin: () -> Unit,
     onLogout: () -> Unit
 ) {
     var isBiometricActive by remember { mutableStateOf(session?.biometricEnabled ?: true) }
@@ -4519,8 +4499,8 @@ private fun ToofanSecurityTab(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     ToofanButton(
-                        title = "Tester modification profil avec PIN",
-                        onClick = onEditProfile
+                        title = "Modifier mon code PIN",
+                        onClick = onChangeWalletPin
                     )
                 }
             }
@@ -4554,6 +4534,7 @@ private fun ToofanEditProfileDialog(
     userProfile: UserProfileEntity?,
     onDismiss: () -> Unit,
     onFullNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
     onCityChange: (String) -> Unit,
     onProfessionChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
@@ -4573,7 +4554,7 @@ private fun ToofanEditProfileDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -4589,6 +4570,7 @@ private fun ToofanEditProfileDialog(
                     placeholder = "Nom complet"
                 )
 
+                ToofanInputField(value=uiState.editPhone,onValueChange=onPhoneChange,placeholder="Téléphone avec indicatif international")
                 ToofanInputField(
                     value = uiState.editCity,
                     onValueChange = onCityChange,
@@ -4610,7 +4592,9 @@ private fun ToofanEditProfileDialog(
                 ToofanInputField(
                     value = uiState.editPinConfirmation,
                     onValueChange = onPinChange,
-                    placeholder = "Code PIN CashPay"
+                    placeholder = "Code PIN CashPay",
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword)
                 )
 
                 if (uiState.editErrorMessage != null) {
@@ -5033,6 +5017,7 @@ fun ToofanCardsAndSecurityTab(
                 userProfile = userProfile,
                 onToggleBiometrics = { dashboardViewModel.toggleBiometrics(it) },
                 onEditProfile = { dashboardViewModel.openEditProfileDialog(userProfile) },
+                onChangeWalletPin = { dashboardViewModel.openWalletPin() },
                 onLogout = onLogout
             )
         }
@@ -5102,14 +5087,6 @@ fun ToofanCardsAndSecurityTab(
         )
     }
 
-    // Loans Dialog Modal
-    if (uiState.isLoansDialogOpen) {
-        LoansDialog(
-            uiState = uiState,
-            viewModel = dashboardViewModel,
-            onDismiss = { dashboardViewModel.closeLoansDialog() }
-        )
-    }
 }
 
 @Composable
@@ -6536,7 +6513,7 @@ fun ContactsPageDialog(
     }
 
     LaunchedEffect(hasContactPermission) {
-        if (hasContactPermission && uiState.contactsList.isEmpty()) {
+        if (hasContactPermission) {
             readAndSyncPhoneContacts(context, dashboardViewModel)
         }
     }
@@ -6633,7 +6610,7 @@ fun ContactsPageDialog(
                 OutlinedTextField(
                     value = uiState.searchContactQuery,
                     onValueChange = { dashboardViewModel.setContactSearchQuery(it) },
-                    placeholder = { Text("Rechercher par nom, 9 chiffres ou Wallet ID...", color = Color(0xFF64748B), fontFamily = MulishFontFamily, fontSize = 13.sp) },
+                    placeholder = { Text("Nom, numéro ou ID Wallet...", color = Color(0xFF64748B), fontFamily = MulishFontFamily, fontSize = 13.sp) },
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
                     },
@@ -6649,6 +6626,12 @@ fun ContactsPageDialog(
                     ),
                     shape = RoundedCornerShape(14.dp)
                 )
+
+                if (hasContactPermission) {
+                    TextButton(enabled = !uiState.isLoadingContacts, onClick = {
+                        readAndSyncPhoneContacts(context, dashboardViewModel)
+                    }) { Text("Actualiser les contacts", color = SuccessGreen) }
+                }
 
                 if (!hasContactPermission) {
                     Surface(
@@ -6684,7 +6667,7 @@ fun ContactsPageDialog(
                                 color = Color.White
                             )
                             Text(
-                                text = "CashPay analyse automatiquement les 9 derniers chiffres de vos contacts pour détecter instantanément ceux qui possèdent déjà un compte CashPay.",
+                                text = "Autorisez la lecture du répertoire pour retrouver vos contacts CashPay avec leur numéro complet et leur pays.",
                                 fontFamily = MulishFontFamily,
                                 fontSize = 13.sp,
                                 textAlign = TextAlign.Center,
@@ -6709,31 +6692,12 @@ fun ContactsPageDialog(
                             }
                         }
                     }
-                } else if (uiState.isLoadingContacts) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = SuccessGreen)
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Text(
-                                text = "Recherche en temps réel des comptes CashPay...",
-                                fontFamily = MulishFontFamily,
-                                fontSize = 13.sp,
-                                color = SuccessGreen,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Analyse des 9 derniers chiffres des contacts",
-                                fontFamily = MulishFontFamily,
-                                fontSize = 11.sp,
-                                color = Color(0xFF94A3B8)
-                            )
-                        }
-                    }
                 } else {
+                    if (uiState.isLoadingContacts) {
+                        androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = SuccessGreen)
+                        Text("Détection des comptes en cours…", color = Color(0xFF94A3B8), fontSize = 12.sp)
+                    }
+                    uiState.contactsError?.let { error -> Text(error, color = Color(0xFFFCA5A5), fontSize = 12.sp) }
                     val filtered = remember(uiState.contactsList, uiState.searchContactQuery) {
                         if (uiState.searchContactQuery.isBlank()) uiState.contactsList else {
                             val q = uiState.searchContactQuery.trim().lowercase()
@@ -6771,7 +6735,7 @@ fun ContactsPageDialog(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
                         if (cashPayContacts.isNotEmpty()) {
@@ -6782,14 +6746,14 @@ fun ContactsPageDialog(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = "⭐ Comptes CashPay Détectés (${cashPayContacts.size})",
+                                        text = "Comptes CashPay (${cashPayContacts.size})",
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp,
                                         color = SuccessGreen
                                     )
                                     Text(
-                                        text = "Actifs",
+                                        text = "Identifiés",
                                         fontFamily = MulishFontFamily,
                                         fontSize = 11.sp,
                                         color = Color(0xFF38BDF8),
@@ -6877,15 +6841,15 @@ private fun ContactItemCard(
     onSendClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(0.dp),
         color = Color(0xFF0B1228),
-        shadowElevation = 2.dp,
+        shadowElevation = 0.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -6904,29 +6868,22 @@ private fun ContactItemCard(
                         .border(1.5.dp, SuccessGreen, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
+                    val initials = contact.name.trim().split(Regex("\\s+")).take(2)
+                        .mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("")
+                    Text(initials, fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold,
+                        color = SuccessGreen, fontSize = 16.sp)
                     val photoUrl = contact.publicProfile?.profilePhotoUrl ?: contact.publicProfile?.profilePhoto
                     if (!photoUrl.isNullOrBlank()) {
-                        AsyncImage(
-                            model = photoUrl,
-                            contentDescription = contact.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().clip(CircleShape)
-                        )
-                    } else {
-                        Text(
-                            text = contact.name.take(2).uppercase(),
-                            fontFamily = MulishFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            color = SuccessGreen,
-                            fontSize = 16.sp
-                        )
+                        AsyncImage(model = resolveAvatarUrl(photoUrl), contentDescription = contact.name,
+                            contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().clip(CircleShape))
                     }
                 }
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = contact.name,
+                            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
@@ -6943,11 +6900,13 @@ private fun ContactItemCard(
                         }
                     }
                     Text(
-                        text = "ID : ${contact.publicProfile?.walletId ?: contact.phone}",
+                        text = listOfNotNull(contact.publicProfile?.fullName?.takeIf { it.isNotBlank() }, contact.publicProfile?.walletId?.takeIf { it.isNotBlank() }).joinToString(" · "),
+                        maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         fontFamily = MulishFontFamily,
                         fontSize = 12.sp,
                         color = Color(0xFF94A3B8)
                     )
+                    Text(contact.phone, color = Color(0xFF94A3B8), fontSize = 12.sp)
                 }
             }
 
@@ -6975,7 +6934,7 @@ private fun OtherContactItemCard(
 ) {
     val context = LocalContext.current
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(0.dp),
         color = Color(0xFF0B1228),
         shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
@@ -6983,11 +6942,12 @@ private fun OtherContactItemCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
@@ -6998,7 +6958,7 @@ private fun OtherContactItemCard(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            text = contact.name.take(2).uppercase(),
+                            text = contact.name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString(""),
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF94A3B8),
@@ -7007,9 +6967,10 @@ private fun OtherContactItemCard(
                     }
                 }
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = contact.name,
+                            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
@@ -7027,7 +6988,11 @@ private fun OtherContactItemCard(
                 shape = RoundedCornerShape(12.dp),
                 color = Color(0xFF3B82F6).copy(alpha = 0.2f),
                 modifier = Modifier.clickable {
-                    Toast.makeText(context, "Invitation CashPay envoyée à ${contact.name}", Toast.LENGTH_SHORT).show()
+                    val invite = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(android.content.Intent.EXTRA_TEXT, "Rejoins-moi sur CashPay : https://app.cashpay-all.com")
+                    }
+                    context.startActivity(android.content.Intent.createChooser(invite, "Inviter ${contact.name}"))
                 }
             ) {
                 Text(
@@ -7787,7 +7752,7 @@ fun MiniPublicProfileDialog(
                     } else {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
-                                text = contact.name.take(2).uppercase(),
+                                text = contact.name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString(""),
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 22.sp,

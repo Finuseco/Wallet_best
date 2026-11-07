@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.util.formatLoanCalendarDate
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +36,7 @@ fun LoansDialog(
     viewModel: DashboardViewModel,
     onDismiss: () -> Unit
 ) {
+    LoanConfirmationDialog(uiState,viewModel)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -118,6 +121,11 @@ fun SubTabLoanOffer(
     uiState: DashboardUiState,
     viewModel: DashboardViewModel
 ) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf("USD","EUR","CDF").forEach { currency ->
+            FilterChip(selected=uiState.loanCurrency==currency,onClick={viewModel.setLoanCurrency(currency)},label={Text(currency)},enabled=!uiState.isRequestingLoan)
+        }
+    }
     if (uiState.isLoadingLoanOffer) {
         Box(
             modifier = Modifier
@@ -213,7 +221,7 @@ fun SubTabLoanOffer(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            RecapRow("Intérêt configuré :", "${offer.interestRate ?: 0.0}%")
+                            RecapRow("Intérêt configuré :", "${offer.interestRates[uiState.loanRequestDuration.toString()] ?: offer.interestRate ?: 0.0}%")
                             RecapRow("Taux de garantie :", "${(offer.guaranteeRate ?: 0.0) * 100}%")
                             RecapRow("Solde maximum disponible :", "${String.format("%.2f", offer.balance)} ${offer.currency}")
                         }
@@ -299,7 +307,7 @@ fun SubTabLoanOffer(
 
                         ToofanButton(
                             title = "Soumettre la demande",
-                            onClick = { viewModel.submitLoanRequest() },
+                            onClick = { viewModel.reviewLoanRequest() },
                             isLoading = uiState.isRequestingLoan,
                             enabled = uiState.loanRequestAmount.toDoubleOrNull() != null && uiState.loanRequestAmount.toDouble() > 0
                         )
@@ -410,8 +418,8 @@ fun SubTabActiveLoan(
 
                             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
 
-                            RecapRow("Date de début :", loan.startDate ?: "-")
-                            RecapRow("Date de fin :", loan.endDate ?: "-")
+                            RecapRow("Date de début :", formatLoanCalendarDate(loan.startDate))
+                            RecapRow("Date de fin :", formatLoanCalendarDate(loan.endDate))
                         }
                     }
                 }
@@ -440,9 +448,9 @@ fun SubTabActiveLoan(
                             }
                             ToofanButton(
                                 title = "Payer",
-                                onClick = { viewModel.submitLoanRepayment(loan.id) },
+                                onClick = { viewModel.reviewLoanRepayment(loan.id) },
                                 isLoading = uiState.isRepayingLoan,
-                                enabled = uiState.loanRepayAmount.toDoubleOrNull() != null && uiState.loanRepayAmount.toDouble() > 0,
+                                enabled = !uiState.isRepayingLoan && !uiState.isRepayInstallmentLoading && (uiState.loanRepayAmount.toDoubleOrNull()?.let { it.isFinite() && it > 0 && it <= loan.remainingBalance } == true),
                                 modifier = Modifier.width(90.dp)
                             )
                         }
@@ -484,8 +492,8 @@ fun SubTabActiveLoan(
                                         }
                                     }
                                     Column {
-                                        Text(text = "Remboursement", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = ToofanMainDark)
-                                        Text(text = rep.date ?: "-", fontSize = 10.sp, color = ToofanBodyText)
+                                        Text(text = if(rep.type=="penalty") "Pénalité" else "Remboursement", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = ToofanMainDark)
+                                        Text(text = formatLoanCalendarDate(rep.date), fontSize = 10.sp, color = ToofanBodyText)
                                     }
                                 }
                                 Text(
@@ -527,14 +535,14 @@ fun SubTabActiveLoan(
                             ) {
                                 Column {
                                     Text(
-                                        text = "Échéance #${inst.number} — ${String.format("%.2f", inst.amount)} ${loan.currency}",
+                                        text = "Échéance #${inst.number} — reste ${String.format("%.2f", inst.remainingAmount)} ${loan.currency}",
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 11.sp,
                                         color = ToofanMainDark
                                     )
                                     Text(
-                                        text = "Date limite: ${inst.dueDate ?: "-"}",
+                                        text = "Date limite: ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${inst.paidAmount} ${loan.currency} · pénalités incluses : ${inst.penalty} ${loan.currency}",
                                         fontSize = 10.sp,
                                         color = ToFocusBorderColor
                                     )
@@ -557,10 +565,10 @@ fun SubTabActiveLoan(
                                         )
                                     }
 
-                                    if (!isPaid) {
+                                    if (!isPaid && inst.remainingAmount > 0) {
                                         ToofanButton(
                                             title = "Rembourser",
-                                            onClick = { viewModel.submitInstallmentRepayment(loan.id, inst.id) },
+                                            onClick = { viewModel.reviewLoanRepayment(loan.id, inst.id) },
                                             isLoading = uiState.isRepayInstallmentLoading,
                                             modifier = Modifier
                                                 .height(28.dp)
@@ -716,7 +724,7 @@ fun SubTabLoanHistory(
                                 color = ToFocusBorderColor
                             )
                             Text(
-                                text = "Date de demande: ${item.startDate ?: "-"} • Échéance: ${item.endDate ?: "-"}",
+                                text = "Date de demande: ${formatLoanCalendarDate(item.startDate)} • Échéance: ${formatLoanCalendarDate(item.endDate)}",
                                 fontSize = 9.sp,
                                 color = ToofanBodyText
                             )

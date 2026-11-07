@@ -35,6 +35,13 @@ class DashboardViewModel(
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+    private val _commerceScanReview = MutableStateFlow<String?>(null)
+    val commerceScanReview: StateFlow<String?> = _commerceScanReview.asStateFlow()
+    fun closeCommerceScanReview() { _commerceScanReview.value = null }
+    private fun showCommerceScanReview(raw: String) {
+        updatePayScan { copy(isPayScanOpen = false, isInterpreting = false, showConfirmPaymentDialog = false) }
+        _commerceScanReview.value = raw
+    }
 
     fun updateMain(transform: MainUiState.() -> MainUiState) = _uiState.update { it.copy(main = it.main.transform()) }
     fun updateCards(transform: CardsUiState.() -> CardsUiState) = _uiState.update { it.copy(cards = it.cards.transform()) }
@@ -53,8 +60,12 @@ class DashboardViewModel(
     fun updateCpk(transform: CpkUiState.() -> CpkUiState) = _uiState.update { it.copy(cpk = it.cpk.transform()) }
     fun updatePayScan(transform: PayScanUiState.() -> PayScanUiState) = _uiState.update { it.copy(payscan = it.payscan.transform()) }
     fun updateAnalytics(transform: AnalyticsUiState.() -> AnalyticsUiState) = _uiState.update { it.copy(analytics = it.analytics.transform()) }
-    fun openLoansScreen() = updateMain { copy(isLoansScreenOpen = true) }
-    fun closeLoansScreen() = updateMain { copy(isLoansScreenOpen = false) }
+    fun openLoansScreen() {
+        closeLoanConfirmation()
+        updateMain { copy(isLoansScreenOpen = true) }
+        fetchLoanOffer(); fetchActiveLoan(); fetchLoanHistory()
+    }
+    fun closeLoansScreen() { closeLoanConfirmation(); updateMain { copy(isLoansScreenOpen = false) } }
 
     fun openAnalyticsScreen() {
         updateAnalytics { copy(isAnalyticsOpen = true) }
@@ -692,6 +703,7 @@ class DashboardViewModel(
     fun openEditProfileDialog(profile: UserProfileEntity?) {
         updateMain { copy(isEditProfileOpen = true,
                 editFullName = profile?.fullName ?: "",
+                editPhone = profile?.phone ?: "",
                 editCity = profile?.city ?: "",
                 editProfession = profile?.profession ?: "",
                 editAddress = profile?.address ?: "",
@@ -704,6 +716,10 @@ class DashboardViewModel(
         updateMain { copy(isEditProfileOpen = false, editErrorMessage = null) }
     }
 
+    fun onEditPhoneChanged(value:String) = updateMain { copy(editPhone=value) }
+    fun openWalletPin() = updateMain { copy(isWalletPinOpen=true) }
+    fun closeWalletPin() = updateMain { copy(isWalletPinOpen=false) }
+    suspend fun changeWalletPin(old:String,new:String,confirmation:String)=repository.changeWalletPin(old,new,confirmation)
     fun onEditFullNameChanged(v: String) = updateMain { copy(editFullName = v) }
     fun onEditCityChanged(v: String) = updateMain { copy(editCity = v) }
     fun onEditProfessionChanged(v: String) = updateMain { copy(editProfession = v) }
@@ -718,7 +734,8 @@ class DashboardViewModel(
         }
 
         val updates = mutableMapOf<String, String>()
-        if (state.editFullName.isNotBlank()) updates["fullName"] = state.editFullName
+        if (state.editFullName.isNotBlank()) updates["full_name"] = state.editFullName
+        if (state.editPhone.isNotBlank()) updates["phone"] = state.editPhone
         if (state.editCity.isNotBlank()) updates["city"] = state.editCity
         if (state.editProfession.isNotBlank()) updates["profession"] = state.editProfession
         if (state.editAddress.isNotBlank()) updates["address"] = state.editAddress
@@ -1406,72 +1423,35 @@ main = it.main.copy(
     }
 
     // Lookup on RAW phone contacts (Gmail, Phone, SIM)
+    private var contactsSyncJob: kotlinx.coroutines.Job? = null
+
     fun syncContacts(rawContacts: List<Pair<String, String>>) {
-        if (rawContacts.isEmpty()) return
-        updateContacts { copy(isLoadingContacts = true, contactsError = null) }
-
-        viewModelScope.launch {
+        contactsSyncJob?.cancel()
+        val allContacts = rawContacts.mapNotNull { (name, rawPhone) ->
+            val phone = rawPhone.trim()
+            val digits = phone.filter { it.isDigit() }
+            if (digits.length !in 7..15) null else com.example.data.model.PhoneContact(
+                name = name.ifBlank { phone }, phone = phone,
+                normalizedPhone = phone.replace(Regex("[^0-9+]"), ""), lastNineDigits = digits.takeLast(9))
+        }.distinctBy { it.normalizedPhone }.sortedBy { it.name.lowercase() }
+        updateContacts { copy(contactsList = allContacts, isLoadingContacts = allContacts.isNotEmpty(), contactsError = null) }
+        if (allContacts.isEmpty()) return
+        contactsSyncJob = viewModelScope.launch {
             try {
-                // Map ALL contacts from SIM, Gmail, and Phone storage so none are lost
-                val allContacts = rawContacts.map { (name, rawPhone) ->
-                    val cleaned = rawPhone.replace(Regex("[^0-9+]"), "")
-                    var normalized = cleaned
-                    if (cleaned.startsWith("0")) {
-                        normalized = "243" + cleaned.substring(1)
-                    } else if (!cleaned.startsWith("+") && !cleaned.startsWith("243") && cleaned.length == 9) {
-                        normalized = "243" + cleaned
-                    }
-                    normalized = normalized.replace("+", "")
-
-                    com.example.data.model.PhoneContact(
-                        name = name,
-                        phone = rawPhone,
-                        normalizedPhone = normalized,
-                        lastNineDigits = if (normalized.length >= 9) normalized.takeLast(9) else normalized,
-                        isCashPayUser = false,
-                        publicProfile = null
-                    )
+                val resolved = mutableMapOf<String, com.example.data.model.PublicProfileDto>()
+                for (batch in allContacts.chunked(250)) {
+                    val response = repository.resolveContacts(batch.map { it.phone }).getOrThrow()
+                    for (contact in response) if (contact.found && contact.profile != null) resolved[contact.phone] = contact.profile
+                    updateContacts { copy(contactsList = allContacts.map { contact ->
+                        val profile = resolved[contact.phone]
+                        contact.copy(isCashPayUser = profile != null, publicProfile = profile)
+                    }.distinctBy { it.publicProfile?.walletId ?: it.normalizedPhone }.sortedWith(compareByDescending<com.example.data.model.PhoneContact> { it.isCashPayUser }.thenBy { it.name.lowercase() })) }
                 }
-
-                // Immediately display all device & Gmail & SIM contacts in UI
-                updateContacts { copy(isLoadingContacts = false,
-                        contactsList = allContacts) }
-
-                // Concurrently resolve CashPay network status for top contacts in parallel batches
-                val lookupBatch = allContacts.take(200)
-                val resolvedMap = kotlinx.coroutines.coroutineScope {
-                    lookupBatch.map { contact ->
-                        async {
-                            try {
-                                val searchResult = repository.searchProfileByPhone(contact.lastNineDigits)
-                                val profile = searchResult.getOrNull()
-                                if (profile != null && profile.success && profile.found && profile.profile != null) {
-                                    contact.lastNineDigits to profile.profile
-                                } else null
-                            } catch (_: Exception) {
-                                null
-                            }
-                        }
-                    }.awaitAll().filterNotNull().toMap()
-                }
-
-                if (resolvedMap.isNotEmpty()) {
-                    val updatedList = allContacts.map { contact ->
-                        val matched = resolvedMap[contact.lastNineDigits]
-                        if (matched != null) {
-                            contact.copy(isCashPayUser = true, publicProfile = matched)
-                        } else {
-                            contact
-                        }
-                    }
-                    updateContacts { copy(contactsList = updatedList.sortedWith(
-                                compareByDescending<com.example.data.model.PhoneContact> { c -> c.isCashPayUser }
-                                    .thenBy { c -> c.name.lowercase() }
-                            )) }
-                }
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e
             } catch (e: Exception) {
-                updateContacts { copy(isLoadingContacts = false,
-                        contactsError = "Synchronisation impossible. Vérifiez votre connexion.") }
+                updateContacts { copy(contactsError = "Détection incomplète. Vérifiez votre connexion puis actualisez.") }
+            } finally {
+                if (kotlinx.coroutines.currentCoroutineContext()[kotlinx.coroutines.Job]?.isActive == true) updateContacts { copy(isLoadingContacts = false) }
             }
         }
     }
@@ -1731,58 +1711,11 @@ main = it.main.copy(
                 amount = amount,
                 currency = state.withdrawalCurrency,
                 operator = if (isMm) state.withdrawalOperator else null
-            ).onSuccess { resp ->
-                if (resp.success && resp.preview != null) {
-                    updateWithdrawal { copy(isWithdrawalPreviewLoading = false,
-                            withdrawalPreview = resp.preview,
-                            withdrawalStep = 3
-                        ) }
-                } else if (isMm) {
-                    // Graceful simulated preview for Mobile Money payout while backend payout route is finalizing
-                    val feeRate = if (state.withdrawalCountryCode == "CD") 0.015 else 0.02
-                    val fee = amount * feeRate
-                    val total = amount + fee
-                    val preview = com.example.data.model.WithdrawalPreviewDto(
-                        amount = amount,
-                        currency = state.withdrawalCurrency,
-                        fee = fee,
-                        total = total,
-                        balance = 1000.0,
-                        sufficient = true,
-                        missing = 0.0,
-                        canConfirm = true
-                    )
-                    updateWithdrawal { copy(isWithdrawalPreviewLoading = false,
-                            withdrawalPreview = preview,
-                            withdrawalStep = 3
-                        ) }
-                } else {
-                    updateWithdrawal { copy(isWithdrawalPreviewLoading = false,
-                            withdrawalPreviewError = resp.error ?: "Erreur de prévisualisation du retrait.") }
-                }
-            }.onFailure { err ->
-                if (isMm) {
-                    val feeRate = if (state.withdrawalCountryCode == "CD") 0.015 else 0.02
-                    val fee = amount * feeRate
-                    val total = amount + fee
-                    val preview = com.example.data.model.WithdrawalPreviewDto(
-                        amount = amount,
-                        currency = state.withdrawalCurrency,
-                        fee = fee,
-                        total = total,
-                        balance = 1000.0,
-                        sufficient = true,
-                        missing = 0.0,
-                        canConfirm = true
-                    )
-                    updateWithdrawal { copy(isWithdrawalPreviewLoading = false,
-                            withdrawalPreview = preview,
-                            withdrawalStep = 3
-                        ) }
-                } else {
-                    updateWithdrawal { copy(isWithdrawalPreviewLoading = false,
-                            withdrawalPreviewError = err.message ?: "Impossible de prévisualiser le retrait.") }
-                }
+            ).onSuccess { response ->
+                if(response.success && response.preview!=null) updateWithdrawal{copy(isWithdrawalPreviewLoading=false,withdrawalPreview=response.preview,withdrawalStep=3)}
+                else updateWithdrawal{copy(isWithdrawalPreviewLoading=false,withdrawalPreview=null,withdrawalPreviewError=response.error ?: "Devis de retrait non confirmé.")}
+            }.onFailure { error ->
+                updateWithdrawal{copy(isWithdrawalPreviewLoading=false,withdrawalPreview=null,withdrawalPreviewError=error.message ?: "Impossible de charger le devis de retrait.")}
             }
         }
     }
@@ -1865,7 +1798,59 @@ main = it.main.copy(
     }
 
     // --- LOANS MODULE ACTIONS ---
+    private val _loanConfirmation=kotlinx.coroutines.flow.MutableStateFlow(com.example.ui.screens.LoanConfirmationState())
+    val loanConfirmation=_loanConfirmation.asStateFlow()
+    private var loanReviewVersion=0
+    fun closeLoanConfirmation(){loanReviewVersion++;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState()}
+    fun reviewLoanRequest(){
+        val state=_uiState.value;val amount=state.loanRequestAmount.toDoubleOrNull()
+        if(amount==null||!amount.isFinite()||amount<=0){updateLoans{copy(loanRequestError="Montant invalide.")};return}
+        val version=++loanReviewVersion;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(loading=true)
+        updateLoans{copy(loanRequestError=null,loanRepayError=null,repayInstallmentError=null)}
+        viewModelScope.launch{repository.loanApplicationQuote(state.loanCurrency,amount,state.loanRequestDuration).onSuccess{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(application=it)}.onFailure{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(error=it.message)}}
+    }
+    fun reviewLoanRepayment(loanId:Long,installmentId:Long?=null){
+        val version=++loanReviewVersion;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(loading=true)
+        updateLoans{copy(loanRequestError=null,loanRepayError=null,repayInstallmentError=null)}
+        val amount=if(installmentId==null)_uiState.value.loanRepayAmount.toDoubleOrNull() else null
+        viewModelScope.launch{repository.loanPaymentQuote(loanId,amount,installmentId).onSuccess{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(payment=it)}.onFailure{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(error=it.message)}}
+    }
+    fun confirmReviewedLoan(){
+        val state=_uiState.value;if(state.isRequestingLoan||state.isRepayingLoan||state.isRepayInstallmentLoading)return
+        val review=_loanConfirmation.value
+        review.application?.let{submitLoanRequest(acceptedTerms=it);return}
+        review.payment?.let{if(it.installmentId==null)submitLoanRepayment(it.loanId,acceptedPayment=it) else submitInstallmentRepayment(it.loanId,it.installmentId,acceptedPayment=it)}
+    }
+
+    fun handleScannedCode(raw:String,target:String){
+        viewModelScope.launch { repository.resolveScan(com.example.data.model.ScanRequest(value=raw)).onSuccess { response ->
+            val result=response.scan
+            if(result?.type=="WALLET" && !result.walletId.isNullOrBlank()){
+                val wallet=result.walletId
+                when(target){
+                    "agent_withdraw"->{setAgentWithdrawClientRef(wallet);searchAndIdentifyClientForWithdraw()}
+                    "agent_deposit"->{setAgentDepositClientRef(wallet);searchAndIdentifyClientForDeposit()}
+                    "agent_loan"->{setAgentLoanClientRef(wallet);searchAgentLoanTarget()}
+                    else->{onRecipientChanged(wallet);openTransferDialog();searchTransferRecipient()}
+                }
+            }else if(target.startsWith("agent_")){
+                updateAgent{copy(agentWithdrawError="Scannez le QR d’un portefeuille CashPay.",agentDepositError="Scannez le QR d’un portefeuille CashPay.",agentLoanSearchError="Scannez le QR d’un portefeuille CashPay.")}
+            }else if(result?.type=="PRODUCTS") {openPayScan();processPayScanInput(raw)}
+            else showCommerceScanReview(raw)
+        }.onFailure{error->
+            if(target.startsWith("agent_"))updateAgent{copy(agentWithdrawError=error.message,agentDepositError=error.message,agentLoanSearchError=error.message)}
+            else {openPayScan();updatePayScan{copy(scanError=error.message)}}
+        } }
+    }
+    suspend fun resolveCommerceScan(request:com.example.data.model.ScanRequest)=repository.resolveScan(request)
+    suspend fun payCommerceScan(token:String,pin:String)=repository.payScan(token,pin)
+    fun refreshAfterCommercePayment() {
+        updatePayScan { copy(basketItems = emptyList(), currentPosSaleData = null, showConfirmPaymentDialog = false, showSuccessReceiptDialog = false, completedTransaction = null) }
+        fetchWallet(); loadTransactions()
+    }
+
     fun openLoansDialog() {
+        closeLoanConfirmation()
         updateLoans { copy(isLoansDialogOpen = true,
                 loanSelectedTab = 0,
                 loanRequestAmount = "",
@@ -1883,6 +1868,7 @@ main = it.main.copy(
     }
 
     fun closeLoansDialog() {
+        closeLoanConfirmation()
         updateLoans { copy(isLoansDialogOpen = false) }
     }
 
@@ -1905,15 +1891,23 @@ main = it.main.copy(
         updateLoans { copy(loanRepayAmount = amount, loanRepayError = null) }
     }
 
+    fun setLoanCurrency(currency: String) {
+        if(currency !in listOf("USD","EUR","CDF") || _uiState.value.isRequestingLoan)return
+        updateLoans { copy(loanCurrency=currency,loanOffer=null,loanOfferError=null) }
+        fetchLoanOffer()
+    }
+
     fun fetchLoanOffer() {
-        val currency = _uiState.value.withdrawalCurrency // standard currency
+        val currency = _uiState.value.loanCurrency
         updateLoans { copy(isLoadingLoanOffer = true, loanOfferError = null) }
         viewModelScope.launch {
             repository.getLoanOffer(currency)
                 .onSuccess { resp ->
+                    if(_uiState.value.loanCurrency!=currency)return@onSuccess
                     if (resp.success && resp.offer != null) {
                         updateLoans { copy(isLoadingLoanOffer = false,
                                 loanOffer = resp.offer,
+                                loanRequestDuration = if(resp.offer.durations.contains(loanRequestDuration)) loanRequestDuration else resp.offer.durations.firstOrNull() ?: 3,
                                 loanOfferError = null) }
                     } else {
                         updateLoans { copy(isLoadingLoanOffer = false,
@@ -1921,6 +1915,7 @@ main = it.main.copy(
                     }
                 }
                 .onFailure { err ->
+                    if(_uiState.value.loanCurrency!=currency)return@onFailure
                     updateLoans { copy(isLoadingLoanOffer = false,
                             loanOfferError = err.message ?: "Erreur réseau.") }
                 }
@@ -1934,7 +1929,7 @@ main = it.main.copy(
                 .onSuccess { resp ->
                     updateLoans { copy(isLoadingActiveLoan = false,
                             activeLoan = if (resp.success) resp.loan else null,
-                            activeLoanError = null) }
+                            activeLoanError = if(resp.success) null else resp.error ?: "Chargement du crédit non confirmé.") }
                 }
                 .onFailure { err ->
                     updateLoans { copy(isLoadingActiveLoan = false,
@@ -1950,7 +1945,7 @@ main = it.main.copy(
                 .onSuccess { resp ->
                     updateLoans { copy(isLoadingLoanHistory = false,
                             loanHistory = if (resp.success) resp.loans else emptyList(),
-                            loanHistoryError = null) }
+                            loanHistoryError = if(resp.success) null else resp.error ?: "Historique indisponible.") }
                 }
                 .onFailure { err ->
                     updateLoans { copy(isLoadingLoanHistory = false,
@@ -1959,11 +1954,16 @@ main = it.main.copy(
         }
     }
 
-    fun submitLoanRequest(userId: Long? = null) {
+    fun submitLoanRequest(userId: Long? = null,acceptedTerms:com.example.data.model.LoanApplicationQuote?=null) {
         val effectiveUserId = getEffectiveUserId(userId)
         val state = _uiState.value
+        if(state.isRequestingLoan)return
+        val offer=state.loanOffer
+        if(offer==null || !offer.eligible || state.loanRequestDuration !in offer.durations){
+            updateLoans { copy(loanRequestError="Chargez une offre valide et choisissez une durée proposée.") };return
+        }
         val amount = state.loanRequestAmount.toDoubleOrNull() ?: 0.0
-        if (amount <= 0.0) {
+        if (!amount.isFinite() || amount <= 0.0) {
             updateLoans { copy(loanRequestError = "Le montant doit être supérieur à zéro.") }
             return
         }
@@ -1972,16 +1972,19 @@ main = it.main.copy(
         viewModelScope.launch {
             repository.requestLoan(
                 amount = amount,
-                currency = "USD", // default
+                currency = offer.currency,
                 durationMonths = state.loanRequestDuration,
-                repaymentFrequency = "monthly",
-                installmentCount = state.loanRequestDuration
+                repaymentFrequency = if(state.loanRequestDuration==1) "weekly" else if(state.loanRequestDuration==3) "monthly" else "quarterly",
+                installmentCount = if(state.loanRequestDuration==1) 4 else if(state.loanRequestDuration==3) 3 else state.loanRequestDuration/3,
+                acceptedTerms=acceptedTerms
             ).onSuccess { resp ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onSuccess
                 if (resp.success) {
                     updateLoans { copy(isRequestingLoan = false,
                             loanRequestSuccess = true,
                             loanRequestAmount = "",
                             loanRequestError = null) }
+                    _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(receipt="Demande enregistrée. Le crédit sera versé uniquement après approbation.")
                     fetchActiveLoan()
                     fetchLoanHistory()
                     fetchWallet(effectiveUserId) // update wallet balance
@@ -1990,30 +1993,34 @@ main = it.main.copy(
                             loanRequestError = resp.error ?: "Erreur lors de la demande.") }
                 }
             }.onFailure { err ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onFailure
                 updateLoans { copy(isRequestingLoan = false,
                         loanRequestError = err.message ?: "Erreur réseau.") }
             }
         }
     }
 
-    fun submitLoanRepayment(loanId: Long, userId: Long? = null) {
+    fun submitLoanRepayment(loanId: Long, userId: Long? = null,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null) {
+        if(_uiState.value.isRepayingLoan || _uiState.value.isRepayInstallmentLoading)return
         val effectiveUserId = getEffectiveUserId(userId)
         val state = _uiState.value
-        val amount = state.loanRepayAmount.toDoubleOrNull() ?: 0.0
-        if (amount <= 0.0) {
+        val amount = acceptedPayment?.amount ?: state.loanRepayAmount.toDoubleOrNull() ?: 0.0
+        if (!amount.isFinite() || amount <= 0.0) {
             updateLoans { copy(loanRepayError = "Le montant doit être supérieur à zéro.") }
             return
         }
 
         updateLoans { copy(isRepayingLoan = true, loanRepayError = null, loanRepaySuccess = false) }
         viewModelScope.launch {
-            repository.repayLoan(loanId, amount)
+            repository.repayLoan(loanId, amount,acceptedPayment)
                 .onSuccess { resp ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onSuccess
                     if (resp.success) {
                         updateLoans { copy(isRepayingLoan = false,
                                 loanRepaySuccess = true,
                                 loanRepayAmount = "",
                                 loanRepayError = null) }
+                        _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(receipt="Remboursement confirmé : ${resp.paid} ${resp.currency}. Frais : ${resp.fee}. Dette restante : ${resp.debtAfter}. Référence : ${resp.reference}.")
                         fetchActiveLoan()
                         fetchLoanHistory()
                         fetchWallet(effectiveUserId)
@@ -2023,22 +2030,26 @@ main = it.main.copy(
                     }
                 }
                 .onFailure { err ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onFailure
                     updateLoans { copy(isRepayingLoan = false,
                             loanRepayError = err.message ?: "Erreur réseau.") }
                 }
         }
     }
 
-    fun submitInstallmentRepayment(loanId: Long, installmentId: Long, userId: Long? = null) {
+    fun submitInstallmentRepayment(loanId: Long, installmentId: Long, userId: Long? = null,acceptedPayment:com.example.data.model.LoanPaymentQuote?=null) {
+        if(_uiState.value.isRepayingLoan || _uiState.value.isRepayInstallmentLoading)return
         val effectiveUserId = getEffectiveUserId(userId)
         updateLoans { copy(isRepayInstallmentLoading = true, repayInstallmentError = null, loanInstallmentSuccess = false) }
         viewModelScope.launch {
-            repository.repayLoanInstallment(loanId, installmentId)
+            repository.repayLoanInstallment(loanId, installmentId,acceptedPayment)
                 .onSuccess { resp ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onSuccess
                     if (resp.success) {
                         updateLoans { copy(isRepayInstallmentLoading = false,
                                 loanInstallmentSuccess = true,
                                 repayInstallmentError = null) }
+                        _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(receipt="Échéance remboursée : ${resp.paid} ${resp.currency}. Frais : ${resp.fee}. Dette restante : ${resp.remaining}. Référence : ${resp.reference}.")
                         fetchActiveLoan()
                         fetchLoanHistory()
                         fetchWallet(effectiveUserId)
@@ -2048,6 +2059,7 @@ main = it.main.copy(
                     }
                 }
                 .onFailure { err ->
+                    if(getEffectiveUserId()!=effectiveUserId)return@onFailure
                     updateLoans { copy(isRepayInstallmentLoading = false,
                             repayInstallmentError = err.message ?: "Erreur réseau.") }
                 }
@@ -2061,7 +2073,8 @@ main = it.main.copy(
                 agentPin = "",
                 isActivatingAgent = false,
                 activateAgentError = null,
-                activateAgentSuccessMessage = null) }
+                activateAgentSuccessMessage = null, agentSubscriptionFee=null) }
+        fetchAgentSubscriptionFee()
     }
 
     fun closeActivateAgentDialog() {
@@ -2069,15 +2082,27 @@ main = it.main.copy(
     }
 
     fun setAgentPlan(plan: String) {
-        updateMain { copy(agentPlan = plan, activateAgentError = null) }
+        if(_uiState.value.isActivatingAgent || plan !in listOf("promo","normal")) return
+        updateMain { copy(agentPlan = plan, agentSubscriptionFee=null, activateAgentError = null, agentPin="") }
+        fetchAgentSubscriptionFee()
     }
 
     fun setAgentPin(pin: String) {
-        updateMain { copy(agentPin = pin, activateAgentError = null) }
+        updateMain { copy(agentPin = pin.filter(Char::isDigit).take(4), activateAgentError = null) }
     }
 
+    fun fetchAgentSubscriptionFee() {
+        val plan=_uiState.value.agentPlan
+        updateMain { copy(isLoadingAgentFee=true,agentSubscriptionFee=null) }
+        viewModelScope.launch { repository.agentSubscriptionFee(plan).onSuccess { result ->
+            if(_uiState.value.agentPlan==plan) updateMain { copy(isLoadingAgentFee=false,agentSubscriptionFee=result.fee,activateAgentError=null) }
+        }.onFailure { error -> if(_uiState.value.agentPlan==plan) updateMain { copy(isLoadingAgentFee=false,activateAgentError=error.message) } } }
+    }
     fun submitActivateAgent(userId: Long? = null) {
         val effectiveUserId = getEffectiveUserId(userId)
+        if(_uiState.value.isActivatingAgent) return
+        val fee=_uiState.value.agentSubscriptionFee
+        if(fee==null || _uiState.value.isLoadingAgentFee){ updateMain { copy(activateAgentError="Chargez le tarif avant de confirmer.") };return }
         val plan = _uiState.value.agentPlan
         val pin = _uiState.value.agentPin
         if (pin.length != 4) {
@@ -2088,7 +2113,7 @@ main = it.main.copy(
         updateMain { copy(isActivatingAgent = true, activateAgentError = null) }
 
         viewModelScope.launch {
-            val result = repository.activateAgent(plan, pin)
+            val result = repository.activateAgent(plan, pin, fee)
             result.onSuccess { res ->
                 if (res.success) {
                     updateMain { copy(isActivatingAgent = false,
@@ -2394,27 +2419,12 @@ main = it.main.copy(
     }
 
     fun fetchShoppingBoutiques() {
-        val hadBoutiques = _uiState.value.shoppingBoutiques.isNotEmpty()
-        if (!hadBoutiques) {
-            updateShopping { copy(isShoppingLoading = true, shoppingError = null) }
-        }
+        updateShopping { copy(isLoadingShoppingBoutiques = true, shoppingBoutiquesError = null) }
         viewModelScope.launch {
-            val result = repository.getShoppingBoutiques()
-            result.onSuccess { res ->
-                val currentBoutiques = _uiState.value.shoppingBoutiques
-                val combined = (currentBoutiques + res.boutiques).distinctBy {
-                    if (it.id.isNotBlank()) it.id else it.name
-                }
-                updateShopping { copy(
-                    isShoppingLoading = false,
-                    shoppingBoutiques = if (combined.isNotEmpty()) combined else res.boutiques,
-                    shoppingError = null
-                ) }
+            repository.getShoppingBoutiques().onSuccess { res ->
+                updateShopping { copy(isLoadingShoppingBoutiques = false, shoppingBoutiques = res.boutiques, shoppingBoutiquesError = null) }
             }.onFailure { err ->
-                updateShopping { copy(
-                    isShoppingLoading = false,
-                    shoppingError = if (shoppingBoutiques.isEmpty()) err.message else null
-                ) }
+                updateShopping { copy(isLoadingShoppingBoutiques = false, shoppingBoutiquesError = err.message ?: "Impossible de charger vos boutiques.") }
             }
         }
     }
@@ -2504,15 +2514,7 @@ main = it.main.copy(
         viewModelScope.launch {
             val result = repository.getShoppingProducts()
             result.onSuccess { res ->
-                val currentBoutiques = _uiState.value.shoppingBoutiques
-                val merged = (currentBoutiques + res.boutiques).distinctBy {
-                    if (it.id.isNotBlank()) it.id else it.name
-                }
-                updateShopping { copy(
-                    isShoppingLoading = false,
-                    shoppingProducts = res.products,
-                    shoppingBoutiques = if (merged.isNotEmpty()) merged else shoppingBoutiques
-                ) }
+                updateShopping { copy(isShoppingLoading = false, shoppingProducts = res.products, shoppingError = null) }
             }.onFailure { err ->
                 updateShopping { copy(
                     isShoppingLoading = false,
@@ -2716,7 +2718,7 @@ main = it.main.copy(
                     amount = amountToSweep,
                     currency = curr,
                     commission = 0.0,
-                    reference = res.reference ?: "SWP-${System.currentTimeMillis() % 100000}",
+                    reference = res.reference ?: "Consultez l’historique",
                     date = "Aujourd'hui, ${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())}",
                     status = "Complété"
                 )
@@ -2741,48 +2743,8 @@ agent = it.agent.copy(
 
                 // Also reload wallet from backend to keep everything synchronized
                 fetchWallet(effectiveUserId)
-            }.onFailure { _ ->
-                // Even on fallback/mock testing, make the transition seamless if PIN was 4 digits
-                val newUsdComm = if (curr == "USD") (state.agentCommissionUsd - amountToSweep).coerceAtLeast(0.0) else state.agentCommissionUsd
-                val newCdfComm = if (curr == "CDF") (state.agentCommissionCdf - amountToSweep).coerceAtLeast(0.0) else state.agentCommissionCdf
-                val newEurComm = if (curr == "EUR") (state.agentCommissionEur - amountToSweep).coerceAtLeast(0.0) else state.agentCommissionEur
-
-                val currentWallet = state.walletResponse
-                val currentFiat = currentWallet?.balances?.fiat?.toMutableMap() ?: mutableMapOf<String, Double>()
-                val currentCurrBal = currentFiat[curr] ?: 0.0
-                currentFiat[curr] = currentCurrBal + amountToSweep
-                val updatedBalances = currentWallet?.balances?.copy(fiat = currentFiat)
-                val updatedWallet = currentWallet?.copy(balances = updatedBalances)
-
-                val newOp = com.example.data.model.AgentOperationRecord(
-                    type = "COMMISSION_SWEEP",
-                    title = "Bascule Commission vers Compte Principal",
-                    clientRef = null,
-                    amount = amountToSweep,
-                    currency = curr,
-                    commission = 0.0,
-                    reference = "SWP-${System.currentTimeMillis() % 100000}",
-                    date = "Aujourd'hui, ${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())}",
-                    status = "Complété"
-                )
-
-                _uiState.update {
- it.copy(
-main = it.main.copy(
-walletResponse = updatedWallet ?: it.main.walletResponse,
-),
-agent = it.agent.copy(
-                        isSweepingCommission = false,
-                        agentCommissionUsd = newUsdComm,
-                        agentCommissionCdf = newCdfComm,
-                        agentCommissionEur = newEurComm,
-                        sweepCommissionSuccess = "Commission de ${String.format(java.util.Locale.US, "%.2f", amountToSweep)} $curr basculée avec succès dans votre solde principal.",
-                        sweepCommissionError = null,
-                        sweepPin = "",
-                        agentOperationsHistory = listOf(newOp) + it.agent.agentOperationsHistory
-)
-)
-}
+            }.onFailure { error ->
+                updateAgent { copy(isSweepingCommission=false,sweepCommissionError=error.message ?: "Bascule non confirmée. Vérifiez votre historique avant de réessayer.",sweepPin="") }
             }
         }
     }
@@ -2898,53 +2860,15 @@ agent = it.agent.copy(
     }
 
     fun confirmClientForDeposit() {
-        val client = _uiState.value.agentDepositFoundClient
-        val walletId = client?.walletId ?: _uiState.value.agentDepositClientRef.trim()
-        if (walletId.isBlank()) {
-            updateAgent { copy(agentDepositError = "Client requis.") }
-            return
-        }
-
-        updateAgent { copy(isAgentDepositLoading = true, agentDepositError = null) }
-
-        viewModelScope.launch {
-            val req = com.example.data.model.AgentDepositRequest(
-                step = "confirm_client",
-                clientWalletId = walletId,
-                clientRef = walletId,
-                phone = client?.phone
-            )
-            val result = repository.executeAgentDeposit(req)
-            val fiatMap = _uiState.value.walletResponse?.balances?.fiat ?: emptyMap()
-            result.onSuccess { res ->
-                val returnedBalances = res.agentBalances?.ifEmpty { null }
-                    ?: _uiState.value.agentBalancesMap.ifEmpty { null }
-                    ?: fiatMap.ifEmpty { null }
-                    ?: mapOf("CDF" to 250000.0, "USD" to 150.0)
-                val availableCurrencies = returnedBalances.keys.toList().ifEmpty { listOf("USD", "CDF") }
-                val currentSelected = _uiState.value.agentDepositCurrency
-                val selectedCurrency = if (availableCurrencies.contains(currentSelected)) currentSelected else availableCurrencies.first()
-
-                updateAgent { copy(isAgentDepositLoading = false,
-                        agentDepositStep = "amount",
-                        agentDepositAgentBalances = returnedBalances,
-                        agentDepositCurrency = selectedCurrency,
-                        agentDepositError = null) }
-            }.onFailure { _ ->
-                val returnedBalances = _uiState.value.agentBalancesMap.ifEmpty { null }
-                    ?: fiatMap.ifEmpty { null }
-                    ?: mapOf("CDF" to 250000.0, "USD" to 150.0)
-                val availableCurrencies = returnedBalances.keys.toList().ifEmpty { listOf("USD", "CDF") }
-                val currentSelected = _uiState.value.agentDepositCurrency
-                val selectedCurrency = if (availableCurrencies.contains(currentSelected)) currentSelected else availableCurrencies.first()
-
-                updateAgent { copy(isAgentDepositLoading = false,
-                        agentDepositStep = "amount",
-                        agentDepositAgentBalances = returnedBalances,
-                        agentDepositCurrency = selectedCurrency,
-                        agentDepositError = null) }
-            }
-        }
+        val state=_uiState.value;val client=state.agentDepositFoundClient
+        val wallet=client?.walletId ?: state.agentDepositClientRef.trim()
+        if(wallet.isBlank())return
+        updateAgent{copy(isAgentDepositLoading=true,agentDepositError=null)}
+        viewModelScope.launch { repository.executeAgentDeposit(com.example.data.model.AgentDepositRequest(step="confirm_client",clientWalletId=wallet,clientRef=wallet,phone=client?.phone)).onSuccess{response->
+            val balances=response.agentBalances
+            if(balances==null){updateAgent{copy(isAgentDepositLoading=false,agentDepositError="Soldes agent non confirmés. Actualisez avant de continuer.")};return@onSuccess}
+            updateAgent{copy(isAgentDepositLoading=false,agentDepositStep="amount",agentDepositAgentBalances=balances)}
+        }.onFailure{error->updateAgent{copy(isAgentDepositLoading=false,agentDepositError=error.message)}} }
     }
 
     fun setAgentDepositAmount(amount: String) {
@@ -3000,12 +2924,8 @@ agent = it.agent.copy(
                             agentDepositPin = "",
                             agentDepositError = null) }
                 }
-            }.onFailure { _ ->
-                // When backend expects final submission with PIN, advance to PIN step with preview
-                updateAgent { copy(isAgentDepositLoading = false,
-                        agentDepositStep = "pin",
-                        agentDepositPin = "",
-                        agentDepositError = null) }
+            }.onFailure { error ->
+                updateAgent { copy(isAgentDepositLoading=false,agentDepositError=error.message ?: "Montant non confirmé par le serveur.") }
             }
         }
     }
@@ -3132,127 +3052,36 @@ agent = it.agent.copy(
     }
 
     fun searchAndIdentifyClientForWithdraw() {
-        val clientRef = _uiState.value.agentWithdrawClientRef.trim()
-        if (clientRef.isBlank()) {
-            updateAgent { copy(agentWithdrawError = "Veuillez entrer le numéro ou Wallet ID du client.") }
-            return
-        }
-
-        updateAgent { copy(isAgentWithdrawLoading = true, agentWithdrawError = null, agentWithdrawFoundClient = null) }
-
-        viewModelScope.launch {
-            val digits = clientRef.filter { it.isDigit() }
-            val isPhone = digits.length >= 8 && clientRef.all { it.isDigit() || it == '+' || it == ' ' }
-            val req = com.example.data.model.WithdrawActionRequest(
-                operation = "client_withdraw",
-                action = "start",
-                identifier = clientRef,
-                clientWalletId = clientRef,
-                phone = if (isPhone) clientRef else null
-            )
-            val res = repository.withdrawAction(req)
-            val resp = res.getOrNull()
-            val target = resp?.target
-            if (res.isSuccess && resp?.success == true && target != null) {
-                updateAgent { copy(isAgentWithdrawLoading = false,
-                        agentWithdrawFoundClient = com.example.data.model.PublicProfileDto(
-                            walletId = target.walletId ?: clientRef,
-                            fullName = target.fullName ?: target.firstName ?: clientRef,
-                            role = target.role,
-                            profilePhotoUrl = target.avatar,
-                            profilePhoto = target.avatar
-                        ),
-                        agentWithdrawOperationId = resp.operationId,
-                        agentWithdrawStep = 2,
-                        agentWithdrawError = null) }
-            } else {
-                // Multi-tier fallback resolution
-                resolveProfile(clientRef).onSuccess { pResp ->
-                    if (pResp.success && pResp.found && pResp.profile != null) {
-                        updateAgent { copy(isAgentWithdrawLoading = false,
-                                agentWithdrawFoundClient = pResp.profile,
-                                agentWithdrawStep = 2,
-                                agentWithdrawError = null) }
-                    } else {
-                        updateAgent { copy(isAgentWithdrawLoading = false,
-                                agentWithdrawError = res.getOrNull()?.error ?: "Client introuvable. Vérifiez l'identifiant.") }
-                    }
-                }.onFailure { err ->
-                    updateAgent { copy(isAgentWithdrawLoading = false,
-                            agentWithdrawError = res.getOrNull()?.error ?: err.message ?: "Client introuvable.") }
-                }
-            }
-        }
+        val ref=_uiState.value.agentWithdrawClientRef.trim()
+        if(ref.isBlank())return
+        updateAgent{copy(isAgentWithdrawLoading=true,agentWithdrawError=null,agentWithdrawFoundClient=null,agentWithdrawOperationId=null,agentWithdrawPreview=null)}
+        viewModelScope.launch { repository.withdrawAction(com.example.data.model.WithdrawActionRequest(operation="agent_withdraw",action="start",identifier=ref,clientWalletId=ref)).onSuccess{response->
+            val client=response.target
+            if(client==null || response.operationId==null){updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawError="Identification non confirmée")};return@onSuccess}
+            updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawFoundClient=com.example.data.model.PublicProfileDto(walletId=client.walletId ?: ref,fullName=client.fullName ?: ref,role=client.role,profilePhotoUrl=client.avatar),agentWithdrawOperationId=response.operationId,agentWithdrawStep=2)}
+        }.onFailure{error->updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawError=error.message)}} }
     }
 
     fun submitAmountForWithdraw() {
-        val state = _uiState.value
-        val amount = state.agentWithdrawAmount.toDoubleOrNull() ?: 0.0
-        val opId = state.agentWithdrawOperationId
-
-        if (amount <= 0.0) {
-            updateAgent { copy(agentWithdrawError = "Veuillez entrer un montant valide.") }
-            return
-        }
-
-        updateAgent { copy(isAgentWithdrawLoading = true, agentWithdrawError = null) }
-
-        viewModelScope.launch {
-            val req = com.example.data.model.WithdrawActionRequest(
-                operation = "client_withdraw",
-                action = "amount",
-                operationId = opId,
-                amount = amount,
-                currency = state.agentWithdrawCurrency
-            )
-            repository.withdrawAction(req)
-                .onSuccess { resp ->
-                    if (resp.success) {
-                        updateAgent { copy(isAgentWithdrawLoading = false,
-                                agentWithdrawOtpChannels = resp.otpChannels ?: listOf("sms", "whatsapp", "app"),
-                                agentWithdrawStep = 3,
-                                agentWithdrawError = null) }
-                    } else {
-                        updateAgent { copy(isAgentWithdrawLoading = false,
-                                agentWithdrawError = resp.error ?: "Montant refusé par le système.") }
-                    }
-                }
-                .onFailure { err ->
-                    updateAgent { copy(isAgentWithdrawLoading = false,
-                            agentWithdrawError = err.message ?: "Erreur lors de la validation du montant.") }
-                }
-        }
+        val state=_uiState.value;val amount=state.agentWithdrawAmount.toDoubleOrNull()
+        if(amount==null || !amount.isFinite() || amount<=0 || state.agentWithdrawOperationId==null){updateAgent{copy(agentWithdrawError="Identifiez le client et entrez un montant valide")};return}
+        updateAgent{copy(isAgentWithdrawLoading=true,agentWithdrawError=null)}
+        viewModelScope.launch { try {
+            val identity=repository.withdrawAction(com.example.data.model.WithdrawActionRequest(operation="agent_withdraw",action="confirm_identity",operationId=state.agentWithdrawOperationId)).getOrThrow()
+            val quote=repository.withdrawAction(com.example.data.model.WithdrawActionRequest(operation="agent_withdraw",action="amount",operationId=identity.operationId,amount=amount,currency=state.agentWithdrawCurrency)).getOrThrow()
+            updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawOperationId=quote.operationId,agentWithdrawPreview=quote,agentWithdrawStep=3,agentWithdrawOtpChannels=listOf("sms","whatsapp","email"))}
+        }catch(error:Exception){updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawError=error.message)}} }
     }
 
-    fun initiateAgentWithdraw(userId: Long? = null) {
-        val state = _uiState.value
-        val channel = state.agentWithdrawChannel
-        val opId = state.agentWithdrawOperationId
-
-        updateAgent { copy(isAgentWithdrawLoading = true, agentWithdrawError = null) }
-
-        viewModelScope.launch {
-            val req = com.example.data.model.WithdrawActionRequest(
-                operation = "client_withdraw",
-                action = "otp_channel",
-                operationId = opId,
-                channel = channel
-            )
-            repository.withdrawAction(req)
-                .onSuccess { resp ->
-                    if (resp.success) {
-                        updateAgent { copy(isAgentWithdrawLoading = false,
-                                agentWithdrawStep = 4,
-                                agentWithdrawError = null) }
-                    } else {
-                        updateAgent { copy(isAgentWithdrawLoading = false,
-                                agentWithdrawError = resp.error ?: "Impossible d'envoyer l'OTP.") }
-                    }
-                }.onFailure { err ->
-                    updateAgent { copy(isAgentWithdrawLoading = false,
-                            agentWithdrawError = err.message ?: "Impossible d'initier le retrait.") }
-                }
-        }
+    fun initiateAgentWithdraw(userId:Long?=null) {
+        val state=_uiState.value
+        if(state.agentWithdrawOperationId==null || state.isAgentWithdrawLoading)return
+        updateAgent{copy(isAgentWithdrawLoading=true,agentWithdrawError=null)}
+        viewModelScope.launch { try {
+            val confirmed=repository.withdrawAction(com.example.data.model.WithdrawActionRequest(operation="agent_withdraw",action="confirm_amount",operationId=state.agentWithdrawOperationId)).getOrThrow()
+            val result=repository.withdrawAction(com.example.data.model.WithdrawActionRequest(operation="agent_withdraw",action="otp_channel",operationId=confirmed.operationId,channel=state.agentWithdrawChannel)).getOrThrow()
+            updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawOperationId=result.operationId,agentWithdrawStep=4)}
+        }catch(error:Exception){updateAgent{copy(isAgentWithdrawLoading=false,agentWithdrawError=error.message)}} }
     }
 
     fun submitAgentWithdrawOtp(userId: Long? = null) {
@@ -3261,7 +3090,7 @@ agent = it.agent.copy(
         val otp = state.agentWithdrawClientOtp.trim()
         val opId = state.agentWithdrawOperationId
         
-        if (otp.length < 4) {
+        if (otp.length != 6) {
             updateAgent { copy(agentWithdrawError = "Veuillez entrer le code OTP client.") }
             return
         }
@@ -3270,7 +3099,7 @@ agent = it.agent.copy(
 
         viewModelScope.launch {
             val req = com.example.data.model.WithdrawActionRequest(
-                operation = "client_withdraw",
+                operation = "agent_withdraw",
                 action = "otp",
                 operationId = opId,
                 otp = otp
@@ -3292,7 +3121,7 @@ agent = it.agent.copy(
                         amount = amount,
                         currency = currency,
                         commission = earnedComm,
-                        reference = resp.reference ?: "WTH-${System.currentTimeMillis() % 100000}",
+                        reference = resp.reference ?: "Consultez l’historique",
                         date = "Aujourd'hui, ${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())}",
                         status = "Complété"
                     )
@@ -3318,83 +3147,32 @@ agent = it.agent.copy(
 
     // --- AGENT LOAN REPAYMENT ---
     fun setAgentLoanClientRef(ref: String) {
-        updateAgent { copy(agentLoanClientRef = ref, agentLoanSearchError = null, agentLoanTarget = null) }
+        updateAgent { copy(agentLoanClientRef = ref, agentLoanFee=null,agentLoanTotalDebit=null,agentLoanSearchError = null, agentLoanTarget = null) }
     }
 
     fun searchAgentLoanTarget() {
-        val clientRef = _uiState.value.agentLoanClientRef.trim()
-        if (clientRef.isBlank()) {
-            updateAgent { copy(agentLoanSearchError = "Entrez un numéro ou Wallet ID client.") }
-            return
-        }
-
-        updateAgent { copy(isAgentSearchingLoan = true, agentLoanSearchError = null, agentLoanTarget = null) }
-
-        viewModelScope.launch {
-            // 1. Try direct loan target query
-            val directLoanRes = repository.getAgentLoanTarget(clientRef)
-            if (directLoanRes.isSuccess && directLoanRes.getOrNull()?.client != null) {
-                val resp = directLoanRes.getOrNull()!!
-                updateAgent { copy(isAgentSearchingLoan = false,
-                        agentLoanTarget = resp,
-                        agentLoanAmount = resp.loan?.remainingBalance?.toString() ?: "",
-                        agentLoanCurrency = resp.loan?.currency ?: "USD",
-                        agentLoanStep = 2,
-                        agentLoanSearchError = if (resp.loan == null) "Ce client n'a aucun prêt en cours à rembourser." else null) }
-                return@launch
-            }
-
-            // 2. Resolve client profile first via multi-tier search
-            resolveProfile(clientRef).onSuccess { pResp ->
-                if (pResp.success && pResp.found && pResp.profile != null) {
-                    val walletId = pResp.profile.walletId
-                    repository.getAgentLoanTarget(walletId)
-                        .onSuccess { resp ->
-                            updateAgent { copy(isAgentSearchingLoan = false,
-                                    agentLoanTarget = if (resp.client == null) {
-                                        resp.copy(client = com.example.data.model.AgentClientInfo(
-                                            name = pResp.profile.fullName,
-                                            walletId = pResp.profile.walletId
-                                        )) } else resp,
-                                    agentLoanAmount = resp.loan?.remainingBalance?.toString() ?: "",
-                                    agentLoanCurrency = resp.loan?.currency ?: "USD",
-                                    agentLoanStep = 2,
-                                    agentLoanSearchError = if (resp.loan == null) "Ce client n'a aucun prêt en cours à rembourser." else null) }
-                        }
-                        .onFailure {
-                            // Client exists, but no active loan
-                            updateAgent { copy(isAgentSearchingLoan = false,
-                                    agentLoanTarget = com.example.data.model.AgentLoanTargetResponse(
-                                        success = true,
-                                        client = com.example.data.model.AgentClientInfo(
-                                            name = pResp.profile.fullName,
-                                            walletId = pResp.profile.walletId
-                                        ),
-                                        loan = null
-                                    ),
-                                    agentLoanSearchError = "Ce client n'a aucun prêt en cours à rembourser.") }
-                        }
-                } else {
-                    updateAgent { copy(isAgentSearchingLoan = false,
-                            agentLoanSearchError = "Utilisateur introuvable.") }
-                }
-            }.onFailure {
-                updateAgent { copy(isAgentSearchingLoan = false,
-                        agentLoanSearchError = "Utilisateur introuvable.") }
-            }
-        }
+        val ref=_uiState.value.agentLoanClientRef.trim();if(ref.isBlank())return
+        updateAgent{copy(isAgentSearchingLoan=true,agentLoanTarget=null,agentLoanFee=null,agentLoanTotalDebit=null,agentLoanSearchError=null)}
+        viewModelScope.launch {repository.getAgentLoanTarget(ref).onSuccess{response->
+            updateAgent{copy(isAgentSearchingLoan=false,agentLoanTarget=response,agentLoanAmount=response.loan?.remainingBalance?.toString() ?: "",agentLoanCurrency=response.loan?.currency ?: "",agentLoanStep=2)}
+        }.onFailure{error->updateAgent{copy(isAgentSearchingLoan=false,agentLoanSearchError=error.message)}}}
     }
 
     fun proceedToLoanPin() {
-        updateAgent { copy(agentLoanStep = 3) }
+        val state=_uiState.value;val amount=state.agentLoanAmount.toDoubleOrNull()
+        if(amount==null || !amount.isFinite() || amount<=0) { updateAgent { copy(agentLoanRepayError="Montant invalide") };return }
+        updateAgent { copy(isAgentLoanRepayLoading=true,agentLoanFee=null,agentLoanTotalDebit=null,agentLoanRepayError=null) }
+        viewModelScope.launch { repository.reviewAgentLoanRepayment(state.agentLoanClientRef.trim(),state.agentLoanCurrency,amount).onSuccess { quote ->
+            updateAgent { copy(isAgentLoanRepayLoading=false,agentLoanFee=quote.fee,agentLoanTotalDebit=quote.totalDebit,agentLoanStep=3) }
+        }.onFailure { error -> updateAgent { copy(isAgentLoanRepayLoading=false,agentLoanRepayError=error.message) } } }
     }
 
     fun setAgentLoanAmount(amount: String) {
-        updateAgent { copy(agentLoanAmount = amount, agentLoanRepayError = null) }
+        updateAgent { copy(agentLoanAmount = amount, agentLoanFee=null,agentLoanTotalDebit=null,agentLoanPin="", agentLoanRepayError = null) }
     }
 
     fun setAgentLoanCurrency(currency: String) {
-        updateAgent { copy(agentLoanCurrency = currency, agentLoanRepayError = null) }
+        updateAgent { copy(agentLoanCurrency = currency,agentLoanFee=null,agentLoanTotalDebit=null,agentLoanPin="", agentLoanRepayError = null) }
     }
 
     fun setAgentLoanPin(pin: String) {
@@ -3414,6 +3192,8 @@ agent = it.agent.copy(
     }
 
     fun submitAgentLoanRepay(userId: Long? = null) {
+        if(_uiState.value.isAgentLoanRepayLoading) return
+        if(_uiState.value.agentLoanFee==null){proceedToLoanPin();return}
         val effectiveUserId = getEffectiveUserId(userId)
         val state = _uiState.value
         val clientRef = state.agentLoanClientRef.trim()
@@ -3439,7 +3219,7 @@ agent = it.agent.copy(
         viewModelScope.launch {
             val result = repository.agentLoanRepay(clientRef, currency, amount, pin)
             result.onSuccess { res ->
-                val earnedComm = res.commission ?: 1.0
+                val earnedComm = res.commission ?: 0.0
                 val newUsdComm = if (currency == "USD") state.agentCommissionUsd + earnedComm else state.agentCommissionUsd
                 val newCdfComm = if (currency == "CDF") state.agentCommissionCdf + earnedComm else state.agentCommissionCdf
                 val newEurComm = if (currency == "EUR") state.agentCommissionEur + earnedComm else state.agentCommissionEur
@@ -3451,7 +3231,7 @@ agent = it.agent.copy(
                     amount = amount,
                     currency = currency,
                     commission = earnedComm,
-                    reference = res.reference ?: "LON-${System.currentTimeMillis() % 100000}",
+                    reference = res.reference ?: "Consultez l’historique",
                     date = "Aujourd'hui, ${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())}",
                     status = "Complété"
                 )
@@ -3650,11 +3430,14 @@ agent = it.agent.copy(
     }
 
     fun loadInternationalClaims() {
+        val userId = getEffectiveUserId()
         updateClaims { copy(isClaimsLoading = true, claimsError = null) }
         viewModelScope.launch {
             val result = repository.getInternationalClaims()
+            if (getEffectiveUserId() != userId) return@launch
             result.onSuccess { resp ->
-                updateClaims { copy(isClaimsLoading = false, claimsList = resp.claims, claimsError = null) }
+                if (resp.success) updateClaims { copy(isClaimsLoading = false, claimsList = resp.claims, claimsError = null) }
+                else updateClaims { copy(isClaimsLoading = false, claimsError = resp.error ?: "Liste des réclamations indisponible.") }
             }.onFailure { err ->
                 updateClaims { copy(isClaimsLoading = false, claimsError = err.message ?: "Impossible de récupérer vos réclamations.") }
             }
@@ -3677,7 +3460,7 @@ agent = it.agent.copy(
         senderCountry: String,
         receiveInCurrency: String
     ) {
-        if (provider.isBlank() || trackingNumber.isBlank() || expectedAmount <= 0.0 ||
+        if (provider.isBlank() || trackingNumber.isBlank() || !expectedAmount.isFinite() || expectedAmount <= 0.0 ||
             expectedCurrency.isBlank() || senderCountry.isBlank() || receiveInCurrency.isBlank()) {
             updateClaims { copy(newClaimError = "Veuillez remplir tous les champs obligatoires.") }
             return
@@ -3724,24 +3507,29 @@ agent = it.agent.copy(
         }
     }
 
+    private var claimDetailVersion = 0
     fun openClaimDetail(claim: com.example.data.model.InternationalTransferClaimDto) {
-        updateClaims { copy(selectedClaimDetail = claim, isClaimDetailDialogOpen = true, isClaimDetailLoading = true) }
+        val version = ++claimDetailVersion
+        val userId = getEffectiveUserId()
+        updateClaims { copy(selectedClaimDetail = claim, isClaimDetailDialogOpen = true, isClaimDetailLoading = true, claimDetailError = null) }
         viewModelScope.launch {
             val result = repository.getInternationalClaimDetail(claim.id)
-            result.onSuccess { resp ->
-                if (resp.claim != null) {
-                    updateClaims { copy(selectedClaimDetail = resp.claim, isClaimDetailLoading = false) }
+            if (version != claimDetailVersion || getEffectiveUserId() != userId) return@launch
+            result.onSuccess { response ->
+                if (response.success && response.claim != null) {
+                    updateClaims { copy(selectedClaimDetail = response.claim, isClaimDetailLoading = false, claimDetailError = null) }
                 } else {
-                    updateClaims { copy(isClaimDetailLoading = false) }
+                    updateClaims { copy(isClaimDetailLoading = false, claimDetailError = response.error ?: "Détail de réclamation indisponible.") }
                 }
-            }.onFailure {
-                updateClaims { copy(isClaimDetailLoading = false) }
+            }.onFailure { error ->
+                updateClaims { copy(isClaimDetailLoading = false, claimDetailError = error.message ?: "Impossible de vérifier le statut actuel. Réessayez.") }
             }
         }
     }
 
     fun closeClaimDetail() {
-        updateClaims { copy(isClaimDetailDialogOpen = false, selectedClaimDetail = null) }
+        claimDetailVersion++
+        updateClaims { copy(isClaimDetailDialogOpen = false, selectedClaimDetail = null, claimDetailError = null) }
     }
 
     // --- REFERRALS & REWARDS (Programme de Parrainage) ---
@@ -4804,29 +4592,7 @@ agent = it.agent.copy(
     }
 
     fun addManualOrBarcodeItem(barcodeOrName: String, price: Double = 0.0, currency: String = "USD") {
-        if (barcodeOrName.isBlank()) return
-        val id = "ITEM_${System.currentTimeMillis()}"
-        val existing = _uiState.value.payscan.basketItems.find { it.barcode == barcodeOrName || it.name.equals(barcodeOrName, ignoreCase = true) }
-        if (existing != null) {
-            updateBasketItemQuantity(existing.id, existing.quantity + 1)
-        } else {
-            val item = com.example.ui.viewmodel.PayScanCartItem(
-                id = id,
-                barcode = barcodeOrName,
-                name = barcodeOrName,
-                unitPrice = if (price > 0.0) price else -1.0,
-                currency = currency,
-                quantity = 1,
-                boutiqueName = _uiState.value.payscan.defaultBoutiqueName,
-                sellerWalletId = _uiState.value.payscan.defaultSellerWalletId
-            )
-            updatePayScan {
-                copy(
-                    basketItems = basketItems + item,
-                    scanSuccessMessage = "Article '$barcodeOrName' ajouté au panier !"
-                )
-            }
-        }
+        processPayScanInput(barcodeOrName)
     }
 
     fun buildPosSaleDataFromBasket(): com.example.data.model.PosSaleData {
@@ -4859,7 +4625,7 @@ agent = it.agent.copy(
         return com.example.data.model.PosSaleData(
             type = "POS_SALE",
             sellerWalletId = sellerWallet,
-            amount = if (total > 0) Math.round(total * 100.0) / 100.0 else 1.0,
+            amount = Math.round(total * 100.0) / 100.0,
             currency = payCurrency,
             paymentCurrency = payCurrency,
             saleReference = "POS_${System.currentTimeMillis().toString().takeLast(8)}",
@@ -4875,23 +4641,12 @@ agent = it.agent.copy(
         val toUpper = to.uppercase()
 
         val directKey = "${fromUpper}_${toUpper}"
-        val reverseKey = "${toUpper}_${fromUpper}"
 
         if (rates.containsKey(directKey) && (rates[directKey] ?: 0.0) > 0.0) {
             return amount * rates[directKey]!!
         }
-        if (rates.containsKey(reverseKey) && (rates[reverseKey] ?: 0.0) > 0.0) {
-            return amount / rates[reverseKey]!!
-        }
 
-        if (fromUpper == "USD" && toUpper == "CDF") return amount * 2850.0
-        if (fromUpper == "CDF" && toUpper == "USD") return amount / 2850.0
-        if (fromUpper == "EUR" && toUpper == "USD") return amount * 1.08
-        if (fromUpper == "USD" && toUpper == "EUR") return amount / 1.08
-        if (fromUpper == "EUR" && toUpper == "CDF") return amount * 3050.0
-        if (fromUpper == "CDF" && toUpper == "EUR") return amount / 3050.0
-
-        return amount
+        return Double.NaN // No invented conversion: the backend quote remains authoritative.
     }
 
     fun calculateBasketTotalInCurrency(targetCurrency: String): Double {
@@ -4906,222 +4661,36 @@ agent = it.agent.copy(
 
     fun processPayScanInput(scannedRaw: String) {
         val cleaned = scannedRaw.trim()
-        if (cleaned.isBlank()) {
-            updatePayScan { copy(scanError = "Code vide ou illisible.") }
-            return
-        }
-
-        updatePayScan {
-            copy(
-                isInterpreting = true,
-                scanError = null,
-                scanSuccessMessage = null
-            )
-        }
-
+        if (cleaned.isBlank()) { updatePayScan { copy(scanError = "Code vide ou illisible.") }; return }
+        updatePayScan { copy(isInterpreting = true, scanError = null, scanSuccessMessage = null) }
         viewModelScope.launch {
-            val result = repository.scanPayInterpret(cleaned)
-            result.onSuccess { response ->
-                val scanObj = response.scan ?: com.example.data.model.ScanResultData(type = "UNKNOWN", value = cleaned)
-                val type = (scanObj.type ?: scanObj.nestedData?.type ?: "UNKNOWN").uppercase()
-
-                updatePayScan {
-                    copy(
-                        isInterpreting = false,
-                        lastInterpretedResult = scanObj
-                    )
+            repository.resolveScan(com.example.data.model.ScanRequest(value = cleaned)).onSuccess { response ->
+                val result = response.scan
+                if (result == null) { updatePayScan { copy(isInterpreting = false, scanError = "Réponse de scan incomplète.") }; return@onSuccess }
+                when {
+                    result.type == "WALLET" && !result.walletId.isNullOrBlank() -> {
+                        updatePayScan { copy(isInterpreting = false) }
+                        onRecipientChanged(result.walletId); openTransferDialog(); searchTransferRecipient()
+                    }
+                    result.type == "PRODUCTS" && _uiState.value.payscan.currentMode == PayScanMode.SUPERMARKET_BASKET && result.products.size == 1 -> {
+                        val product = result.products.single()
+                        val cart = _uiState.value.payscan.basketItems
+                        if (cart.any { !it.sellerWalletId.isNullOrBlank() && it.sellerWalletId != product.sellerWalletId }) {
+                            updatePayScan { copy(isInterpreting = false, scanError = "Terminez le panier du magasin actuel avant de changer de vendeur.") }; return@onSuccess
+                        }
+                        val existing = cart.find { it.id == product.id }
+                        val quantity = (existing?.quantity ?: 0) + 1
+                        if (quantity > product.stock || !product.price.isFinite() || product.price <= 0) {
+                            updatePayScan { copy(isInterpreting = false, scanError = "Stock ou prix du catalogue indisponible.") }; return@onSuccess
+                        }
+                        val apparel = isApparelKeyword(product.name)
+                        val item = PayScanCartItem(id = product.id, barcode = cleaned, name = product.name, unitPrice = product.price, currency = product.currency, quantity = quantity, boutiqueName = product.boutiqueName, sellerWalletId = product.sellerWalletId, isApparel = apparel)
+                        updatePayScan { copy(isInterpreting = false, basketItems = cart.filterNot { it.id == product.id } + item, lastScannedApparelItem = if (apparel) item else null, showApparelTreatmentSheet = apparel, scanSuccessMessage = "Article vérifié dans le catalogue : ${product.name}") }
+                    }
+                    else -> showCommerceScanReview(cleaned)
                 }
-
-                when (type) {
-                    "WALLET" -> {
-                        val walletId = scanObj.walletId ?: scanObj.nestedData?.walletId ?: cleaned
-                        updatePayScan {
-                            copy(scanSuccessMessage = "Portefeuille détecté : $walletId")
-                        }
-                        onRecipientChanged(walletId)
-                        openTransferDialog()
-                        searchTransferRecipient()
-                    }
-
-                    "POS_SALE" -> {
-                        val saleObj = scanObj.nestedData ?: scanObj
-                        val sellerWallet = saleObj.sellerWalletId ?: _uiState.value.payscan.defaultSellerWalletId
-                        val amount = saleObj.amount ?: 0.0
-                        val currency = saleObj.currency ?: "USD"
-                        val boutique = saleObj.boutiqueName ?: "Commerce Partenaire"
-                        val items = (saleObj.items ?: emptyList()).map {
-                            com.example.ui.viewmodel.PayScanCartItem(
-                                id = it.id ?: "ITEM_${System.currentTimeMillis()}",
-                                barcode = it.barcode,
-                                name = it.name.ifBlank { "Article POS" },
-                                unitPrice = it.sellingPrice,
-                                currency = it.currency ?: currency,
-                                quantity = it.quantity,
-                                boutiqueName = boutique,
-                                sellerWalletId = sellerWallet
-                            )
-                        }
-
-                        val saleData = com.example.data.model.PosSaleData(
-                            type = "POS_SALE",
-                            sellerWalletId = sellerWallet,
-                            amount = amount,
-                            currency = currency,
-                            paymentCurrency = saleObj.paymentCurrency ?: currency,
-                            saleReference = saleObj.saleReference ?: "POS_${System.currentTimeMillis().toString().takeLast(6)}",
-                            boutiqueName = boutique,
-                            sellerName = saleObj.sellerName ?: "Vendeur",
-                            items = saleObj.items ?: emptyList()
-                        )
-
-                        updatePayScan {
-                            copy(
-                                basketItems = if (items.isNotEmpty()) items else basketItems,
-                                currentPosSaleData = saleData,
-                                showConfirmPaymentDialog = true,
-                                scanSuccessMessage = "Vente POS détectée ($boutique - $amount $currency)"
-                            )
-                        }
-                    }
-
-                    "PAYMENT_REQUEST" -> {
-                        val req = scanObj.nestedData ?: scanObj
-                        val recipient = req.recipient ?: cleaned
-                        val amount = req.amount ?: 0.0
-                        val currency = req.currency ?: "USD"
-
-                        val saleData = com.example.data.model.PosSaleData(
-                            type = "POS_SALE",
-                            sellerWalletId = recipient,
-                            amount = amount,
-                            currency = currency,
-                            paymentCurrency = currency,
-                            boutiqueName = "Demande de paiement",
-                            sellerName = recipient,
-                            items = listOf(
-                                com.example.data.model.PosSaleItemDto(
-                                    id = "REQ_1",
-                                    name = "Paiement direct",
-                                    quantity = 1,
-                                    sellingPrice = amount,
-                                    currency = currency
-                                )
-                            )
-                        )
-
-                        updatePayScan {
-                            copy(
-                                currentPosSaleData = saleData,
-                                showConfirmPaymentDialog = true,
-                                scanSuccessMessage = "Demande de paiement de $amount $currency pour $recipient"
-                            )
-                        }
-                    }
-
-                    "PRODUCT", "BARCODE" -> {
-                        val barcodeOrId = scanObj.productId ?: scanObj.barcode ?: scanObj.value ?: cleaned
-                        handleScannedProduct(barcodeOrId)
-                    }
-
-                    else -> {
-                        if (cleaned.matches(Regex("^[A-Z]{2}\\d{10}$")) || cleaned.startsWith("CP-")) {
-                            onRecipientChanged(cleaned)
-                            openTransferDialog()
-                            searchTransferRecipient()
-                        } else {
-                            handleScannedProduct(cleaned)
-                        }
-                    }
-                }
-            }.onFailure {
-                handleLocalFallbackScan(cleaned)
-            }
+            }.onFailure { error -> updatePayScan { copy(isInterpreting = false, scanError = error.message ?: "Scan non confirmé par le serveur.") } }
         }
-    }
-
-    private fun handleLocalFallbackScan(cleaned: String) {
-        updatePayScan { copy(isInterpreting = false) }
-
-        if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
-            try {
-                val json = org.json.JSONObject(cleaned)
-                val type = json.optString("type", "").uppercase()
-                if (type == "POS_SALE") {
-                    val sellerWallet = json.optString("sellerWalletId", "CD0100000001")
-                    val amount = json.optDouble("amount", 0.0)
-                    val currency = json.optString("currency", "USD")
-                    val boutique = json.optString("boutiqueName", "Commerce")
-                    val itemsJson = json.optJSONArray("items")
-                    val itemsList = mutableListOf<com.example.data.model.PosSaleItemDto>()
-                    if (itemsJson != null) {
-                        for (i in 0 until itemsJson.length()) {
-                            val itObj = itemsJson.optJSONObject(i)
-                            if (itObj != null) {
-                                itemsList.add(
-                                    com.example.data.model.PosSaleItemDto(
-                                        id = itObj.optString("id", "ITEM_$i"),
-                                        name = itObj.optString("name", "Article"),
-                                        quantity = itObj.optInt("quantity", 1),
-                                        sellingPrice = itObj.optDouble("sellingPrice", 0.0),
-                                        barcode = itObj.optString("barcode", null)
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    val posData = com.example.data.model.PosSaleData(
-                        type = "POS_SALE",
-                        sellerWalletId = sellerWallet,
-                        amount = amount,
-                        currency = currency,
-                        paymentCurrency = json.optString("paymentCurrency", currency),
-                        saleReference = json.optString("saleReference", "POS_${System.currentTimeMillis().toString().takeLast(6)}"),
-                        boutiqueName = boutique,
-                        sellerName = json.optString("sellerName", "Vendeur"),
-                        items = itemsList
-                    )
-                    updatePayScan {
-                        copy(
-                            currentPosSaleData = posData,
-                            showConfirmPaymentDialog = true,
-                            scanSuccessMessage = "Vente POS détectée ($boutique - $amount $currency)"
-                        )
-                    }
-                    return
-                } else if (type == "PAYMENT_REQUEST") {
-                    val recipient = json.optString("recipient", "")
-                    val amount = json.optDouble("amount", 0.0)
-                    val currency = json.optString("currency", "USD")
-                    val posData = com.example.data.model.PosSaleData(
-                        type = "POS_SALE",
-                        sellerWalletId = recipient,
-                        amount = amount,
-                        currency = currency,
-                        paymentCurrency = currency,
-                        boutiqueName = "Demande de paiement",
-                        sellerName = recipient,
-                        items = listOf(com.example.data.model.PosSaleItemDto(name = "Paiement demandé", quantity = 1, sellingPrice = amount))
-                    )
-                    updatePayScan {
-                        copy(
-                            currentPosSaleData = posData,
-                            showConfirmPaymentDialog = true,
-                            scanSuccessMessage = "Demande de $amount $currency reçue."
-                        )
-                    }
-                    return
-                }
-            } catch (_: Exception) {}
-        }
-
-        if (cleaned.matches(Regex("^[A-Z]{2}\\d{10}$")) || cleaned.startsWith("CP-")) {
-            onRecipientChanged(cleaned)
-            openTransferDialog()
-            searchTransferRecipient()
-            return
-        }
-
-        handleScannedProduct(cleaned)
     }
 
     fun closeApparelTreatmentSheet() {
@@ -5183,158 +4752,22 @@ agent = it.agent.copy(
         return keywords.any { lower.contains(it) } || lower.startsWith("vet") || lower.startsWith("cloth")
     }
 
-    private fun handleScannedProduct(barcodeOrId: String) {
-        viewModelScope.launch {
-            val catalogProducts = _uiState.value.shopping.shoppingProducts
-            val matchingInCatalog = catalogProducts.find {
-                it.barcode.equals(barcodeOrId, ignoreCase = true) ||
-                it.rawId?.toString().equals(barcodeOrId, ignoreCase = true)
+    fun reviewPosPayment() {
+        updatePayScan { copy(showConfirmPaymentDialog = false, scanError = null) }
+        // The authenticated backend prices the real catalogue before any PIN is requested.
+        val sale = _uiState.value.payscan.currentPosSaleData ?: buildPosSaleDataFromBasket()
+        val seller = sale.items.firstOrNull()?.let { first -> _uiState.value.payscan.basketItems.find { it.id == first.id }?.sellerWalletId } ?: sale.sellerWalletId
+        val scan = org.json.JSONObject().put("type", "POS_SALE").put("sellerWalletId", seller)
+        val items = org.json.JSONArray()
+        sale.items.forEach { item ->
+            if (item.id.isNullOrBlank() || item.quantity < 1) {
+                updatePayScan { copy(scanError = "Rescannez les articles pour obtenir leurs identifiants de catalogue.") }; return
             }
-
-            if (matchingInCatalog != null) {
-                val price = matchingInCatalog.sellingPrice
-                val name = matchingInCatalog.name.ifBlank { "Article #$barcodeOrId" }
-                val curr = matchingInCatalog.currency.ifBlank { "USD" }
-                val categoryId = matchingInCatalog.categoryId
-                val isClothing = categoryId == "cat-vetements" || isApparelKeyword(name)
-                addCartItem(
-                    barcode = barcodeOrId,
-                    name = name,
-                    price = price,
-                    currency = curr,
-                    categoryId = if (isClothing) "cat-vetements" else categoryId,
-                    categoryName = if (isClothing) "Vêtements & Mode" else "Article Catalogue",
-                    isApparel = isClothing
-                )
-                return@launch
-            }
-
-            val lookupRes = repository.lookupScannedProduct(productId = barcodeOrId, barcode = barcodeOrId)
-            lookupRes.onSuccess { resp ->
-                val lk = resp.lookup
-                val name = lk?.name ?: "Article #$barcodeOrId"
-                val price = lk?.sellingPrice ?: -1.0
-                val curr = lk?.currency ?: "USD"
-                val isClothing = isApparelKeyword(name)
-                addCartItem(
-                    barcode = barcodeOrId,
-                    name = name,
-                    price = price,
-                    currency = curr,
-                    categoryId = if (isClothing) "cat-vetements" else "cat-divers",
-                    categoryName = if (isClothing) "Vêtements & Mode" else "Produit Validé",
-                    isApparel = isClothing
-                )
-            }.onFailure {
-                // Reject unknown products rather than defaulting to hardcoded prices
-                updatePayScan {
-                    copy(
-                        isInterpreting = false,
-                        scanError = "Produit non reconnu dans le catalogue."
-                    )
-                }
-            }
+            items.put(org.json.JSONObject().put("id", item.id).put("quantity", item.quantity))
         }
-    }
-
-    private fun addCartItem(
-        barcode: String,
-        name: String,
-        price: Double,
-        currency: String,
-        categoryId: String = "cat-divers",
-        categoryName: String = "Article",
-        isApparel: Boolean = false
-    ) {
-        val existing = _uiState.value.payscan.basketItems.find { it.barcode == barcode || it.name == name }
-        if (existing != null) {
-            updateBasketItemQuantity(existing.id, existing.quantity + 1)
-        } else {
-            val item = com.example.ui.viewmodel.PayScanCartItem(
-                id = "ITEM_${System.currentTimeMillis()}",
-                barcode = barcode,
-                name = name,
-                unitPrice = if (price > 0) price else 1.0,
-                currency = currency,
-                quantity = 1,
-                boutiqueName = _uiState.value.payscan.defaultBoutiqueName,
-                sellerWalletId = _uiState.value.payscan.defaultSellerWalletId,
-                categoryId = categoryId,
-                categoryName = categoryName,
-                treatmentInfo = if (isApparel) "Prêt-à-porter • Traitement textile & caisse" else null,
-                isApparel = isApparel,
-                size = if (isApparel) "M" else null
-            )
-            val successMsg = if (isApparel) {
-                "👗 Vêtement détecté : $name ($price $currency) — Traitement prêt-à-porter activé !"
-            } else {
-                "Ajouté au panier : $name ($price $currency)"
-            }
-            updatePayScan {
-                copy(
-                    basketItems = basketItems + item,
-                    scanSuccessMessage = successMsg,
-                    lastScannedApparelItem = if (isApparel) item else null,
-                    showApparelTreatmentSheet = isApparel
-                )
-            }
-        }
-    }
-
-    fun executePosPayment(pin: String) {
-        if (!pin.matches(Regex("^\\d{4}$"))) {
-            updatePayScan { copy(scanError = "Le code PIN doit comporter exactement 4 chiffres.") }
-            return
-        }
-
-        val saleData = _uiState.value.payscan.currentPosSaleData ?: buildPosSaleDataFromBasket()
-        if (saleData.items.isEmpty() && saleData.amount <= 0.0) {
-            updatePayScan { copy(scanError = "Le montant ou le panier est vide.") }
-            return
-        }
-
-        updatePayScan {
-            copy(
-                isProcessingPayment = true,
-                scanError = null,
-                scanSuccessMessage = null
-            )
-        }
-
-        viewModelScope.launch {
-            val result = repository.processPosSale(pin, saleData)
-            result.onSuccess { resp ->
-                val details = resp.transaction ?: com.example.data.model.PosTransactionDetails(
-                    type = "POS_SALE",
-                    saleReference = saleData.saleReference,
-                    sellerWalletId = saleData.sellerWalletId,
-                    amount = saleData.amount,
-                    currency = saleData.currency,
-                    paymentCurrency = saleData.paymentCurrency,
-                    boutiqueName = saleData.boutiqueName,
-                    sellerName = saleData.sellerName,
-                    createdAt = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.FRANCE).format(java.util.Date())
-                )
-
-                updatePayScan {
-                    copy(
-                        isProcessingPayment = false,
-                        showConfirmPaymentDialog = false,
-                        showSuccessReceiptDialog = true,
-                        completedTransaction = details,
-                        basketItems = emptyList(),
-                        scanSuccessMessage = resp.message ?: "Paiement POS effectué avec succès !"
-                    )
-                }
-            }.onFailure { err ->
-                updatePayScan {
-                    copy(
-                        isProcessingPayment = false,
-                        scanError = err.message ?: "Échec du paiement POS. Veuillez réessayer."
-                    )
-                }
-            }
-        }
+        if (items.length() == 0) { updatePayScan { copy(scanError = "Scannez la demande de paiement ou un article du catalogue.") }; return }
+        scan.put("items", items)
+        showCommerceScanReview(scan.toString())
     }
 
     // Aliases for compatibility

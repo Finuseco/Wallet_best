@@ -95,7 +95,6 @@ fun PayScanDialog(
     var lastScannedTime by remember { mutableLongStateOf(0L) }
     var showManualInputDialog by remember { mutableStateOf(false) }
     var manualBarcodeValue by remember { mutableStateOf("") }
-    var enteredPin by remember { mutableStateOf("") }
 
     val coroutineScope = rememberCoroutineScope()
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -119,9 +118,7 @@ fun PayScanDialog(
 
                     var sampleSize = 1
                     val maxDim = maxOf(boundsOptions.outWidth, boundsOptions.outHeight)
-                    if (maxDim > 2200) {
-                        sampleSize = 2
-                    }
+                    while (maxDim / sampleSize > 2048) sampleSize *= 2
 
                     val decodeOptions = BitmapFactory.Options().apply {
                         inSampleSize = sampleSize
@@ -591,7 +588,7 @@ fun PayScanDialog(
                                     color = Color.LightGray
                                 )
                                 Text(
-                                    text = String.format(java.util.Locale.US, "%.2f %s", basketTotalInSelected, paymentCurrency),
+                                    text = if(basketTotalInSelected.isFinite()) String.format(java.util.Locale.US, "%.2f %s", basketTotalInSelected, paymentCurrency) else "Devis serveur requis",
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = ToofanGreen
@@ -606,7 +603,7 @@ fun PayScanDialog(
                                     color = Color.Gray
                                 )
                                 Text(
-                                    text = if (paymentCurrency == "USD") "≈ ${String.format(java.util.Locale.US, "%,.0f CDF", totalCdf)}"
+                                    text = if (!totalCdf.isFinite() || !totalUsd.isFinite()) "Taux indisponible" else if (paymentCurrency == "USD") "≈ ${String.format(java.util.Locale.US, "%,.0f CDF", totalCdf)}"
                                            else "≈ ${String.format(java.util.Locale.US, "%.2f USD", totalUsd)}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
@@ -856,7 +853,7 @@ fun PayScanDialog(
                             ) {
                                 Text("Total Panier :", color = Color.LightGray, fontSize = 14.sp)
                                 Text(
-                                    text = String.format(java.util.Locale.US, "%.2f %s", basketTotal, paymentCurrency),
+                                    text = if(basketTotal.isFinite()) String.format(java.util.Locale.US, "%.2f %s", basketTotal, paymentCurrency) else "Devis serveur requis",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
                                     color = ToofanGreen
@@ -882,160 +879,9 @@ fun PayScanDialog(
         }
     }
 
-    // Modal: Confirmation du paiement POS avec saisie sécurisée du Code PIN (4 chiffres)
+    // Obtain and display the authoritative server quote before requesting a PIN.
     if (payscanState.showConfirmPaymentDialog) {
-        val sale = payscanState.currentPosSaleData ?: dashboardViewModel.buildPosSaleDataFromBasket()
-        Dialog(
-            onDismissRequest = {
-                if (!payscanState.isProcessingPayment) {
-                    enteredPin = ""
-                    dashboardViewModel.closeConfirmPosPayment()
-                }
-            },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF0A0F1D)),
-                color = Color(0xFF0A0F1D)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .systemBarsPadding(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        IconButton(
-                            onClick = {
-                                enteredPin = ""
-                                dashboardViewModel.closeConfirmPosPayment()
-                            },
-                            enabled = !payscanState.isProcessingPayment
-                        ) {
-                            Icon(Icons.Default.Close, contentDescription = "Fermer", tint = Color.White)
-                        }
-                    }
-
-                    Text(
-                        text = "Confirmation Paiement POS",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontFamily = MulishFontFamily
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "Vérifiez les détails et saisissez votre PIN CashPay",
-                        fontSize = 12.sp,
-                        color = Color.LightGray
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Sale Summary Card
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF162032),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF26354D))
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Boutique / Vendeur :", color = Color.Gray, fontSize = 12.sp)
-                                Text(sale.boutiqueName ?: "Commerce CashPay", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Portefeuille Vendeur :", color = Color.Gray, fontSize = 12.sp)
-                                Text(sale.sellerWalletId, fontWeight = FontWeight.SemiBold, color = ToofanGreen, fontSize = 13.sp)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Articles :", color = Color.Gray, fontSize = 12.sp)
-                                Text("${sale.items.size} référence(s)", color = Color.White, fontSize = 13.sp)
-                            }
-
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFF26354D))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Montant Total Débité :", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
-                                Text(
-                                    text = String.format(java.util.Locale.US, "%.2f %s", sale.amount, sale.paymentCurrency),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = ToofanGreen,
-                                    fontSize = 20.sp
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // PIN Dots
-                    Text(
-                        text = "Code PIN de Sécurité (4 chiffres)",
-                        color = Color.LightGray,
-                        fontSize = 13.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    PinDots(
-                        pinLength = enteredPin.length,
-                        maxDigits = 4,
-                        isDark = true,
-                        isError = payscanState.scanError != null
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // Custom 4-digit PIN Keypad
-                    CustomKeypad(
-                        isDark = true,
-                        isBiometricEnabled = false,
-                        isPinLocked = payscanState.isProcessingPayment,
-                        onDigitClick = { digit ->
-                            if (enteredPin.length < 4 && !payscanState.isProcessingPayment) {
-                                enteredPin += digit
-                                if (enteredPin.length == 4) {
-                                    dashboardViewModel.executePosPayment(enteredPin)
-                                }
-                            }
-                        },
-                        onBackspaceClick = {
-                            if (enteredPin.isNotEmpty() && !payscanState.isProcessingPayment) {
-                                enteredPin = enteredPin.dropLast(1)
-                            }
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    if (payscanState.isProcessingPayment) {
-                        CircularProgressIndicator(color = ToofanGreen, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Traitement sécurisé de la transaction POS...", color = Color.Gray, fontSize = 11.sp)
-                    }
-                }
-            }
-        }
+        LaunchedEffect(Unit) { dashboardViewModel.reviewPosPayment() }
     }
 
     // Modal: Reçu de succès après paiement POS réel

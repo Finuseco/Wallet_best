@@ -8,6 +8,8 @@ data class MainUiState(
     val selectedTab: Int = 0, // 0: Accueil / Wallet, 1: Profil Complet & Données, 2: Sécurité & PIN
     val isEditProfileOpen: Boolean = false,
     val editFullName: String = "",
+    val editPhone: String = "",
+    val isWalletPinOpen: Boolean = false,
     val editCity: String = "",
     val editProfession: String = "",
     val editAddress: String = "",
@@ -44,6 +46,8 @@ data class MainUiState(
     val isDarkMode: Boolean = false,
     val isActivateAgentDialogOpen: Boolean = false,
     val agentPlan: String = "promo",
+    val agentSubscriptionFee: Double? = null,
+    val isLoadingAgentFee: Boolean = false,
     val agentPin: String = "",
     val isActivatingAgent: Boolean = false,
     val activateAgentError: String? = null,
@@ -158,6 +162,7 @@ data class WithdrawalUiState(
 )
 
 data class LoansUiState(
+    val loanCurrency: String = "USD",
     val isLoansDialogOpen: Boolean = false,
     val isLoadingLoanOffer: Boolean = false,
     val loanOffer: LoanOfferDto? = null,
@@ -225,8 +230,11 @@ data class AgentSuiteUiState(
     val agentWithdrawError: String? = null,
     val agentWithdrawSuccess: AgentWithdrawResponse? = null,
     val agentWithdrawOperationId: String? = null,
+    val agentWithdrawPreview: WithdrawActionResponse? = null,
     val agentWithdrawOtpChannels: List<String> = emptyList(),
     val agentLoanStep: Int = 1,
+    val agentLoanFee: Double? = null,
+    val agentLoanTotalDebit: Double? = null,
     val agentLoanClientRef: String = "",
     val agentLoanTarget: AgentLoanTargetResponse? = null,
     val isAgentSearchingLoan: Boolean = false,
@@ -258,6 +266,8 @@ data class AgentSuiteUiState(
 )
 
 data class ShoppingUiState(
+    val isLoadingShoppingBoutiques: Boolean = false,
+    val shoppingBoutiquesError: String? = null,
     val isAgentShoppingDialogOpen: Boolean = false,
     val shoppingActiveTab: Int = 0,
     val isShoppingLoading: Boolean = false,
@@ -400,6 +410,7 @@ data class ClaimsUiState(
     val selectedClaimDetail: com.example.data.model.InternationalTransferClaimDto? = null,
     val isClaimDetailDialogOpen: Boolean = false,
     val isClaimDetailLoading: Boolean = false,
+    val claimDetailError: String? = null,
     val isSubmittingClaim: Boolean = false,
     val newClaimError: String? = null,
     val newClaimSuccessMessage: String? = null,
@@ -562,6 +573,8 @@ data class DashboardUiState(
     // --- MAIN IMMUTABLE FIELDS ---
     val selectedTab: Int = main.selectedTab
     val isEditProfileOpen: Boolean = main.isEditProfileOpen
+    val editPhone: String = main.editPhone
+    val isWalletPinOpen: Boolean = main.isWalletPinOpen
     val editFullName: String = main.editFullName
     val editCity: String = main.editCity
     val editProfession: String = main.editProfession
@@ -598,6 +611,8 @@ data class DashboardUiState(
     val notificationsError: String? = main.notificationsError
     val isDarkMode: Boolean = main.isDarkMode
     val isActivateAgentDialogOpen: Boolean = main.isActivateAgentDialogOpen
+    val agentSubscriptionFee: Double? = main.agentSubscriptionFee
+    val isLoadingAgentFee: Boolean = main.isLoadingAgentFee
     val agentPlan: String = main.agentPlan
     val agentPin: String = main.agentPin
     val isActivatingAgent: Boolean = main.isActivatingAgent
@@ -711,6 +726,7 @@ data class DashboardUiState(
     // --- LOANS IMMUTABLE FIELDS ---
     val isLoansDialogOpen: Boolean = loans.isLoansDialogOpen
     val isLoadingLoanOffer: Boolean = loans.isLoadingLoanOffer
+    val loanCurrency: String = loans.loanCurrency
     val loanOffer: LoanOfferDto? = loans.loanOffer
     val loanOfferError: String? = loans.loanOfferError
     val activeLoan: LoanDto? = loans.activeLoan
@@ -774,8 +790,11 @@ data class DashboardUiState(
     val isAgentWithdrawLoading: Boolean = agent.isAgentWithdrawLoading
     val agentWithdrawError: String? = agent.agentWithdrawError
     val agentWithdrawSuccess: AgentWithdrawResponse? = agent.agentWithdrawSuccess
+    val agentWithdrawPreview: WithdrawActionResponse? = agent.agentWithdrawPreview
     val agentWithdrawOperationId: String? = agent.agentWithdrawOperationId
     val agentWithdrawOtpChannels: List<String> = agent.agentWithdrawOtpChannels
+    val agentLoanFee: Double? = agent.agentLoanFee
+    val agentLoanTotalDebit: Double? = agent.agentLoanTotalDebit
     val agentLoanStep: Int = agent.agentLoanStep
     val agentLoanClientRef: String = agent.agentLoanClientRef
     val agentLoanTarget: AgentLoanTargetResponse? = agent.agentLoanTarget
@@ -809,6 +828,8 @@ data class DashboardUiState(
     // --- SHOPPING IMMUTABLE FIELDS ---
     val isAgentShoppingDialogOpen: Boolean = shopping.isAgentShoppingDialogOpen
     val shoppingActiveTab: Int = shopping.shoppingActiveTab
+    val isLoadingShoppingBoutiques: Boolean = shopping.isLoadingShoppingBoutiques
+    val shoppingBoutiquesError: String? = shopping.shoppingBoutiquesError
     val isShoppingLoading: Boolean = shopping.isShoppingLoading
     val shoppingError: String? = shopping.shoppingError
     val shoppingSuccessMessage: String? = shopping.shoppingSuccessMessage
@@ -874,6 +895,7 @@ data class DashboardUiState(
     val claimsError: String? = claims.claimsError
     val selectedClaimDetail: com.example.data.model.InternationalTransferClaimDto? = claims.selectedClaimDetail
     val isClaimDetailDialogOpen: Boolean = claims.isClaimDetailDialogOpen
+    val claimDetailError: String? = claims.claimDetailError
     val isClaimDetailLoading: Boolean = claims.isClaimDetailLoading
     val isSubmittingClaim: Boolean = claims.isSubmittingClaim
     val newClaimError: String? = claims.newClaimError

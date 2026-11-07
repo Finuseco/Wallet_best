@@ -30,6 +30,9 @@ fun ActivateAgentDialog(
     plan: String,
     pin: String,
     isLoading: Boolean,
+    fee: Double?,
+    feeLoading: Boolean,
+    onRetryFee: () -> Unit,
     errorMessage: String?,
     successMessage: String?,
     onPlanChange: (String) -> Unit,
@@ -151,7 +154,7 @@ fun ActivateAgentDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .clickable { onPlanChange(pKey) },
+                                .clickable(enabled=!isLoading) { onPlanChange(pKey) },
                             color = if (isSel) ToofanGreen.copy(alpha = 0.08f) else Color(0xFFF8FAFC),
                             border = BorderStroke(if (isSel) 2.dp else 1.dp, if (isSel) ToofanGreen else Color(0xFFE2E8F0))
                         ) {
@@ -184,6 +187,8 @@ fun ActivateAgentDialog(
                         }
                     }
 
+                    Text(if(feeLoading) "Chargement du tarif…" else if(fee!=null) "Abonnement 30 jours : ${String.format(java.util.Locale.US, "%.2f",fee)} USD — montant débité" else "Tarif indisponible")
+                    if(fee==null && !feeLoading) TextButton(onClick=onRetryFee){Text("Actualiser le tarif")}
                     // PIN Input
                     Text(
                         text = "Saisissez votre code PIN CashPay :",
@@ -209,7 +214,7 @@ fun ActivateAgentDialog(
                         title = "Activer le statut Agent",
                         onClick = onSubmit,
                         isLoading = isLoading,
-                        enabled = pin.length == 4
+                        enabled = pin.length == 4 && fee!=null && !feeLoading && !isLoading
                     )
                 }
             }

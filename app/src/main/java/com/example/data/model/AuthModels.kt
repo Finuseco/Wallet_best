@@ -542,7 +542,8 @@ data class ForgotPinResetResponse(
 @JsonClass(generateAdapter = true)
 data class ActivateAgentRequest(
     @Json(name = "plan") val plan: String, // "promo" or "normal"
-    @Json(name = "pin") val pin: String
+    @Json(name = "pin") val pin: String,
+    val acceptedFee: Double? = null
 )
 
 @JsonClass(generateAdapter = true)

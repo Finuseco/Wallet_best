@@ -37,6 +37,18 @@ import retrofit2.http.Query
 
 interface CashPayApiService {
 
+    @POST("api/v1/contacts/resolve")
+    suspend fun resolveContacts(@Body request: com.example.data.model.ContactResolveRequest): Response<com.example.data.model.ContactResolveResponse>
+
+    @GET("api/v1/loans/offer")
+    suspend fun loanApplicationQuote(@Query("currency") currency:String,@Query("amount") amount:Double,@Query("durationMonths") duration:Int):Response<com.example.data.model.LoanApplicationQuoteResponse>
+    @GET("api/v1/loans/repay")
+    suspend fun loanPaymentQuote(@Query("loanId") loanId:Long,@Query("amount") amount:Double?,@Query("installmentId") installmentId:Long?):Response<com.example.data.model.LoanPaymentQuoteResponse>
+    @POST("api/v1/scanpay/scan")
+    suspend fun resolveScan(@Body request:com.example.data.model.ScanRequest):Response<com.example.data.model.ScanResponse>
+    @POST("api/v1/scanpay/payment")
+    suspend fun payScan(@Body request:com.example.data.model.ScanPaymentRequest):Response<com.example.data.model.ScanPaymentResponse>
+
     @GET("api/v1/countries")
     suspend fun getCountries(): Response<CountriesResponse>
 
@@ -245,6 +257,15 @@ interface CashPayApiService {
     suspend fun forgotPinReset(
         @Body request: com.example.data.model.ForgotPinResetDto
     ): Response<com.example.data.model.ForgotPinResetResponse>
+
+    @GET("api/v1/agent/subscription/fees")
+    suspend fun agentSubscriptionFee(@Query("plan") plan:String): Response<com.example.data.model.AgentFeeResponse>
+
+    @POST("api/v1/auth/change-pin")
+    suspend fun changeWalletPin(@Body request:com.example.data.model.WalletPinRequest): Response<com.example.data.model.WalletPinResponse>
+
+    @POST("api/v1/agent/loan-repayment")
+    suspend fun agentLoanWorkflow(@Body request:Map<String, @JvmSuppressWildcards Any>): Response<com.example.data.model.AgentLoanWorkflowResponse>
 
     @POST("api/v1/agent/activate")
     suspend fun activateAgent(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,6 +28,8 @@ fun LoansScreen(
     viewModel: DashboardViewModel,
     onBack: () -> Unit
 ) {
+    androidx.activity.compose.BackHandler(onBack = onBack)
+    LoanConfirmationDialog(uiState, viewModel)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -35,6 +38,11 @@ fun LoansScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
+                },
+                actions = {
+                    IconButton(enabled = !uiState.isLoadingLoanOffer && !uiState.isLoadingActiveLoan && !uiState.isLoadingLoanHistory, onClick = {
+                        viewModel.fetchLoanOffer(); viewModel.fetchActiveLoan(); viewModel.fetchLoanHistory()
+                    }) { Icon(Icons.Default.Refresh, contentDescription = "Actualiser les crédits et remboursements") }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = ToofanMainDark,

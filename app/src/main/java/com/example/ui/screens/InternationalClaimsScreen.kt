@@ -410,13 +410,13 @@ fun ClaimItemCard(
     claim: InternationalTransferClaimDto,
     onClick: () -> Unit
 ) {
-    val statusColor = when ((claim.status ?: "").lowercase().trim()) {
+    val statusColor = when (claim.effectiveStatus) {
         "pending" -> ClaimsYellow
-        "processing" -> ClaimsBlue
+        "reserved", "processing" -> ClaimsBlue
         "approved" -> Color(0xFF06B6D4)
         "processing_payment" -> ClaimsPurple
         "completed" -> ClaimsPrimary
-        "rejected", "failed" -> ClaimsRed
+        "disputed", "rejected", "failed" -> ClaimsRed
         else -> Color(0xFF94A3B8)
     }
 
@@ -1101,6 +1101,8 @@ fun ClaimDetailDialog(
     isOpen: Boolean,
     claim: InternationalTransferClaimDto?,
     isLoading: Boolean,
+    errorMessage: String? = null,
+    onRetry: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     if (!isOpen || claim == null) return
@@ -1108,13 +1110,13 @@ fun ClaimDetailDialog(
     val clipboard = LocalClipboardManager.current
     var copied by remember { mutableStateOf(false) }
 
-    val statusColor = when ((claim.status ?: "").lowercase().trim()) {
+    val statusColor = when (claim.effectiveStatus) {
         "pending" -> ClaimsYellow
-        "processing" -> ClaimsBlue
+        "reserved", "processing" -> ClaimsBlue
         "approved" -> Color(0xFF06B6D4)
         "processing_payment" -> ClaimsPurple
         "completed" -> ClaimsPrimary
-        "rejected", "failed" -> ClaimsRed
+        "disputed", "rejected", "failed" -> ClaimsRed
         else -> Color(0xFF94A3B8)
     }
 
@@ -1134,6 +1136,14 @@ fun ClaimDetailDialog(
                     .padding(20.dp)
                     .verticalScroll(rememberScrollState())
             ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = ClaimsPrimary)
+                    Text("Actualisation du statut…", color = Color.White)
+                }
+                errorMessage?.let { message ->
+                    Text(message, color = ClaimsRed)
+                    onRetry?.let { retry -> TextButton(onClick = retry) { Text("Réessayer") } }
+                }
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1323,19 +1333,11 @@ fun ClaimDetailDialog(
                             }
                         }
 
+                        claim.netAmount?.let { Text("Montant net : ${formatMoney(it)} ${claim.receiveInCurrency}", color = Color.White) }
                         if (!claim.rejectionReason.isNullOrBlank()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Motif :", color = ClaimsRed, fontSize = 12.5.sp, fontFamily = MulishFontFamily)
-                                Text(
-                                    text = claim.rejectionReason,
-                                    color = ClaimsRed,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp,
-                                    fontFamily = MulishFontFamily
-                                )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("Motif et consignes de l’agence", color = ClaimsRed, fontWeight = FontWeight.Bold)
+                                Text(claim.rejectionReason, color = Color.White, fontSize = 13.sp)
                             }
                         }
                     }
@@ -1359,8 +1361,10 @@ fun ClaimDetailDialog(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = when ((claim.status ?: "").lowercase().trim()) {
+                            text = when (claim.effectiveStatus) {
                                 "pending" -> "Votre demande est actuellement en attente de prise en charge par l'équipe back-office CashPay All."
+                                "reserved" -> "Un agent a réservé les fonds et vérifie votre identité et la référence du transfert."
+                                "disputed" -> "Le dossier est en litige et les fonds restent réservés. Consultez le motif détaillé de l’agence."
                                 "processing" -> "Votre réclamation est en cours d'examen et de vérification auprès de l'opérateur international."
                                 "approved" -> "Votre réclamation a été approuvée par le back-office. Le traitement financier va être initié."
                                 "processing_payment" -> "Le virement des fonds vers votre portefeuille CashPay All est en cours d'exécution financière."
