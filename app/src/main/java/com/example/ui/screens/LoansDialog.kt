@@ -493,7 +493,7 @@ fun SubTabActiveLoan(
                                     }
                                     Column {
                                         Text(text = if(rep.type=="penalty") "Pénalité" else "Remboursement", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = ToofanMainDark)
-                                        Text(text = formatLoanCalendarDate(rep.date), fontSize = 10.sp, color = ToofanBodyText)
+                                        Text(text = formatLoanCalendarDate(rep.date), fontSize = 12.sp, color = ToofanBodyText)
                                     }
                                 }
                                 Text(
@@ -542,7 +542,7 @@ fun SubTabActiveLoan(
                                         color = ToofanMainDark
                                     )
                                     Text(
-                                        text = "Date limite: ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${inst.paidAmount} ${loan.currency} · pénalités incluses : ${inst.penalty} ${loan.currency}",
+                                        text = "Jour de remboursement : ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${inst.paidAmount} ${loan.currency} · pénalités incluses : ${inst.penalty} ${loan.currency}",
                                         fontSize = 10.sp,
                                         color = ToFocusBorderColor
                                     )
@@ -724,8 +724,8 @@ fun SubTabLoanHistory(
                                 color = ToFocusBorderColor
                             )
                             Text(
-                                text = "Date de demande: ${formatLoanCalendarDate(item.startDate)} • Échéance: ${formatLoanCalendarDate(item.endDate)}",
-                                fontSize = 9.sp,
+                                text = "Début : ${formatLoanCalendarDate(item.startDate)}\nÉchéance : ${formatLoanCalendarDate(item.endDate)}",
+                                fontSize = 12.sp,
                                 color = ToofanBodyText
                             )
                         }
