@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.util.formatLoanCalendarDate
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -416,8 +418,8 @@ fun SubTabActiveLoan(
 
                             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
 
-                            RecapRow("Date de début :", loan.startDate ?: "-")
-                            RecapRow("Date de fin :", loan.endDate ?: "-")
+                            RecapRow("Date de début :", formatLoanCalendarDate(loan.startDate))
+                            RecapRow("Date de fin :", formatLoanCalendarDate(loan.endDate))
                         }
                     }
                 }
@@ -491,7 +493,7 @@ fun SubTabActiveLoan(
                                     }
                                     Column {
                                         Text(text = if(rep.type=="penalty") "Pénalité" else "Remboursement", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = ToofanMainDark)
-                                        Text(text = rep.date ?: "-", fontSize = 10.sp, color = ToofanBodyText)
+                                        Text(text = formatLoanCalendarDate(rep.date), fontSize = 10.sp, color = ToofanBodyText)
                                     }
                                 }
                                 Text(
@@ -540,7 +542,7 @@ fun SubTabActiveLoan(
                                         color = ToofanMainDark
                                     )
                                     Text(
-                                        text = "Date limite: ${inst.dueDate ?: "-"}\nDéjà payé : ${inst.paidAmount} ${loan.currency} · pénalités incluses : ${inst.penalty} ${loan.currency}",
+                                        text = "Date limite: ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${inst.paidAmount} ${loan.currency} · pénalités incluses : ${inst.penalty} ${loan.currency}",
                                         fontSize = 10.sp,
                                         color = ToFocusBorderColor
                                     )
@@ -722,7 +724,7 @@ fun SubTabLoanHistory(
                                 color = ToFocusBorderColor
                             )
                             Text(
-                                text = "Date de demande: ${item.startDate ?: "-"} • Échéance: ${item.endDate ?: "-"}",
+                                text = "Date de demande: ${formatLoanCalendarDate(item.startDate)} • Échéance: ${formatLoanCalendarDate(item.endDate)}",
                                 fontSize = 9.sp,
                                 color = ToofanBodyText
                             )
