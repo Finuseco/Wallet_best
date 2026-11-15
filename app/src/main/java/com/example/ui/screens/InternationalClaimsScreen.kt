@@ -85,8 +85,8 @@ import java.text.NumberFormat
 import java.util.Locale
 
 // Custom modern colors for Claims Module matching CashPay theme
-private val ClaimsDarkBg = Color(0xFF0F172A)
-private val ClaimsCardBg = Color(0xFF1E293B)
+private val ClaimsDarkBg = Color(0xFF190A28)
+private val ClaimsCardBg = Color(0xFF190A28)
 private val ClaimsPrimary = Color(0xFF00E676)
 private val ClaimsBlue = Color(0xFFA66BE0)
 private val ClaimsPurple = Color(0xFFA855F7)
@@ -191,7 +191,7 @@ fun InternationalClaimsScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF334155))
+                                .background(Color(0xFF4A2B62))
                                 .testTag("claims_refresh_button")
                         ) {
                             if (isLoading) {
@@ -347,7 +347,7 @@ fun InternationalClaimsScreen(
                         modifier = Modifier
                             .size(72.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF1E293B)),
+                            .background(Color(0xFF190A28)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -423,7 +423,7 @@ fun ClaimItemCard(
     Surface(
         color = ClaimsCardBg,
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color(0xFF334155)),
+        border = BorderStroke(1.dp, Color(0xFF4A2B62)),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -446,7 +446,7 @@ fun ClaimItemCard(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF334155)),
+                            .background(Color(0xFF4A2B62)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -503,7 +503,7 @@ fun ClaimItemCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(Color(0xFF334155).copy(alpha = 0.5f))
+                    .background(Color(0xFF4A2B62).copy(alpha = 0.5f))
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -661,9 +661,9 @@ fun NewClaimDialog(
 
                 // Important Legal / Functional Notice
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155))
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62))
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
@@ -704,11 +704,11 @@ fun NewClaimDialog(
                     providers.forEach { (code, label) ->
                         val isSelected = selectedProvider == code
                         Surface(
-                            color = if (isSelected) ClaimsPrimary.copy(alpha = 0.15f) else Color(0xFF1E293B),
+                            color = if (isSelected) ClaimsPrimary.copy(alpha = 0.15f) else Color(0xFF190A28),
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(
                                 1.5.dp,
-                                if (isSelected) ClaimsPrimary else Color(0xFF334155)
+                                if (isSelected) ClaimsPrimary else Color(0xFF4A2B62)
                             ),
                             modifier = Modifier
                                 .weight(1f)
@@ -762,11 +762,11 @@ fun NewClaimDialog(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = ClaimsPrimary,
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     singleLine = true
                 )
@@ -800,11 +800,11 @@ fun NewClaimDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = ClaimsPrimary,
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color(0xFF1E293B),
-                            unfocusedContainerColor = Color(0xFF1E293B)
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         singleLine = true
                     )
@@ -817,9 +817,9 @@ fun NewClaimDialog(
                         currencies.forEach { cur ->
                             val isSel = expectedCurrency == cur
                             Surface(
-                                color = if (isSel) ClaimsPrimary else Color(0xFF1E293B),
+                                color = if (isSel) ClaimsPrimary else Color(0xFF190A28),
                                 shape = RoundedCornerShape(10.dp),
-                                border = BorderStroke(1.dp, if (isSel) ClaimsPrimary else Color(0xFF334155)),
+                                border = BorderStroke(1.dp, if (isSel) ClaimsPrimary else Color(0xFF4A2B62)),
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(54.dp)
@@ -851,9 +851,9 @@ fun NewClaimDialog(
                 Spacer(modifier = Modifier.height(6.dp))
                 var countryExpanded by remember { mutableStateOf(false) }
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { countryExpanded = !countryExpanded }
@@ -882,9 +882,9 @@ fun NewClaimDialog(
                 if (countryExpanded) {
                     Spacer(modifier = Modifier.height(6.dp))
                     Surface(
-                        color = Color(0xFF162032),
+                        color = Color(0xFF190A28),
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFF334155)),
+                        border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(160.dp)
@@ -931,9 +931,9 @@ fun NewClaimDialog(
                     currencies.forEach { cur ->
                         val isSel = receiveInCurrency == cur
                         Surface(
-                            color = if (isSel) ClaimsBlue.copy(alpha = 0.2f) else Color(0xFF1E293B),
+                            color = if (isSel) ClaimsBlue.copy(alpha = 0.2f) else Color(0xFF190A28),
                             shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.5.dp, if (isSel) ClaimsBlue else Color(0xFF334155)),
+                            border = BorderStroke(1.5.dp, if (isSel) ClaimsBlue else Color(0xFF4A2B62)),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(46.dp)
@@ -1230,7 +1230,7 @@ fun ClaimDetailDialog(
                 Surface(
                     color = ClaimsCardBg,
                     shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -1347,9 +1347,9 @@ fun ClaimDetailDialog(
 
                 // Functional Stage Explanation
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155))
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62))
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Text(
@@ -1388,7 +1388,7 @@ fun ClaimDetailDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(44.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B62)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Fermer", color = Color.White, fontWeight = FontWeight.Bold)

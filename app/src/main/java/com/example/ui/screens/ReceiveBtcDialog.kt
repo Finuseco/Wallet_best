@@ -73,8 +73,8 @@ fun ReceiveBtcDialog(
                 .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(22.dp),
-            color = Color(0xFF101827),
-            border = BorderStroke(1.dp, Color(0xFF334155)),
+            color = Color(0xFF190A28),
+            border = BorderStroke(1.dp, Color(0xFF4A2B62)),
             shadowElevation = 24.dp
         ) {
             Column(
@@ -178,8 +178,8 @@ fun ReceiveBtcDialog(
                 // Address Container Card
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF1E293B),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    color = Color(0xFF190A28),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(

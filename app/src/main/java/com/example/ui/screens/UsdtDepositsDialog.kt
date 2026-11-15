@@ -32,8 +32,8 @@ import com.example.data.model.UsdtDepositItem
 import com.example.ui.theme.MulishFontFamily
 
 private val UsdtTeal = Color(0xFF26A17B)
-private val UsdtDarkBg = Color(0xFF0F172A)
-private val UsdtSurface = Color(0xFF1E293B)
+private val UsdtDarkBg = Color(0xFF190A28)
+private val UsdtSurface = Color(0xFF190A28)
 
 @Composable
 fun UsdtDepositsDialog(
@@ -189,7 +189,7 @@ fun UsdtDepositsDialog(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 color = UsdtSurface,
-                                border = BorderStroke(1.dp, Color(0xFF334155))
+                                border = BorderStroke(1.dp, Color(0xFF4A2B62))
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Row(

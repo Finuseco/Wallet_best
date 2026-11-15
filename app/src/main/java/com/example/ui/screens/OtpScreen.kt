@@ -52,7 +52,7 @@ import com.example.ui.components.ToofanHeader
 import com.example.ui.theme.MulishFontFamily
 import com.example.ui.theme.ToofanBgColor
 import com.example.ui.theme.ToofanBodyText
-import com.example.ui.theme.ToofanGreen
+import com.example.ui.theme.BrandPurple
 import com.example.ui.theme.ToofanGrey1
 import com.example.ui.theme.ToofanLinkPink
 import com.example.ui.theme.ToofanMainDark
@@ -89,9 +89,9 @@ fun OtpScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0x22070F22),
-                            Color(0x330F1E3D),
-                            Color(0x55050B17)
+                            Color(0x22190A28),
+                            Color(0x33190A28),
+                            Color(0x55190A28)
                         )
                     )
                 )
@@ -171,7 +171,7 @@ fun OtpScreen(
                                     .clip(RoundedCornerShape(12.dp))
                                     .border(
                                         width = if (isSelected) 1.8.dp else 1.dp,
-                                        color = if (isSelected) ToofanGreen else ToofanGrey1.copy(alpha = 0.6f),
+                                        color = if (isSelected) BrandPurple else ToofanGrey1.copy(alpha = 0.6f),
                                         shape = RoundedCornerShape(12.dp)
                                     )
                                     .clickable { viewModel.selectOtpChannel(channelId) }
@@ -192,14 +192,14 @@ fun OtpScreen(
                                     ) {
                                         Surface(
                                             shape = CircleShape,
-                                            color = if (isSelected) ToofanGreen.copy(alpha = 0.15f) else ToofanBgColor,
+                                            color = if (isSelected) BrandPurple.copy(alpha = 0.15f) else ToofanBgColor,
                                             modifier = Modifier.size(38.dp)
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Icon(
                                                     imageVector = iconVector,
                                                     contentDescription = null,
-                                                    tint = if (isSelected) ToofanGreen else ToofanBodyText,
+                                                    tint = if (isSelected) BrandPurple else ToofanBodyText,
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                             }
@@ -218,7 +218,7 @@ fun OtpScreen(
                                                 fontFamily = MulishFontFamily,
                                                 fontSize = 12.sp,
                                                 fontWeight = FontWeight.Medium,
-                                                color = ToofanGreen
+                                                color = BrandPurple
                                             )
                                         }
                                     }
@@ -227,7 +227,7 @@ fun OtpScreen(
                                         Icon(
                                             imageVector = Icons.Default.Check,
                                             contentDescription = "Sélectionné",
-                                            tint = ToofanGreen,
+                                            tint = BrandPurple,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -257,7 +257,7 @@ fun OtpScreen(
                             text = "Code envoyé à ${if (uiState.selectedChannel == "email") uiState.maskedEmail else uiState.maskedPhone}",
                             fontFamily = MulishFontFamily,
                             fontSize = 13.sp,
-                            color = ToofanGreen,
+                            color = BrandPurple,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
@@ -324,14 +324,14 @@ fun OtpScreen(
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(16.dp),
-                                    color = ToofanGreen,
+                                    color = BrandPurple,
                                     strokeWidth = 2.dp
                                 )
                                 Text(
                                     text = "Validation en cours...",
                                     fontFamily = MulishFontFamily,
                                     fontSize = 12.sp,
-                                    color = ToofanGreen
+                                    color = BrandPurple
                                 )
                             }
                         }

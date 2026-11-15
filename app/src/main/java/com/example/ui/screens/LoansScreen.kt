@@ -85,7 +85,7 @@ fun LoansScreen(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
-                                color = if (isSelected) Color.White else Color(0xFF0F172A)
+                                color = if (isSelected) Color.White else Color(0xFF190A28)
                             )
                         }
                     }

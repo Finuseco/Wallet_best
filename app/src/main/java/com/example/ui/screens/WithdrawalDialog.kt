@@ -51,7 +51,7 @@ fun WithdrawalDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF0F172A),
+        containerColor = Color(0xFF7A22D4),
         shape = RoundedCornerShape(20.dp),
         title = {
             Row(
@@ -230,7 +230,7 @@ fun StepSelectTypeAndRecipient(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                .background(Color(0xFF190A28), RoundedCornerShape(10.dp))
                 .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -398,9 +398,9 @@ fun StepSelectTypeAndRecipient(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
-                    .border(1.dp, Color(0xFF334155), RoundedCornerShape(10.dp))
+                    .border(1.dp, Color(0xFF4A2B62), RoundedCornerShape(10.dp))
                     .clickable { showCountryDialog = true },
-                color = Color(0xFF1E293B)
+                color = Color(0xFF190A28)
             ) {
                 Row(
                     modifier = Modifier
@@ -485,12 +485,12 @@ fun StepSelectTypeAndRecipient(
                                     .weight(1f)
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
+                                        color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF4A2B62),
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { viewModel.setWithdrawalOperator(op.code) },
-                                color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF190A28)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
@@ -590,8 +590,8 @@ fun StepEnterAmount(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-                    border = BorderStroke(1.dp, Color(0xFF334155))
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62))
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
@@ -630,8 +630,8 @@ fun StepEnterAmount(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Row(
                     modifier = Modifier.padding(10.dp),
@@ -689,8 +689,8 @@ fun StepEnterAmount(
             chips.forEach { chipVal ->
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = Color(0xFF1E293B),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    color = Color(0xFF190A28),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier
                         .weight(1f)
                         .clickable { viewModel.setWithdrawalAmount(chipVal) }
@@ -732,12 +732,12 @@ fun StepEnterAmount(
                         .height(42.dp)
                         .border(
                             width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
+                            color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF4A2B62),
                             shape = RoundedCornerShape(10.dp)
                         )
                         .clip(RoundedCornerShape(10.dp))
                         .clickable { viewModel.setWithdrawalCurrency(curr) },
-                    color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                    color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF190A28)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
@@ -755,8 +755,8 @@ fun StepEnterAmount(
         // Informative guidance note based on country & currency
         Surface(
             shape = RoundedCornerShape(8.dp),
-            color = if (country.isLocalDrc) ToofanGreen.copy(alpha = 0.12f) else Color(0xFF0284C7).copy(alpha = 0.12f),
-            border = BorderStroke(1.dp, if (country.isLocalDrc) ToofanGreen.copy(alpha = 0.3f) else Color(0xFF0284C7).copy(alpha = 0.3f)),
+            color = if (country.isLocalDrc) ToofanGreen.copy(alpha = 0.12f) else Color(0xFF7A22D4).copy(alpha = 0.12f),
+            border = BorderStroke(1.dp, if (country.isLocalDrc) ToofanGreen.copy(alpha = 0.3f) else Color(0xFF7A22D4).copy(alpha = 0.3f)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -815,8 +815,8 @@ fun StepPreviewWithdrawal(
         preview?.let { p ->
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFF1E293B),
-                border = BorderStroke(1.dp, Color(0xFF334155)),
+                color = Color(0xFF190A28),
+                border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -832,13 +832,13 @@ fun StepPreviewWithdrawal(
                         WithdrawalRecapRow("Agent agréé :", uiState.searchedAgentProfile?.fullName ?: uiState.withdrawalRecipient)
                     }
 
-                    HorizontalDivider(color = Color(0xFF334155), thickness = 1.dp)
+                    HorizontalDivider(color = Color(0xFF4A2B62), thickness = 1.dp)
 
                     WithdrawalRecapRow("Montant demandé :", "${String.format("%.2f", p.amount)} ${p.currency}")
                     WithdrawalRecapRow("Frais estimés :", "${String.format("%.2f", p.fee)} ${p.currency}")
                     WithdrawalRecapRow("Total à débiter :", "${String.format("%.2f", p.total)} ${p.currency}", isBold = true, customColor = if (isExpress) Color(0xFF7A22D4) else ToofanGreen)
 
-                    HorizontalDivider(color = Color(0xFF334155), thickness = 1.dp)
+                    HorizontalDivider(color = Color(0xFF4A2B62), thickness = 1.dp)
 
                     WithdrawalRecapRow("Délai de réception :", "Instantané (Temps réel)")
                 }
@@ -1006,8 +1006,8 @@ fun StepWithdrawalSuccess(
 
         Surface(
             shape = RoundedCornerShape(10.dp),
-            color = Color(0xFF1E293B),
-            border = BorderStroke(1.dp, Color(0xFF334155)),
+            color = Color(0xFF190A28),
+            border = BorderStroke(1.dp, Color(0xFF4A2B62)),
             modifier = Modifier.fillMaxWidth(0.95f)
         ) {
             Column(
@@ -1061,9 +1061,9 @@ fun CountrySelectionDialog(
                 .fillMaxWidth(0.92f)
                 .fillMaxHeight(0.8f)
                 .clip(RoundedCornerShape(18.dp)),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 16.dp,
-            border = BorderStroke(1.dp, Color(0xFF334155))
+            border = BorderStroke(1.dp, Color(0xFF4A2B62))
         ) {
             Column(
                 modifier = Modifier
@@ -1127,11 +1127,11 @@ fun CountrySelectionDialog(
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF7A22D4),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     )
                 )
 
@@ -1155,11 +1155,11 @@ fun CountrySelectionDialog(
                                 .clip(RoundedCornerShape(8.dp))
                                 .border(
                                     width = if (isSelected) 1.5.dp else 1.dp,
-                                    color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
+                                    color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF4A2B62),
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 .clickable { onCountrySelected(country) },
-                            color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                            color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF190A28)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -1221,7 +1221,7 @@ private fun LinearProgressBar(
         modifier = modifier
             .height(6.dp)
             .clip(RoundedCornerShape(3.dp))
-            .background(Color(0xFF334155))
+            .background(Color(0xFF4A2B62))
     ) {
         Box(
             modifier = Modifier

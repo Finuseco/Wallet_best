@@ -119,7 +119,7 @@ fun DepositDialog(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
                 .clip(RoundedCornerShape(24.dp)),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 16.dp
         ) {
             Column(
@@ -186,7 +186,7 @@ fun DepositDialog(
 
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
-                    containerColor = Color(0xFF1E293B),
+                    containerColor = Color(0xFF7A22D4),
                     contentColor = Color(0xFF00E676),
                     indicator = { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
@@ -259,9 +259,9 @@ fun DepositDialog(
                                     .fillMaxWidth()
                                     .height(54.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .border(1.dp, Color(0xFF334155), RoundedCornerShape(12.dp))
+                                    .border(1.dp, Color(0xFF4A2B62), RoundedCornerShape(12.dp))
                                     .menuAnchor(),
-                                color = Color(0xFF1E293B)
+                                color = Color(0xFF190A28)
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -299,7 +299,7 @@ fun DepositDialog(
                                                     text = op.displayName,
                                                     fontFamily = MulishFontFamily,
                                                     fontWeight = FontWeight.SemiBold,
-                                                    color = Color(0xFF0F172A)
+                                                    color = Color(0xFF190A28)
                                                 )
                                             }
                                         },
@@ -335,11 +335,11 @@ fun DepositDialog(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color(0xFF00E676),
-                                unfocusedBorderColor = Color(0xFF334155),
+                                unfocusedBorderColor = Color(0xFF4A2B62),
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedContainerColor = Color(0xFF1E293B),
-                                unfocusedContainerColor = Color(0xFF1E293B)
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -349,7 +349,7 @@ fun DepositDialog(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFF1E293B), RoundedCornerShape(14.dp))
+                                .background(Color(0xFF190A28), RoundedCornerShape(14.dp))
                                 .padding(16.dp)
                         ) {
                             Column {
@@ -385,7 +385,7 @@ fun DepositDialog(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFF1E293B), RoundedCornerShape(14.dp))
+                                .background(Color(0xFF190A28), RoundedCornerShape(14.dp))
                                 .padding(16.dp)
                         ) {
                             Column {
@@ -393,7 +393,7 @@ fun DepositDialog(
                                     Icon(
                                         imageVector = Icons.Default.Public,
                                         contentDescription = null,
-                                        tint = Color(0xFF3B82F6),
+                                        tint = Color(0xFF7A22D4),
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -447,11 +447,11 @@ fun DepositDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF00E676),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -468,14 +468,14 @@ fun DepositDialog(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isPresetSelected) Color(0xFF00E676) else Color(0xFF1E293B))
+                                .background(if (isPresetSelected) Color(0xFF00E676) else Color(0xFF190A28))
                                 .clickable { onAmountChange(preset) }
                                 .padding(vertical = 6.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "$$preset",
-                                color = if (isPresetSelected) Color(0xFF0F172A) else Color(0xFFCBD5E1),
+                                color = if (isPresetSelected) Color(0xFF190A28) else Color(0xFFCBD5E1),
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp
@@ -490,7 +490,7 @@ fun DepositDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF1E293B).copy(alpha = 0.6f), RoundedCornerShape(10.dp))
+                        .background(Color(0xFF190A28).copy(alpha = 0.6f), RoundedCornerShape(10.dp))
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -532,7 +532,7 @@ fun DepositDialog(
                             "paypal" -> "Procéder au Paiement PayPal"
                             else -> "Valider la Recharge"
                         },
-                        color = Color(0xFF0F172A),
+                        color = Color(0xFF190A28),
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -552,7 +552,7 @@ fun DepositDialog(
                 modifier = Modifier
                     .fillMaxWidth(0.88f)
                     .clip(RoundedCornerShape(24.dp)),
-                color = Color(0xFF0F172A),
+                color = Color(0xFF190A28),
                 shadowElevation = 24.dp,
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E676).copy(alpha = 0.4f))
             ) {
@@ -610,7 +610,7 @@ fun DepositDialog(
                 modifier = Modifier
                     .fillMaxWidth(0.90f)
                     .clip(RoundedCornerShape(24.dp)),
-                color = Color(0xFF0F172A),
+                color = Color(0xFF190A28),
                 shadowElevation = 24.dp,
                 border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF10B981))
             ) {
@@ -649,7 +649,7 @@ fun DepositDialog(
 
                     if (uiState.depositPendingReference != null) {
                         Surface(
-                            color = Color(0xFF1E293B),
+                            color = Color(0xFF190A28),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.padding(vertical = 6.dp)
                         ) {
@@ -726,7 +726,7 @@ fun DepositDialog(
                 modifier = Modifier
                     .fillMaxWidth(0.90f)
                     .clip(RoundedCornerShape(24.dp)),
-                color = Color(0xFF0F172A),
+                color = Color(0xFF190A28),
                 shadowElevation = 24.dp,
                 border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFFEF4444))
             ) {

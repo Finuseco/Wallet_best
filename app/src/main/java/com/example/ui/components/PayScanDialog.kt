@@ -179,7 +179,7 @@ fun PayScanDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0A0F1D))
+                .background(Color(0xFF190A28))
         ) {
             Column(
                 modifier = Modifier
@@ -198,7 +198,7 @@ fun PayScanDialog(
                         onClick = onDismissRequest,
                         modifier = Modifier
                             .size(40.dp)
-                            .background(Color(0xFF1E293B), CircleShape)
+                            .background(Color(0xFF190A28), CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -228,7 +228,7 @@ fun PayScanDialog(
                             onClick = { photoPickerLauncher.launch("image/*") },
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(Color(0xFF1E293B), CircleShape)
+                                .background(Color(0xFF190A28), CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Image,
@@ -241,7 +241,7 @@ fun PayScanDialog(
                             onClick = { showManualInputDialog = true },
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(Color(0xFF1E293B), CircleShape)
+                                .background(Color(0xFF190A28), CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -257,7 +257,7 @@ fun PayScanDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .background(Color(0xFF162032), RoundedCornerShape(14.dp))
+                        .background(Color(0xFF190A28), RoundedCornerShape(14.dp))
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -532,8 +532,8 @@ fun PayScanDialog(
                         .fillMaxWidth()
                         .padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF26354D))
+                    color = Color(0xFF190A28),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF59158D))
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(
@@ -558,7 +558,7 @@ fun PayScanDialog(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(if (isCurrSelected) ToofanGreen else Color(0xFF1E293B))
+                                            .background(if (isCurrSelected) ToofanGreen else Color(0xFF190A28))
                                             .clickable { dashboardViewModel.setPayScanCurrency(curr) }
                                             .padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
@@ -624,7 +624,7 @@ fun PayScanDialog(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
                             ) {
                                 Icon(Icons.Default.ReceiptLong, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -665,8 +665,8 @@ fun PayScanDialog(
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF0F172A)),
-                color = Color(0xFF0F172A)
+                    .background(Color(0xFF190A28)),
+                color = Color(0xFF190A28)
             ) {
                 Column(
                     modifier = Modifier
@@ -721,7 +721,7 @@ fun PayScanDialog(
                                 Surface(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFF1E293B)
+                                    color = Color(0xFF190A28)
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(12.dp),
@@ -763,7 +763,7 @@ fun PayScanDialog(
                                                     ) {
                                                         Text(
                                                             text = "👗 Taille ${item.size ?: "M"}",
-                                                            color = Color(0xFFC4B5FD),
+                                                            color = Color(0xFFD8C3ED),
                                                             fontSize = 10.sp,
                                                             fontWeight = FontWeight.Bold,
                                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -812,7 +812,7 @@ fun PayScanDialog(
                                                 onClick = { dashboardViewModel.updateBasketItemQuantity(item.id, item.quantity - 1) },
                                                 modifier = Modifier
                                                     .size(32.dp)
-                                                    .background(Color(0xFF334155), CircleShape)
+                                                    .background(Color(0xFF4A2B62), CircleShape)
                                             ) {
                                                 Icon(Icons.Default.Remove, contentDescription = "Moins", tint = Color.White, modifier = Modifier.size(16.dp))
                                             }
@@ -843,7 +843,7 @@ fun PayScanDialog(
                     val basketTotal = dashboardViewModel.calculateBasketTotalInCurrency(paymentCurrency)
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF131D31),
+                        color = Color(0xFF190A28),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -897,8 +897,8 @@ fun PayScanDialog(
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF070B14)),
-                color = Color(0xFF070B14)
+                    .background(Color(0xFF190A28)),
+                color = Color(0xFF190A28)
             ) {
                 Column(
                     modifier = Modifier
@@ -944,8 +944,8 @@ fun PayScanDialog(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF131D31),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF26354D))
+                        color = Color(0xFF190A28),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF59158D))
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
                             Row(
@@ -980,7 +980,7 @@ fun PayScanDialog(
                                 Text(trans?.createdAt ?: "Instantané", color = Color.White, fontSize = 12.sp)
                             }
 
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFF26354D))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFF59158D))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -1024,8 +1024,8 @@ fun PayScanDialog(
                     .fillMaxWidth()
                     .padding(16.dp),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF131D31),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF26354D))
+                color = Color(0xFF190A28),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF59158D))
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
@@ -1051,7 +1051,7 @@ fun PayScanDialog(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedBorderColor = ToofanGreen,
-                            unfocusedBorderColor = Color(0xFF334155)
+                            unfocusedBorderColor = Color(0xFF4A2B62)
                         )
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -1127,8 +1127,8 @@ fun ApparelTreatmentDialog(
                 .fillMaxWidth(0.92f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(20.dp),
-            color = Color(0xFF0F172A),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+            color = Color(0xFF190A28),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
         ) {
             Column(
                 modifier = Modifier
@@ -1181,7 +1181,7 @@ fun ApparelTreatmentDialog(
                 // Item info card
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -1237,8 +1237,8 @@ fun ApparelTreatmentDialog(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSel) ToofanGreen else Color(0xFF1E293B))
-                                .border(1.dp, if (isSel) ToofanGreen else Color(0xFF334155), RoundedCornerShape(8.dp))
+                                .background(if (isSel) ToofanGreen else Color(0xFF190A28))
+                                .border(1.dp, if (isSel) ToofanGreen else Color(0xFF4A2B62), RoundedCornerShape(8.dp))
                                 .clickable { selectedSize = sz }
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
@@ -1263,8 +1263,8 @@ fun ApparelTreatmentDialog(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSel) ToofanGreen else Color(0xFF1E293B))
-                                .border(1.dp, if (isSel) ToofanGreen else Color(0xFF334155), RoundedCornerShape(8.dp))
+                                .background(if (isSel) ToofanGreen else Color(0xFF190A28))
+                                .border(1.dp, if (isSel) ToofanGreen else Color(0xFF4A2B62), RoundedCornerShape(8.dp))
                                 .clickable { selectedSize = sz }
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
@@ -1284,7 +1284,7 @@ fun ApparelTreatmentDialog(
                 // Caisse & Anti-theft Treatment
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
@@ -1315,7 +1315,7 @@ fun ApparelTreatmentDialog(
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(color = Color(0xFF334155))
+                        HorizontalDivider(color = Color(0xFF4A2B62))
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(

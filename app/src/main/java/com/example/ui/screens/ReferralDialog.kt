@@ -39,8 +39,8 @@ import com.example.data.model.WalletResponse
 import com.example.ui.theme.MulishFontFamily
 
 private val ToofanGreen = Color(0xFF00C48C)
-private val DarkCardBg = Color(0xFF1E293B)
-private val DarkBorderColor = Color(0xFF334155)
+private val DarkCardBg = Color(0xFF190A28)
+private val DarkBorderColor = Color(0xFF4A2B62)
 
 @Composable
 fun ReferralDialog(
@@ -134,7 +134,7 @@ fun ReferralDialog(
                 .fillMaxWidth(0.96f)
                 .fillMaxHeight(0.92f)
                 .clip(RoundedCornerShape(24.dp)),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 24.dp,
             border = BorderStroke(1.dp, DarkBorderColor)
         ) {
@@ -362,8 +362,8 @@ fun ReferralDialog(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(Color(0xFF0F172A), RoundedCornerShape(10.dp))
-                                            .border(1.dp, Color(0xFF334155), RoundedCornerShape(10.dp))
+                                            .background(Color(0xFF190A28), RoundedCornerShape(10.dp))
+                                            .border(1.dp, Color(0xFF4A2B62), RoundedCornerShape(10.dp))
                                             .padding(horizontal = 12.dp, vertical = 8.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
@@ -589,7 +589,7 @@ fun ReferralDialog(
                 // Close Button
                 Button(
                     onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth().height(46.dp)
                 ) {
@@ -663,7 +663,7 @@ private fun ReferralItemRow(
                 Box(
                     modifier = Modifier
                         .size(38.dp)
-                        .background(Color(0xFF0F172A), CircleShape)
+                        .background(Color(0xFF190A28), CircleShape)
                         .border(1.dp, Color(0xFFA66BE0), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -746,8 +746,8 @@ private fun ReferralItemRow(
                     onClick = onClaim,
                     enabled = !isClaiming && isActive,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isActive) ToofanGreen else Color(0xFF334155),
-                        disabledContainerColor = Color(0xFF1E293B)
+                        containerColor = if (isActive) ToofanGreen else Color(0xFF4A2B62),
+                        disabledContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),

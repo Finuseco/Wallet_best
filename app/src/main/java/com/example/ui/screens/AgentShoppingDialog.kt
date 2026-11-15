@@ -178,11 +178,11 @@ fun AgentShoppingDialog(
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            containerColor = Color(0xFF0F172A),
+            containerColor = Color(0xFF7A22D4),
             topBar = {
                 // Header
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shadowElevation = 8.dp
                 ) {
                     Column(
@@ -350,7 +350,7 @@ fun AgentShoppingDialog(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color(0xFF0B1120))
+                    .background(Color(0xFF190A28))
             ) {
                 if (uiState.isLoadingShoppingBoutiques && uiState.shoppingBoutiques.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -448,7 +448,7 @@ fun AgentShoppingDialog(
     if (showBoutiqueModal) {
         AlertDialog(
             onDismissRequest = { showBoutiqueModal = false },
-            containerColor = Color(0xFF1E293B),
+            containerColor = Color(0xFF7A22D4),
             shape = RoundedCornerShape(18.dp),
             title = {
                 Row(
@@ -492,11 +492,11 @@ fun AgentShoppingDialog(
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF7A22D4),
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color(0xFF0F172A),
-                            unfocusedContainerColor = Color(0xFF0F172A)
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -510,11 +510,11 @@ fun AgentShoppingDialog(
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF7A22D4),
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color(0xFF0F172A),
-                            unfocusedContainerColor = Color(0xFF0F172A)
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -532,11 +532,11 @@ fun AgentShoppingDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF7A22D4),
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color(0xFF0F172A),
-                            unfocusedContainerColor = Color(0xFF0F172A)
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -592,7 +592,7 @@ fun AgentShoppingDialog(
         val refInfo = uiState.productReferenceInfo
         AlertDialog(
             onDismissRequest = { showReferenceModal = false },
-            containerColor = Color(0xFF1E293B),
+            containerColor = Color(0xFF7A22D4),
             shape = RoundedCornerShape(18.dp),
             title = {
                 Row(
@@ -615,7 +615,7 @@ fun AgentShoppingDialog(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Surface(
-                        color = Color(0xFF0F172A),
+                        color = Color(0xFF190A28),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -646,7 +646,7 @@ fun AgentShoppingDialog(
                             Toast.makeText(context, "Référence copiée dans le presse-papier !", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B62)),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
@@ -671,7 +671,7 @@ fun AgentShoppingDialog(
                 itemToDeleteId = null
                 itemToDeleteName = null
             },
-            containerColor = Color(0xFF1E293B),
+            containerColor = Color(0xFF7A22D4),
             shape = RoundedCornerShape(16.dp),
             title = {
                 Text(
@@ -771,9 +771,9 @@ private fun BoutiquesTabContent(
         if (boutiques.isEmpty()) {
             item {
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
                 ) {
                     Column(
@@ -820,9 +820,9 @@ private fun BoutiquesTabContent(
             items(boutiques) { b ->
                 val countProducts = products.count { it.boutiqueId == b.id }
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -838,7 +838,7 @@ private fun BoutiquesTabContent(
                                 Box(
                                     modifier = Modifier
                                         .size(38.dp)
-                                        .background(Color(0xFF0F172A), RoundedCornerShape(8.dp)),
+                                        .background(Color(0xFF190A28), RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(20.dp))
@@ -914,7 +914,7 @@ private fun BoutiquesTabContent(
                             }
                         }
 
-                        Divider(color = Color(0xFF334155), thickness = 0.8.dp)
+                        Divider(color = Color(0xFF4A2B62), thickness = 0.8.dp)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1034,9 +1034,9 @@ private fun ProductsTabContent(
         if (filteredProducts.isEmpty()) {
             item {
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
                 ) {
                     Column(
@@ -1101,9 +1101,9 @@ private fun FilterChipShopping(
 ) {
     Surface(
         onClick = onClick,
-        color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF1E293B),
+        color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF190A28),
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155))
+        border = BorderStroke(1.dp, if (isSelected) Color(0xFF7A22D4) else Color(0xFF4A2B62))
     ) {
         Text(
             text = label,
@@ -1131,9 +1131,9 @@ private fun ProductAgentCard(
     val category = SHOPPING_CATEGORIES.find { it.id == product.categoryId }?.nameFr ?: product.categoryId
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
         shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, Color(0xFF334155)),
+        border = BorderStroke(1.dp, Color(0xFF4A2B62)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -1147,7 +1147,7 @@ private fun ProductAgentCard(
                     modifier = Modifier
                         .size(72.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF0F172A)),
+                        .background(Color(0xFF190A28)),
                     contentAlignment = Alignment.Center
                 ) {
                     if (!imgUrl.isNullOrBlank()) {
@@ -1236,7 +1236,7 @@ private fun ProductAgentCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
+                    .background(Color(0xFF190A28), RoundedCornerShape(8.dp))
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -1437,9 +1437,9 @@ private fun PublishProductTabContent(
         // Section: Boutique Selector
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Boutique de Rattachement *", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.5.sp)
@@ -1482,16 +1482,16 @@ private fun PublishProductTabContent(
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White,
                                     focusedBorderColor = Color(0xFF7A22D4),
-                                    unfocusedBorderColor = Color(0xFF334155),
-                                    focusedContainerColor = Color(0xFF0F172A),
-                                    unfocusedContainerColor = Color(0xFF0F172A)
+                                    unfocusedBorderColor = Color(0xFF4A2B62),
+                                    focusedContainerColor = Color(0xFF190A28),
+                                    unfocusedContainerColor = Color(0xFF190A28)
                                 ),
                                 shape = RoundedCornerShape(10.dp)
                             )
                             ExposedDropdownMenu(
                                 expanded = boutiqueDropdownExpanded,
                                 onDismissRequest = { boutiqueDropdownExpanded = false },
-                                modifier = Modifier.background(Color(0xFF1E293B))
+                                modifier = Modifier.background(Color(0xFF190A28))
                             ) {
                                 boutiques.forEach { b ->
                                     DropdownMenuItem(
@@ -1515,9 +1515,9 @@ private fun PublishProductTabContent(
         // Section: Informations Générales
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Informations Générales", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.5.sp)
@@ -1533,9 +1533,9 @@ private fun PublishProductTabContent(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedBorderColor = Color(0xFF7A22D4),
-                            unfocusedBorderColor = Color(0xFF334155),
-                            focusedContainerColor = Color(0xFF0F172A),
-                            unfocusedContainerColor = Color(0xFF0F172A)
+                            unfocusedBorderColor = Color(0xFF4A2B62),
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -1551,9 +1551,9 @@ private fun PublishProductTabContent(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedBorderColor = Color(0xFF7A22D4),
-                            unfocusedBorderColor = Color(0xFF334155),
-                            focusedContainerColor = Color(0xFF0F172A),
-                            unfocusedContainerColor = Color(0xFF0F172A)
+                            unfocusedBorderColor = Color(0xFF4A2B62),
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -1578,16 +1578,16 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(10.dp)
                         )
                         ExposedDropdownMenu(
                             expanded = categoryDropdownExpanded,
                             onDismissRequest = { categoryDropdownExpanded = false },
-                            modifier = Modifier.background(Color(0xFF1E293B))
+                            modifier = Modifier.background(Color(0xFF190A28))
                         ) {
                             SHOPPING_CATEGORIES.forEach { cat ->
                                 DropdownMenuItem(
@@ -1618,9 +1618,9 @@ private fun PublishProductTabContent(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedBorderColor = Color(0xFF7A22D4),
-                            unfocusedBorderColor = Color(0xFF334155),
-                            focusedContainerColor = Color(0xFF0F172A),
-                            unfocusedContainerColor = Color(0xFF0F172A)
+                            unfocusedBorderColor = Color(0xFF4A2B62),
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -1631,9 +1631,9 @@ private fun PublishProductTabContent(
         // Section: Prix & Stock
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Prix & Stock", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.5.sp)
@@ -1650,9 +1650,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(10.dp)
                         )
@@ -1668,9 +1668,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF00E676),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(10.dp)
                         )
@@ -1683,7 +1683,7 @@ private fun PublishProductTabContent(
                         val marginVal = pSell - pBuy
                         val marginPct = if (pBuy > 0) (marginVal / pBuy) * 100 else 100.0
                         Surface(
-                            color = Color(0xFF0F172A),
+                            color = Color(0xFF190A28),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -1715,9 +1715,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(10.dp)
                         )
@@ -1733,9 +1733,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(10.dp)
                         )
@@ -1747,9 +1747,9 @@ private fun PublishProductTabContent(
         // Section: Images (1 à 5)
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
@@ -1772,9 +1772,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
@@ -1814,7 +1814,7 @@ private fun PublishProductTabContent(
                                     modifier = Modifier
                                         .size(60.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(Color(0xFF0F172A))
+                                        .background(Color(0xFF190A28))
                                 ) {
                                     AsyncImage(
                                         model = img,
@@ -1841,9 +1841,9 @@ private fun PublishProductTabContent(
         // Section: Variations (Couleurs / Tailles & Stock)
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Variations (Couleur & Stock) *", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.5.sp)
@@ -1860,9 +1860,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
@@ -1878,9 +1878,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
@@ -1896,7 +1896,7 @@ private fun PublishProductTabContent(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Ajouter", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("Ajouter", color = Color(0xFF190A28), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
 
@@ -1905,7 +1905,7 @@ private fun PublishProductTabContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
+                                .background(Color(0xFF190A28), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 10.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
@@ -1925,9 +1925,9 @@ private fun PublishProductTabContent(
         // Section: Tarifs de Livraison (Optionnel)
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Tarifs de Livraison par Province", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.5.sp)
@@ -1943,9 +1943,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
@@ -1961,9 +1961,9 @@ private fun PublishProductTabContent(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
                                 focusedBorderColor = Color(0xFF7A22D4),
-                                unfocusedBorderColor = Color(0xFF334155),
-                                focusedContainerColor = Color(0xFF0F172A),
-                                unfocusedContainerColor = Color(0xFF0F172A)
+                                unfocusedBorderColor = Color(0xFF4A2B62),
+                                focusedContainerColor = Color(0xFF190A28),
+                                unfocusedContainerColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
@@ -1987,7 +1987,7 @@ private fun PublishProductTabContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
+                                .background(Color(0xFF190A28), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 10.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
@@ -2017,9 +2017,9 @@ private fun PublishProductTabContent(
         if (categoryId == "cat-electronique" || categoryId == "cat-livre") {
             item {
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155))
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62))
                 ) {
                     Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
@@ -2036,7 +2036,7 @@ private fun PublishProductTabContent(
                                     onValueChange = { brand = it },
                                     label = { Text("Marque") },
                                     modifier = Modifier.weight(1f),
-                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF0F172A), unfocusedContainerColor = Color(0xFF0F172A)),
+                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF190A28), unfocusedContainerColor = Color(0xFF190A28)),
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 OutlinedTextField(
@@ -2044,7 +2044,7 @@ private fun PublishProductTabContent(
                                     onValueChange = { model = it },
                                     label = { Text("Modèle") },
                                     modifier = Modifier.weight(1f),
-                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF0F172A), unfocusedContainerColor = Color(0xFF0F172A)),
+                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF190A28), unfocusedContainerColor = Color(0xFF190A28)),
                                     shape = RoundedCornerShape(8.dp)
                                 )
                             }
@@ -2054,7 +2054,7 @@ private fun PublishProductTabContent(
                                 label = { Text("Mémoire / Stockage") },
                                 placeholder = { Text("Ex : 256GB / 8GB RAM") },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF0F172A), unfocusedContainerColor = Color(0xFF0F172A)),
+                                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF190A28), unfocusedContainerColor = Color(0xFF190A28)),
                                 shape = RoundedCornerShape(8.dp)
                             )
                         } else if (categoryId == "cat-livre") {
@@ -2064,7 +2064,7 @@ private fun PublishProductTabContent(
                                     onValueChange = { isbn10 = it },
                                     label = { Text("ISBN-10") },
                                     modifier = Modifier.weight(1f),
-                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF0F172A), unfocusedContainerColor = Color(0xFF0F172A)),
+                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF190A28), unfocusedContainerColor = Color(0xFF190A28)),
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 OutlinedTextField(
@@ -2072,7 +2072,7 @@ private fun PublishProductTabContent(
                                     onValueChange = { isbn13 = it },
                                     label = { Text("ISBN-13") },
                                     modifier = Modifier.weight(1f),
-                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF0F172A), unfocusedContainerColor = Color(0xFF0F172A)),
+                                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF190A28), unfocusedContainerColor = Color(0xFF190A28)),
                                     shape = RoundedCornerShape(8.dp)
                                 )
                             }
@@ -2081,7 +2081,7 @@ private fun PublishProductTabContent(
                                 onValueChange = { pdfUrl = it },
                                 label = { Text("Lien PDF (Optionnel)") },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF0F172A), unfocusedContainerColor = Color(0xFF0F172A)),
+                                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color(0xFF190A28), unfocusedContainerColor = Color(0xFF190A28)),
                                 shape = RoundedCornerShape(8.dp)
                             )
                         }
@@ -2093,9 +2093,9 @@ private fun PublishProductTabContent(
         // Section: Visibilité publique
         item {
             Surface(
-                color = Color(0xFF1E293B),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155))
+                border = BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(14.dp),
@@ -2117,7 +2117,7 @@ private fun PublishProductTabContent(
                             checkedThumbColor = Color(0xFF00E676),
                             checkedTrackColor = Color(0xFF00E676).copy(alpha = 0.3f),
                             uncheckedThumbColor = Color(0xFF7B42AD),
-                            uncheckedTrackColor = Color(0xFF334155)
+                            uncheckedTrackColor = Color(0xFF4A2B62)
                         )
                     )
                 }
@@ -2231,9 +2231,9 @@ private fun PublicCatalogTabContent(
     ) {
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, Color(0xFF334155)),
+                border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -2291,7 +2291,7 @@ private fun PublicCatalogTabContent(
         } else if (publicCatalog == null || publicCatalog.products.isEmpty()) {
             item {
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
                 ) {
@@ -2308,7 +2308,7 @@ private fun PublicCatalogTabContent(
         } else {
             items(publicCatalog.products) { p ->
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -2322,7 +2322,7 @@ private fun PublicCatalogTabContent(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF0F172A)),
+                                .background(Color(0xFF190A28)),
                             contentAlignment = Alignment.Center
                         ) {
                             if (!img.isNullOrBlank()) {
@@ -2340,7 +2340,7 @@ private fun PublicCatalogTabContent(
 
                         p.seller?.let { sel ->
                             sel.walletId?.let { wid ->
-                                Surface(color = Color(0xFF0F172A), shape = RoundedCornerShape(6.dp)) {
+                                Surface(color = Color(0xFF190A28), shape = RoundedCornerShape(6.dp)) {
                                     Text(wid.take(8) + "...", color = Color(0xFFA66BE0), fontSize = 11.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp))
                                 }
                             }

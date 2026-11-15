@@ -200,7 +200,7 @@ fun AgentServicesDialog(
                                 .padding(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            val colors = listOf(Color(0xFF0F172A), Color(0xFF312E81), Color(0xFF1E3A8A), Color(0xFF065F46))
+                            val colors = listOf(Color(0xFF190A28), Color(0xFF190A28), Color(0xFF190A28), Color(0xFF065F46))
                             var cIdx = 0
                             commMap.forEach { (curr, amt) ->
                                 AgentCommissionCard(
@@ -242,7 +242,7 @@ fun AgentServicesDialog(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 18.sp,
-                        color = Color(0xFF0F172A),
+                        color = Color(0xFF190A28),
                         modifier = Modifier.padding(horizontal = 20.dp).padding(top = 20.dp)
                     )
                 }
@@ -267,10 +267,10 @@ fun AgentServicesDialog(
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             AgentActionSquare("Scanner", "QR Code", Icons.Default.QrCodeScanner, Color(0xFF190A28), Modifier.weight(1f)) { onOpenQrScanner("agent_withdraw") }
                             AgentActionSquare("Prêt", "Loan Me", Icons.Default.Payments, Color(0xFF7C3AED), Modifier.weight(1f)) { activeModal = "loan" }
-                            AgentActionSquare("Starlink", "Manager", Icons.Default.Public, Color(0xFF0284C7), Modifier.weight(1f)) { onOpenStarlink() }
+                            AgentActionSquare("Starlink", "Manager", Icons.Default.Public, Color(0xFF7A22D4), Modifier.weight(1f)) { onOpenStarlink() }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            AgentActionSquare("Historique", "Opérations", Icons.Default.Receipt, Color(0xFF0066FF), Modifier.weight(1f)) { activeModal = "history" }
+                            AgentActionSquare("Historique", "Opérations", Icons.Default.Receipt, Color(0xFF7A22D4), Modifier.weight(1f)) { activeModal = "history" }
                             AgentActionSquare("Virement", "Comm.", Icons.Default.SwapHoriz, Color(0xFF00B386), Modifier.weight(1f)) { onOpenSweepDialog("USD") }
                         }
 
@@ -278,7 +278,7 @@ fun AgentServicesDialog(
                         Text("Clients & Shopping", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF7B42AD), fontSize = 14.sp)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             AgentActionSquare("KYC", "Client", Icons.Default.PersonAdd, Color(0xFF10B981), Modifier.weight(1f)) { onOpenRegisterCustomer() }
-                            AgentActionSquare("Mes Clients", "Parrainés", Icons.Default.Person, Color(0xFF6366F1), Modifier.weight(1f)) { onOpenCustomerList() }
+                            AgentActionSquare("Mes Clients", "Parrainés", Icons.Default.Person, Color(0xFF7A22D4), Modifier.weight(1f)) { onOpenCustomerList() }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             AgentActionSquare("Shopping", "Boutiques", Icons.Default.Store, Color(0xFF7A22D4), Modifier.weight(1f)) { onOpenShopping(0) }
@@ -481,7 +481,7 @@ private fun AgentActionSquare(
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
                 Text(
                     text = subtitle,
@@ -543,7 +543,7 @@ private fun AgentDepositModal(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
-                        color = Color(0xFF0F172A)
+                        color = Color(0xFF190A28)
                     )
                     Text(
                         text = when (step) {
@@ -659,7 +659,7 @@ private fun AgentDepositModal(
                                         text = "TX-${detail?.transactionId ?: res?.transactionId ?: (System.currentTimeMillis() % 100000)}",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF0F172A),
+                                        color = Color(0xFF190A28),
                                         fontFamily = MulishFontFamily
                                     )
                                 }
@@ -672,7 +672,7 @@ private fun AgentDepositModal(
                                         text = detail?.clientName ?: uiState.agentDepositFoundClient?.fullName ?: "Client CashPay",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF0F172A),
+                                        color = Color(0xFF190A28),
                                         fontFamily = MulishFontFamily
                                     )
                                 }
@@ -711,7 +711,7 @@ private fun AgentDepositModal(
                                         text = "${detail?.totalDebited ?: detail?.totalDebitAgent ?: uiState.agentDepositAmount} ${detail?.currency ?: uiState.agentDepositCurrency}",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF0F172A),
+                                        color = Color(0xFF190A28),
                                         fontFamily = MulishFontFamily
                                     )
                                 }
@@ -725,7 +725,7 @@ private fun AgentDepositModal(
                                             text = "${String.format(java.util.Locale.US, "%,.2f", detail.agentRemainingBalance)} ${detail.currency}",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF0F172A),
+                                            color = Color(0xFF190A28),
                                             fontFamily = MulishFontFamily
                                         )
                                     }
@@ -751,7 +751,7 @@ private fun AgentDepositModal(
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.weight(1f).height(46.dp)
                             ) {
-                                Text("Fermer", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                                Text("Fermer", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF190A28))
                             }
                         }
                     }
@@ -766,7 +766,7 @@ private fun AgentDepositModal(
                     text = "Veuillez identifier le compte du client souhaitant déposer des espèces.",
                     fontFamily = MulishFontFamily,
                     fontSize = 13.sp,
-                    color = Color(0xFF475569)
+                    color = Color(0xFF6C527D)
                 )
 
                 Row(
@@ -797,7 +797,7 @@ private fun AgentDepositModal(
                         onClick = onOpenQrScanner,
                         modifier = Modifier
                             .size(54.dp)
-                            .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
+                            .background(Color(0xFF190A28), RoundedCornerShape(8.dp))
                     ) {
                         Icon(
                             imageVector = Icons.Default.QrCodeScanner,
@@ -871,7 +871,7 @@ private fun AgentDepositModal(
                             Box(
                                 modifier = Modifier
                                     .size(50.dp)
-                                    .background(Color(0xFF0F172A), CircleShape),
+                                    .background(Color(0xFF190A28), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 val initials = (client?.fullName ?: client?.firstName ?: "C")
@@ -894,7 +894,7 @@ private fun AgentDepositModal(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp,
-                                    color = Color(0xFF0F172A)
+                                    color = Color(0xFF190A28)
                                 )
                                 Text(
                                     text = client?.phone ?: "-",
@@ -934,7 +934,7 @@ private fun AgentDepositModal(
                                     text = "Compte client vérifié et actif pour dépôt d'espèces.",
                                     fontFamily = MulishFontFamily,
                                     fontSize = 11.sp,
-                                    color = Color(0xFF334155)
+                                    color = Color(0xFF4A2B62)
                                 )
                             }
                         }
@@ -960,7 +960,7 @@ private fun AgentDepositModal(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Text("Modifier", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                        Text("Modifier", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF4A2B62))
                     }
 
                     Button(
@@ -1002,14 +1002,14 @@ private fun AgentDepositModal(
                         modifier = Modifier.padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = Color(0xFF0F172A), modifier = Modifier.size(16.dp))
+                        Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = Color(0xFF190A28), modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Bénéficiaire : ${client?.fullName ?: client?.firstName ?: uiState.agentDepositClientRef}",
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
-                            color = Color(0xFF0F172A)
+                            color = Color(0xFF190A28)
                         )
                     }
                 }
@@ -1018,7 +1018,7 @@ private fun AgentDepositModal(
                     text = "Choisissez la devise selon les disponibilités de votre portefeuille :",
                     fontFamily = MulishFontFamily,
                     fontSize = 12.sp,
-                    color = Color(0xFF475569)
+                    color = Color(0xFF6C527D)
                 )
 
                 // Currency selector showing agent's actual balance in each currency
@@ -1048,7 +1048,7 @@ private fun AgentDepositModal(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 13.sp,
-                                    color = if (isSelected) Color.White else Color(0xFF0F172A)
+                                    color = if (isSelected) Color.White else Color(0xFF190A28)
                                 )
                                 Text(
                                     text = "Solde: ${String.format(java.util.Locale.US, "%,.0f", bal)}",
@@ -1103,7 +1103,7 @@ private fun AgentDepositModal(
                                 fontFamily = MulishFontFamily,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF334155),
+                                color = Color(0xFF4A2B62),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                             )
                         }
@@ -1143,7 +1143,7 @@ private fun AgentDepositModal(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Text("Retour", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                        Text("Retour", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF4A2B62))
                     }
 
                     Button(
@@ -1184,7 +1184,7 @@ private fun AgentDepositModal(
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
-                            color = Color(0xFF0F172A)
+                            color = Color(0xFF190A28)
                         )
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Bénéficiaire", fontSize = 12.sp, color = Color(0xFF7B42AD), fontFamily = MulishFontFamily)
@@ -1192,7 +1192,7 @@ private fun AgentDepositModal(
                                 text = detail?.clientName ?: uiState.agentDepositFoundClient?.fullName ?: "Client",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F172A),
+                                color = Color(0xFF190A28),
                                 fontFamily = MulishFontFamily
                             )
                         }
@@ -1221,7 +1221,7 @@ private fun AgentDepositModal(
                                 text = "${detail?.totalDebitAgent ?: uiState.agentDepositAmount} ${detail?.currency ?: uiState.agentDepositCurrency}",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFF0F172A),
+                                color = Color(0xFF190A28),
                                 fontFamily = MulishFontFamily
                             )
                         }
@@ -1232,7 +1232,7 @@ private fun AgentDepositModal(
                                     text = "${String.format(java.util.Locale.US, "%,.2f", detail.agentBalanceBefore)} → ${String.format(java.util.Locale.US, "%,.2f", detail.agentBalanceAfter)} ${detail.currency}",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF334155),
+                                    color = Color(0xFF4A2B62),
                                     fontFamily = MulishFontFamily
                                 )
                             }
@@ -1272,7 +1272,7 @@ private fun AgentDepositModal(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Text("Annuler", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                        Text("Annuler", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, color = Color(0xFF4A2B62))
                     }
 
                     Button(
@@ -1340,7 +1340,7 @@ private fun AgentWithdrawModal(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
                 IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "Fermer")
@@ -1384,7 +1384,7 @@ private fun AgentWithdrawModal(
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.sp,
-                            color = Color(0xFF0F172A)
+                            color = Color(0xFF190A28)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
@@ -1425,7 +1425,7 @@ private fun AgentWithdrawModal(
                         onClick = onOpenQrScanner,
                         modifier = Modifier
                             .size(54.dp)
-                            .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
+                            .background(Color(0xFF190A28), RoundedCornerShape(8.dp))
                     ) {
                         Icon(
                             imageVector = Icons.Default.QrCodeScanner,
@@ -1490,7 +1490,7 @@ private fun AgentWithdrawModal(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
-                                color = if (selected) Color.White else Color(0xFF334155),
+                                color = if (selected) Color.White else Color(0xFF4A2B62),
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }
@@ -1542,7 +1542,7 @@ private fun AgentWithdrawModal(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
-                    color = Color(0xFF475569)
+                    color = Color(0xFF6C527D)
                 )
 
                 val channels = uiState.agentWithdrawOtpChannels.ifEmpty { listOf("sms", "whatsapp", "email") }
@@ -1552,11 +1552,11 @@ private fun AgentWithdrawModal(
                         val selected = uiState.agentWithdrawChannel == code
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = if (selected) Color(0xFF0F172A) else Color(0xFFF1F5F9),
+                            color = if (selected) Color(0xFF190A28) else Color(0xFFF1F5F9),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onChannelChange(code) },
-                            border = BorderStroke(1.dp, if (selected) Color(0xFF0F172A) else Color(0xFFE6DCF0))
+                            border = BorderStroke(1.dp, if (selected) Color(0xFF190A28) else Color(0xFFE6DCF0))
                         ) {
                             Row(
                                 modifier = Modifier.padding(14.dp),
@@ -1579,7 +1579,7 @@ private fun AgentWithdrawModal(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
-                                    color = if (selected) Color.White else Color(0xFF334155)
+                                    color = if (selected) Color.White else Color(0xFF4A2B62)
                                 )
                                 Spacer(modifier = Modifier.weight(1f))
                                 if (selected) {
@@ -1724,7 +1724,7 @@ private fun AgentLoanModal(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
                 IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "Fermer")
@@ -1789,7 +1789,7 @@ private fun AgentLoanModal(
                         onClick = onOpenQrScanner,
                         modifier = Modifier
                             .size(54.dp)
-                            .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
+                            .background(Color(0xFF190A28), RoundedCornerShape(8.dp))
                     ) {
                         Icon(
                             imageVector = Icons.Default.QrCodeScanner,
@@ -1838,7 +1838,7 @@ private fun AgentLoanModal(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
-                                color = Color(0xFF0F172A)
+                                color = Color(0xFF190A28)
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
@@ -1985,7 +1985,7 @@ private fun AgentHistoryModal(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
                 IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "Fermer")
@@ -2040,7 +2040,7 @@ private fun AgentHistoryModal(
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 13.sp,
-                                        color = Color(0xFF0F172A)
+                                        color = Color(0xFF190A28)
                                     )
                                     Text(
                                         text = if (!op.clientRef.isNullOrBlank()) "${op.clientRef} • ${op.date}" else op.date,
@@ -2055,7 +2055,7 @@ private fun AgentHistoryModal(
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 13.sp,
-                                        color = Color(0xFF0F172A)
+                                        color = Color(0xFF190A28)
                                     )
                                     if (op.commission > 0.0) {
                                         Text(
@@ -2136,7 +2136,7 @@ private fun SweepCommissionModalDialog(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = Color(0xFF0F172A)
+                        color = Color(0xFF190A28)
                     )
                 }
 
@@ -2150,7 +2150,7 @@ private fun SweepCommissionModalDialog(
                 fontFamily = MulishFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
-                color = Color(0xFF475569)
+                color = Color(0xFF6C527D)
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -2163,7 +2163,7 @@ private fun SweepCommissionModalDialog(
                     }
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = if (selected) Color(0xFF0F172A) else Color(0xFFF1F5F9),
+                        color = if (selected) Color(0xFF190A28) else Color(0xFFF1F5F9),
                         modifier = Modifier
                             .weight(1f)
                             .clickable { onCurrencyChange(curr) }
@@ -2177,7 +2177,7 @@ private fun SweepCommissionModalDialog(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
-                                color = if (selected) Color.White else Color(0xFF0F172A)
+                                color = if (selected) Color.White else Color(0xFF190A28)
                             )
                             Text(
                                 text = "${String.format(java.util.Locale.US, "%.1f", currAvailable)}",
@@ -2233,7 +2233,7 @@ private fun SweepCommissionModalDialog(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = if (uiState.sweepIsAll) Color.White else Color(0xFF334155),
+                        color = if (uiState.sweepIsAll) Color.White else Color(0xFF4A2B62),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 10.dp)
                     )
@@ -2251,7 +2251,7 @@ private fun SweepCommissionModalDialog(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = if (!uiState.sweepIsAll) Color.White else Color(0xFF334155),
+                        color = if (!uiState.sweepIsAll) Color.White else Color(0xFF4A2B62),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 10.dp)
                     )

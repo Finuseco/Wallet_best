@@ -79,7 +79,7 @@ fun AgentExternalMoMoDialog(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
                 .clip(RoundedCornerShape(24.dp)),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 16.dp
         ) {
             Column(
@@ -216,10 +216,10 @@ fun AgentExternalMoMoDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B))
+                                .background(if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF190A28))
                                 .border(
                                     width = if (isSelected) 1.5.dp else 1.dp,
-                                    color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
+                                    color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF4A2B62),
                                     shape = RoundedCornerShape(10.dp)
                                 )
                                 .clickable { onOperatorChange(op.code) }
@@ -268,11 +268,11 @@ fun AgentExternalMoMoDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF7A22D4),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -306,11 +306,11 @@ fun AgentExternalMoMoDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF7A22D4),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -321,7 +321,7 @@ fun AgentExternalMoMoDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF1E293B).copy(alpha = 0.6f), RoundedCornerShape(10.dp))
+                        .background(Color(0xFF190A28).copy(alpha = 0.6f), RoundedCornerShape(10.dp))
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

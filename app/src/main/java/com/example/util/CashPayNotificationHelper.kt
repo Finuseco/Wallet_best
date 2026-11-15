@@ -104,7 +104,7 @@ object CashPayNotificationHelper {
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setColor(Color.parseColor("#000E38"))
+            .setColor(Color.parseColor("#7A22D4"))
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
 
         try {

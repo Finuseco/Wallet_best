@@ -4,7 +4,8 @@ import androidx.compose.ui.graphics.Color
 
 // Palette verified in Finuseco/cashpay-main origin/main (3831815), css/style.css.
 // Legacy token names are retained for existing components.
-val BrandBlue = Color(0xFF7A22D4)
+val BrandPurple = Color(0xFF7A22D4)
+val BrandBlue = BrandPurple
 val BrandBlueVibrant = Color(0xFF59158D)
 val BrandBlueDark = Color(0xFF190A28)
 val BrandBlueCyan = Color(0xFFA66BE0)

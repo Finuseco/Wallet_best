@@ -100,8 +100,8 @@ fun ForgotPinDialog(
                         val completed = step > (index + 1)
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = if (active) ToofanGreen else if (completed) ToofanGreen.copy(alpha = 0.2f) else Color(0xFFF1F5F9),
-                            border = BorderStroke(1.dp, if (active || completed) ToofanGreen else Color(0xFFE6DCF0)),
+                            color = if (active) BrandPurple else if (completed) BrandPurple.copy(alpha = 0.2f) else Color(0xFFF1F5F9),
+                            border = BorderStroke(1.dp, if (active || completed) BrandPurple else Color(0xFFE6DCF0)),
                             modifier = Modifier.padding(2.dp)
                         ) {
                             Text(
@@ -109,7 +109,7 @@ fun ForgotPinDialog(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 10.sp,
-                                color = if (active) Color.White else if (completed) ToofanGreen else Color(0xFF7B42AD),
+                                color = if (active) Color.White else if (completed) BrandPurple else Color(0xFF7B42AD),
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
@@ -151,11 +151,11 @@ fun ForgotPinDialog(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = ToofanGreen.copy(alpha = 0.15f),
+                            color = BrandPurple.copy(alpha = 0.15f),
                             modifier = Modifier.size(54.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ToofanGreen, modifier = Modifier.size(32.dp))
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = BrandPurple, modifier = Modifier.size(32.dp))
                             }
                         }
                         Text(
@@ -210,8 +210,8 @@ fun ForgotPinDialog(
                                             .weight(1f)
                                             .clip(RoundedCornerShape(10.dp))
                                             .clickable { onChannelChange(chKey) },
-                                        color = if (isSel) ToofanGreen.copy(alpha = 0.12f) else Color(0xFFF8FAFC),
-                                        border = BorderStroke(1.dp, if (isSel) ToofanGreen else Color(0xFFE6DCF0))
+                                        color = if (isSel) BrandPurple.copy(alpha = 0.12f) else Color(0xFFF8FAFC),
+                                        border = BorderStroke(1.dp, if (isSel) BrandPurple else Color(0xFFE6DCF0))
                                     ) {
                                         Box(
                                             modifier = Modifier.padding(vertical = 10.dp),
@@ -222,7 +222,7 @@ fun ForgotPinDialog(
                                                 fontFamily = MulishFontFamily,
                                                 fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
                                                 fontSize = 12.sp,
-                                                color = if (isSel) ToofanGreen else ToofanMainDark
+                                                color = if (isSel) BrandPurple else ToofanMainDark
                                             )
                                         }
                                     }

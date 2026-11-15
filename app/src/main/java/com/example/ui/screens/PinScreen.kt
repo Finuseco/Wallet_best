@@ -52,7 +52,7 @@ import com.example.ui.components.ToofanHeader
 import com.example.ui.theme.MulishFontFamily
 import com.example.ui.theme.ToofanBgColor
 import com.example.ui.theme.ToofanBodyText
-import com.example.ui.theme.ToofanGreen
+import com.example.ui.theme.BrandPurple
 import com.example.ui.theme.ToofanLinkPink
 import com.example.ui.theme.ToofanMainDark
 import com.example.ui.theme.ToofanWhite
@@ -88,9 +88,9 @@ fun PinScreen(
                 .background(
                     androidx.compose.ui.graphics.Brush.verticalGradient(
                         colors = listOf(
-                            Color(0x22070F22),
-                            Color(0x330F1E3D),
-                            Color(0x55050B17)
+                            Color(0x22190A28),
+                            Color(0x33190A28),
+                            Color(0x55190A28)
                         )
                     )
                 )
@@ -121,8 +121,8 @@ fun PinScreen(
                     .fillMaxWidth()
                     .widthIn(max = 420.dp),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF0F172A).copy(alpha = 0.95f),
-                border = BorderStroke(1.dp, Color(0xFF1E293B)),
+                color = Color(0xFF190A28).copy(alpha = 0.95f),
+                border = BorderStroke(1.dp, Color(0xFF190A28)),
                 shadowElevation = 8.dp
             ) {
                 Column(
@@ -135,8 +135,8 @@ fun PinScreen(
                         modifier = Modifier
                             .size(68.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF1E293B))
-                            .border(2.dp, ToofanGreen, CircleShape),
+                            .background(Color(0xFF190A28))
+                            .border(2.dp, BrandPurple, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                             if (!uiState.installedUserProfile?.profilePhotoUrl.isNullOrBlank()) {
@@ -261,14 +261,14 @@ fun PinScreen(
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(16.dp),
-                                    color = ToofanGreen,
+                                    color = Color(0xFFA66BE0),
                                     strokeWidth = 2.dp
                                 )
                                 Text(
                                     text = "Vérification du code PIN...",
                                     fontFamily = MulishFontFamily,
                                     fontSize = 12.sp,
-                                    color = ToofanGreen
+                                    color = Color(0xFFA66BE0)
                                 )
                             }
                         }
@@ -332,7 +332,7 @@ fun PinScreen(
                             fontFamily = MulishFontFamily,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = ToofanGreen,
+                            color = Color(0xFFA66BE0),
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()

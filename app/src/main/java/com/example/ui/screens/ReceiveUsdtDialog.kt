@@ -34,8 +34,8 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 
 private val UsdtTeal = Color(0xFF26A17B)
-private val UsdtDarkBg = Color(0xFF0F172A)
-private val UsdtSurface = Color(0xFF1E293B)
+private val UsdtDarkBg = Color(0xFF190A28)
+private val UsdtSurface = Color(0xFF190A28)
 
 @Composable
 fun ReceiveUsdtDialog(
@@ -219,7 +219,7 @@ fun ReceiveUsdtDialog(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         color = UsdtSurface,
-                        border = BorderStroke(1.dp, Color(0xFF334155))
+                        border = BorderStroke(1.dp, Color(0xFF4A2B62))
                     ) {
                         Row(
                             modifier = Modifier
@@ -287,8 +287,8 @@ fun ReceiveUsdtDialog(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFF0F172A),
-                    border = BorderStroke(1.dp, Color(0xFF334155))
+                    color = Color(0xFF190A28),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62))
                 ) {
                     Column(modifier = Modifier.padding(10.dp)) {
                         Text(

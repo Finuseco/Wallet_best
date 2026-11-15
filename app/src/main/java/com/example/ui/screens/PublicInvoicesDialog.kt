@@ -33,10 +33,10 @@ import com.example.ui.viewmodel.DashboardUiState
 import com.example.ui.viewmodel.DashboardViewModel
 
 private val BrandGreen = Color(0xFF00C48C)
-private val WaterBlue = Color(0xFF0284C7)
+private val WaterBlue = Color(0xFF7A22D4)
 private val ElectricYellow = Color(0xFFEAB308)
-private val DarkCardBg = Color(0xFF1E293B)
-private val DarkBorderColor = Color(0xFF334155)
+private val DarkCardBg = Color(0xFF190A28)
+private val DarkBorderColor = Color(0xFF4A2B62)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +72,7 @@ fun PublicInvoicesDialog(
                 .fillMaxWidth(0.96f)
                 .fillMaxHeight(0.92f)
                 .clip(RoundedCornerShape(24.dp)),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 24.dp,
             border = BorderStroke(1.dp, DarkBorderColor)
         ) {
@@ -188,14 +188,14 @@ fun PublicInvoicesDialog(
                             Icon(
                                 imageVector = Icons.Outlined.Bolt,
                                 contentDescription = null,
-                                tint = if (activeTab == 1) Color(0xFF0F172A) else Color(0xFF94A3B8),
+                                tint = if (activeTab == 1) Color(0xFF190A28) else Color(0xFF94A3B8),
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = "SNEL (Électricité)",
                                 fontSize = 13.sp,
                                 fontWeight = if (activeTab == 1) FontWeight.Bold else FontWeight.Medium,
-                                color = if (activeTab == 1) Color(0xFF0F172A) else Color(0xFF94A3B8)
+                                color = if (activeTab == 1) Color(0xFF190A28) else Color(0xFF94A3B8)
                             )
                         }
                     }
@@ -281,7 +281,7 @@ fun PublicInvoicesDialog(
                                                         .fillMaxWidth()
                                                         .clip(RoundedCornerShape(10.dp))
                                                         .clickable { provinceMenuExpanded = true },
-                                                    color = Color(0xFF0F172A),
+                                                    color = Color(0xFF190A28),
                                                     border = BorderStroke(1.dp, DarkBorderColor)
                                                 ) {
                                                     Row(
@@ -309,7 +309,7 @@ fun PublicInvoicesDialog(
                                                 DropdownMenu(
                                                     expanded = provinceMenuExpanded,
                                                     onDismissRequest = { provinceMenuExpanded = false },
-                                                    modifier = Modifier.background(Color(0xFF1E293B))
+                                                    modifier = Modifier.background(Color(0xFF190A28))
                                                 ) {
                                                     RegidesoProvince.ALL_PROVINCES.forEach { prov ->
                                                         DropdownMenuItem(
@@ -349,8 +349,8 @@ fun PublicInvoicesDialog(
                                                     unfocusedBorderColor = DarkBorderColor,
                                                     focusedTextColor = Color.White,
                                                     unfocusedTextColor = Color.White,
-                                                    focusedContainerColor = Color(0xFF0F172A),
-                                                    unfocusedContainerColor = Color(0xFF0F172A)
+                                                    focusedContainerColor = Color(0xFF190A28),
+                                                    unfocusedContainerColor = Color(0xFF190A28)
                                                 ),
                                                 shape = RoundedCornerShape(10.dp)
                                             )
@@ -512,7 +512,7 @@ fun PublicInvoicesDialog(
                             item {
                                 Surface(
                                     modifier = Modifier.fillMaxWidth(),
-                                    color = Color(0xFF0F172A),
+                                    color = Color(0xFF190A28),
                                     border = BorderStroke(1.dp, DarkBorderColor),
                                     shape = RoundedCornerShape(10.dp)
                                 ) {

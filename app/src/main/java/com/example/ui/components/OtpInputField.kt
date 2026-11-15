@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.MulishFontFamily
-import com.example.ui.theme.ToofanGreen
+import com.example.ui.theme.BrandPurple
 import com.example.ui.theme.ToofanGrey1
 import com.example.ui.theme.ToofanMainDark
 import com.example.ui.theme.ToofanWhite
@@ -60,8 +60,8 @@ fun OtpInputField(
                     val borderColor by animateColorAsState(
                         targetValue = when {
                             isError -> Color(0xFFFF4868)
-                            isFocused -> ToofanGreen
-                            char.isNotEmpty() -> ToofanGreen
+                            isFocused -> BrandPurple
+                            char.isNotEmpty() -> BrandPurple
                             else -> ToofanGrey1
                         },
                         label = "toofan_otp_border"

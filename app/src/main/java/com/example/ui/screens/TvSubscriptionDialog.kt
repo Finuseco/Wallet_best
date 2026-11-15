@@ -35,9 +35,9 @@ import com.example.ui.viewmodel.DashboardUiState
 import com.example.ui.viewmodel.DashboardViewModel
 
 private val BrandGreen = Color(0xFF00C48C)
-private val DarkCardBg = Color(0xFF1E293B)
-private val DarkBorderColor = Color(0xFF334155)
-private val AccentBlue = Color(0xFF2563EB)
+private val DarkCardBg = Color(0xFF190A28)
+private val DarkBorderColor = Color(0xFF4A2B62)
+private val AccentBlue = Color(0xFF7A22D4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +65,7 @@ fun TvSubscriptionDialog(
                 .fillMaxWidth(0.96f)
                 .fillMaxHeight(0.92f)
                 .clip(RoundedCornerShape(24.dp)),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 24.dp,
             border = BorderStroke(1.dp, DarkBorderColor)
         ) {
@@ -93,7 +93,7 @@ fun TvSubscriptionDialog(
                             Icon(
                                 imageVector = Icons.Default.Tv,
                                 contentDescription = null,
-                                tint = Color(0xFF60A5FA),
+                                tint = Color(0xFFA66BE0),
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -133,7 +133,7 @@ fun TvSubscriptionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF1E293B))
+                        .background(Color(0xFF190A28))
                         .padding(4.dp)
                 ) {
                     Box(
@@ -318,7 +318,7 @@ fun TvSubscriptionDialog(
                                                     text = "${"%,d".format(pkg.effectivePrice.toLong()).replace(',', ' ')} ${pkg.effectiveCurrency}",
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 14.sp,
-                                                    color = Color(0xFF60A5FA)
+                                                    color = Color(0xFFA66BE0)
                                                 )
                                             }
                                         }
@@ -404,7 +404,7 @@ fun TvSubscriptionDialog(
                         item {
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
-                                color = Color(0xFF1E293B),
+                                color = Color(0xFF190A28),
                                 border = BorderStroke(1.dp, DarkBorderColor),
                                 shape = RoundedCornerShape(12.dp)
                             ) {

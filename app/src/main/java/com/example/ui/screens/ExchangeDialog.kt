@@ -220,7 +220,7 @@ fun ExchangeDialog(
                 }
             },
             shape = RoundedCornerShape(18.dp),
-            containerColor = Color(0xFF0F172A)
+            containerColor = Color(0xFF7A22D4)
         )
     }
 
@@ -235,9 +235,9 @@ fun ExchangeDialog(
                 .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(22.dp),
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             shadowElevation = 24.dp,
-            border = BorderStroke(1.dp, Color(0xFF1E293B))
+            border = BorderStroke(1.dp, Color(0xFF190A28))
         ) {
             Column(
                 modifier = Modifier
@@ -319,8 +319,8 @@ fun ExchangeDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF1E293B))
-                        .border(1.dp, Color(0xFF334155), RoundedCornerShape(14.dp))
+                        .background(Color(0xFF190A28))
+                        .border(1.dp, Color(0xFF4A2B62), RoundedCornerShape(14.dp))
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -361,10 +361,10 @@ fun ExchangeDialog(
                                         .weight(1f)
                                         .height(34.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(if (isSelected) Color(0xFF00E676) else Color(0xFF0F172A))
+                                        .background(if (isSelected) Color(0xFF00E676) else Color(0xFF190A28))
                                         .border(
                                             1.dp,
-                                            if (isSelected) Color(0xFF00E676) else Color(0xFF334155),
+                                            if (isSelected) Color(0xFF00E676) else Color(0xFF4A2B62),
                                             RoundedCornerShape(8.dp)
                                         )
                                         .clickable { onFromCurrencyChange(curr) },
@@ -375,7 +375,7 @@ fun ExchangeDialog(
                                         fontFamily = MulishFontFamily,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = if (isSelected) Color(0xFF0B0F19) else Color.White
+                                        color = if (isSelected) Color(0xFF190A28) else Color.White
                                     )
                                 }
                             }
@@ -391,7 +391,7 @@ fun ExchangeDialog(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF0F172A))
+                                .background(Color(0xFF190A28))
                                 .border(1.dp, Color(0xFF00E676), CircleShape)
                                 .clickable { onSwapCurrencies() }
                                 .testTag("swap_currencies_btn"),
@@ -443,10 +443,10 @@ fun ExchangeDialog(
                                         .weight(1f)
                                         .height(34.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(if (isSelected) Color(0xFFA66BE0) else Color(0xFF0F172A))
+                                        .background(if (isSelected) Color(0xFFA66BE0) else Color(0xFF190A28))
                                         .border(
                                             1.dp,
-                                            if (isSelected) Color(0xFFA66BE0) else Color(0xFF334155),
+                                            if (isSelected) Color(0xFFA66BE0) else Color(0xFF4A2B62),
                                             RoundedCornerShape(8.dp)
                                         )
                                         .clickable { onToCurrencyChange(curr) },
@@ -457,7 +457,7 @@ fun ExchangeDialog(
                                         fontFamily = MulishFontFamily,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = if (isSelected) Color(0xFF0B0F19) else Color.White
+                                        color = if (isSelected) Color(0xFF190A28) else Color.White
                                     )
                                 }
                             }
@@ -514,11 +514,11 @@ fun ExchangeDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF00E676),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -527,9 +527,9 @@ fun ExchangeDialog(
 
                 // Rate & Conversion Summary Card (Concise labels, no wrapping!)
                 Surface(
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -611,11 +611,11 @@ fun ExchangeDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF00E676),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -637,13 +637,13 @@ fun ExchangeDialog(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = Color(0xFF0F172A), modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(color = Color(0xFF190A28), modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Conversion...", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontFamily = MulishFontFamily)
+                        Text("Conversion...", color = Color(0xFF190A28), fontWeight = FontWeight.Bold, fontFamily = MulishFontFamily)
                     } else {
                         Text(
                             text = "Convertir",
-                            color = Color(0xFF0F172A),
+                            color = Color(0xFF190A28),
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp

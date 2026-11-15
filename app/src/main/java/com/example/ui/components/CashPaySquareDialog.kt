@@ -107,7 +107,7 @@ fun CashPaySquareStatusDialog(
                 .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(22.dp),
-            color = Color(0xFF101827),
+            color = Color(0xFF190A28),
             border = BorderStroke(1.dp, borderColor),
             shadowElevation = 24.dp
         ) {
@@ -164,8 +164,8 @@ fun CashPaySquareStatusDialog(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF1E293B),
-                        border = BorderStroke(1.dp, Color(0xFF334155))
+                        color = Color(0xFF190A28),
+                        border = BorderStroke(1.dp, Color(0xFF4A2B62))
                     ) {
                         Column(
                             modifier = Modifier.padding(12.dp),

@@ -131,8 +131,8 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 private val BrandOrange = Color(0xFFF97316)
 private val BrandOrangeLight = Color(0xFFFB923C)
 private val BrandGreen = Color(0xFF10B981)
-private val BrandBlueMidnight = Color(0xFF0F1E3D)
-private val BrandBlueDark = Color(0xFF070F22)
+private val BrandBlueMidnight = Color(0xFF190A28)
+private val BrandBlueDark = Color(0xFF190A28)
 
 private data class SelectOption(val key: String, val label: String)
 
@@ -286,7 +286,7 @@ fun RegisterAccountScreen(
                 modifier = Modifier
                     .fillMaxWidth(0.92f)
                     .clip(RoundedCornerShape(24.dp)),
-                color = Color(0xFF0B0F19), // OnChat dark navy background
+                color = Color(0xFF190A28), // OnChat dark navy background
                 shadowElevation = 24.dp,
                 border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFFEF4444))
             ) {
@@ -362,7 +362,7 @@ fun RegisterAccountScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                         border = BorderStroke(1.2.dp, Color.White),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -423,9 +423,9 @@ fun RegisterAccountScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0x22070F22),
-                            Color(0x330F1E3D),
-                            Color(0x55050B17)
+                            Color(0x22190A28),
+                            Color(0x33190A28),
+                            Color(0x55190A28)
                         )
                     )
                 )
@@ -1975,7 +1975,7 @@ fun RegistrationSuccessView(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
-                    color = Color(0xFF0C1938),
+                    color = Color(0xFF190A28),
                     border = androidx.compose.foundation.BorderStroke(1.5.dp, ToofanGreen)
                 ) {
                     Column(

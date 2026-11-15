@@ -13,8 +13,8 @@ android {
     applicationId = "com.aistudio.cashpay.auth"
     minSdk = 24
     targetSdk = 36
-    versionCode = 125
-    versionName = "12.5"
+    versionCode = 126
+    versionName = "12.6"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

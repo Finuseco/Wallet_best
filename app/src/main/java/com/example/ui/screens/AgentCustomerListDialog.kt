@@ -95,7 +95,7 @@ fun AgentCustomerListDialog(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 Surface(
-                    color = Color(0xFF0F172A),
+                    color = Color(0xFF190A28),
                     modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 4.dp
                 ) {
@@ -110,10 +110,10 @@ fun AgentCustomerListDialog(
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
-                                    .background(Color(0xFF6366F1).copy(alpha = 0.2f), CircleShape),
+                                    .background(Color(0xFF7A22D4).copy(alpha = 0.2f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Group, contentDescription = null, tint = Color(0xFF818CF8), modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Group, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(20.dp))
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
@@ -128,14 +128,14 @@ fun AgentCustomerListDialog(
                                     text = "${customersList.size} client(s) parrainé(s)",
                                     fontFamily = MulishFontFamily,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF818CF8)
+                                    color = Color(0xFFA66BE0)
                                 )
                             }
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = onRefresh, modifier = Modifier.size(36.dp)) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Actualiser", tint = Color(0xFF818CF8))
+                                Icon(Icons.Default.Refresh, contentDescription = "Actualiser", tint = Color(0xFFA66BE0))
                             }
                             IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
                                 Icon(Icons.Default.Close, contentDescription = "Fermer", tint = Color(0xFF94A3B8))
@@ -149,7 +149,7 @@ fun AgentCustomerListDialog(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color(0xFF0F172A))
+                    .background(Color(0xFF190A28))
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
@@ -158,23 +158,23 @@ fun AgentCustomerListDialog(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     placeholder = { Text("Rechercher par nom, téléphone, Wallet ID...", color = Color(0xFF7B42AD), fontSize = 13.sp) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF818CF8)) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFA66BE0)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF818CF8),
-                        unfocusedBorderColor = Color(0xFF334155),
+                        focusedBorderColor = Color(0xFFA66BE0),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
 
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFF818CF8))
+                        CircularProgressIndicator(color = Color(0xFFA66BE0))
                     }
                 } else if (filteredList.isEmpty()) {
                     Column(
@@ -184,7 +184,7 @@ fun AgentCustomerListDialog(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF475569), modifier = Modifier.size(56.dp))
+                        Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF6C527D), modifier = Modifier.size(56.dp))
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
                             text = if (searchQuery.isNotBlank()) "Aucun client ne correspond à votre recherche."
@@ -199,9 +199,9 @@ fun AgentCustomerListDialog(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Icon(Icons.Default.PersonAdd, contentDescription = null, tint = Color(0xFF0F172A), modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.PersonAdd, contentDescription = null, tint = Color(0xFF190A28), modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Créer un compte Client", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontFamily = MulishFontFamily)
+                            Text("Créer un compte Client", color = Color(0xFF190A28), fontWeight = FontWeight.Bold, fontFamily = MulishFontFamily)
                         }
                     }
                 } else {
@@ -211,9 +211,9 @@ fun AgentCustomerListDialog(
                     ) {
                         items(filteredList) { cust ->
                             Surface(
-                                color = Color(0xFF1E293B),
+                                color = Color(0xFF190A28),
                                 shape = RoundedCornerShape(14.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62)),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Row(
@@ -231,12 +231,12 @@ fun AgentCustomerListDialog(
                                             modifier = Modifier
                                                 .size(42.dp)
                                                 .clip(CircleShape)
-                                                .background(Color(0xFF6366F1).copy(alpha = 0.2f)),
+                                                .background(Color(0xFF7A22D4).copy(alpha = 0.2f)),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
                                                 text = (cust.firstName?.take(1) ?: "") + (cust.lastName?.take(1) ?: "C"),
-                                                color = Color(0xFF818CF8),
+                                                color = Color(0xFFA66BE0),
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 15.sp,
                                                 fontFamily = MulishFontFamily

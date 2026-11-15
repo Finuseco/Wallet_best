@@ -113,9 +113,9 @@ fun SplashScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF070F22), // Midnight Blue
-                        Color(0xFF0A1938),
-                        Color(0xFF030814)
+                        Color(0xFF190A28), // Midnight Blue
+                        Color(0xFF190A28),
+                        Color(0xFF190A28)
                     )
                 )
             ),

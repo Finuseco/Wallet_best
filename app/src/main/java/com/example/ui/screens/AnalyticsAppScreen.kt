@@ -56,12 +56,12 @@ import kotlin.math.max
 // --- PALETTE OFFICIELLE CASHPAY ALL (Bleu Primaire & Neumorphisme Sombre Épuré) ---
 private val PrimaryNavy = Color(0xFF190A28)
 private val PrimaryNavyLight = Color(0xFF2A0E42)
-private val PrimarySurface = Color(0xFF14203D)
-private val NeumorphBg = Color(0xFF0D131F)
-private val NeumorphSurface = Color(0xFF161F33)
-private val NeumorphSurfaceElevated = Color(0xFF1E2A44)
-private val NeumorphBorderLight = Color(0xFF283857)
-private val NeumorphBorderSubtle = Color(0xFF1D283E)
+private val PrimarySurface = Color(0xFF190A28)
+private val NeumorphBg = Color(0xFF190A28)
+private val NeumorphSurface = Color(0xFF190A28)
+private val NeumorphSurfaceElevated = Color(0xFF190A28)
+private val NeumorphBorderLight = Color(0xFF190A28)
+private val NeumorphBorderSubtle = Color(0xFF190A28)
 private val NeumorphCyan = Color(0xFFA66BE0)
 private val NeumorphBlue = Color(0xFFA66BE0)
 private val NeumorphTeal = Color(0xFF1DE9B6)
@@ -308,7 +308,7 @@ fun AnalyticsAppScreen(
             Surface(
                 color = PrimaryNavy,
                 shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, Color(0xFF1E2A44)),
+                border = BorderStroke(1.dp, Color(0xFF190A28)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
@@ -978,7 +978,7 @@ fun AnalyticsAppScreen(
                                         }
                                         Button(
                                             onClick = onOpenUsdtDeposits,
-                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B62)),
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier.weight(1f)
                                         ) {

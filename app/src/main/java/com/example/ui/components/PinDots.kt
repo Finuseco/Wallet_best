@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.ui.theme.ToofanMainDark
+import com.example.ui.theme.BrandPurple
 
 @Composable
 fun PinDots(
@@ -38,8 +38,8 @@ fun PinDots(
                 animationSpec = spring(),
                 label = "toofan_pin_size"
             )
-            val defaultEmptyColor = if (isDark) Color(0xFF334155) else Color(0xFFBDC5D2)
-            val defaultFilledColor = if (isDark) Color(0xFF00E676) else ToofanMainDark
+            val defaultEmptyColor = BrandPurple.copy(alpha = if (isDark) 0.35f else 0.2f)
+            val defaultFilledColor = if (isDark) Color(0xFFA66BE0) else BrandPurple
             val color by animateColorAsState(
                 targetValue = when {
                     isError -> Color(0xFFFF4868)

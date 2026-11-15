@@ -168,8 +168,8 @@ fun SendBtcDialog(
                 .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(22.dp),
-            color = Color(0xFF101827),
-            border = BorderStroke(1.dp, Color(0xFF334155)),
+            color = Color(0xFF190A28),
+            border = BorderStroke(1.dp, Color(0xFF4A2B62)),
             shadowElevation = 24.dp
         ) {
             Column(
@@ -238,8 +238,8 @@ fun SendBtcDialog(
                 // Rate & Balance Header Info (Compact & Straight)
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF1E293B),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
+                    color = Color(0xFF190A28),
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -305,9 +305,9 @@ fun SendBtcDialog(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = Color(0xFFF59E0B),
-                        unfocusedBorderColor = Color(0xFF334155),
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        unfocusedBorderColor = Color(0xFF4A2B62),
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     trailingIcon = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -347,7 +347,7 @@ fun SendBtcDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF1E293B))
+                        .background(Color(0xFF190A28))
                         .padding(3.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -409,9 +409,9 @@ fun SendBtcDialog(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedBorderColor = Color(0xFFF59E0B),
-                            unfocusedBorderColor = Color(0xFF334155),
-                            focusedContainerColor = Color(0xFF1E293B),
-                            unfocusedContainerColor = Color(0xFF1E293B)
+                            unfocusedBorderColor = Color(0xFF4A2B62),
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         trailingIcon = {
                             TextButton(onClick = {
@@ -454,9 +454,9 @@ fun SendBtcDialog(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedBorderColor = Color(0xFFF59E0B),
-                            unfocusedBorderColor = Color(0xFF334155),
-                            focusedContainerColor = Color(0xFF1E293B),
-                            unfocusedContainerColor = Color(0xFF1E293B)
+                            unfocusedBorderColor = Color(0xFF4A2B62),
+                            focusedContainerColor = Color(0xFF190A28),
+                            unfocusedContainerColor = Color(0xFF190A28)
                         ),
                         trailingIcon = {
                             TextButton(onClick = {
@@ -505,9 +505,9 @@ fun SendBtcDialog(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = Color(0xFFF59E0B),
-                        unfocusedBorderColor = Color(0xFF334155),
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        unfocusedBorderColor = Color(0xFF4A2B62),
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     trailingIcon = {
                         IconButton(onClick = { isPinVisible = !isPinVisible }) {
@@ -561,7 +561,7 @@ fun SendBtcDialog(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFF59E0B),
-                        disabledContainerColor = Color(0xFF475569)
+                        disabledContainerColor = Color(0xFF6C527D)
                     ),
                     modifier = Modifier
                         .fillMaxWidth()

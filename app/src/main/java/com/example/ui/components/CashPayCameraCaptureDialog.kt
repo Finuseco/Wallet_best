@@ -520,7 +520,7 @@ fun CashPayCameraCaptureDialog(
                     ) {
                         Button(
                             onClick = { capturedBitmap = null },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .weight(1f)

@@ -68,7 +68,7 @@ fun StarlinkManagerScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(Color(0xFF190A28))
     ) {
         Column(
             modifier = Modifier
@@ -121,7 +121,7 @@ fun StarlinkManagerScreen(
 
                             Surface(
                                 shape = CircleShape,
-                                color = Color(0xFF0284C7).copy(alpha = 0.2f),
+                                color = Color(0xFF7A22D4).copy(alpha = 0.2f),
                                 modifier = Modifier.size(38.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -206,7 +206,7 @@ fun StarlinkManagerScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF070B14))
+                        .background(Color(0xFF190A28))
                 ) {
                     // Error banner
                     if (starlinkState.error != null) {
@@ -313,7 +313,7 @@ fun StarlinkManagerScreen(
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 color = Color(0xFF190A28),
                 shadowElevation = 10.dp,
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E2A44))
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
             ) {
                 Row(
                     modifier = Modifier
@@ -392,7 +392,7 @@ fun StarlinkManagerScreen(
                     Text("Annuler", color = Color.LightGray)
                 }
             },
-            containerColor = Color(0xFF0F172A),
+            containerColor = Color(0xFF7A22D4),
             textContentColor = Color.White
         )
     }
@@ -409,8 +409,8 @@ fun StarlinkManagerScreen(
                     .fillMaxWidth(0.9f)
                     .wrapContentHeight(),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF0F172A),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                color = Color(0xFF190A28),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(
                     modifier = Modifier
@@ -492,8 +492,8 @@ fun StarlinkManagerScreen(
                     .fillMaxWidth(0.9f)
                     .wrapContentHeight(),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF0F172A),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                color = Color(0xFF190A28),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(
                     modifier = Modifier
@@ -545,7 +545,7 @@ fun StarlinkManagerScreen(
                             enabled = starlinkState.linkKitSerialNumberInput.isNotBlank() && !starlinkState.isLoading,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4))
                         ) {
                             if (starlinkState.isLoading) {
                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White)
@@ -566,7 +566,7 @@ fun StarlinkManagerScreen(
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             color = Color(0xFF190A28),
             shadowElevation = 10.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E2A44))
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
         ) {
             Row(
                 modifier = Modifier
@@ -645,7 +645,7 @@ fun StarlinkManagerScreen(
                     Text("Annuler", color = Color.LightGray)
                 }
             },
-            containerColor = Color(0xFF0F172A),
+            containerColor = Color(0xFF7A22D4),
             textContentColor = Color.White
         )
     }
@@ -662,8 +662,8 @@ fun StarlinkManagerScreen(
                     .fillMaxWidth(0.9f)
                     .wrapContentHeight(),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF0F172A),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                color = Color(0xFF190A28),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(
                     modifier = Modifier
@@ -745,8 +745,8 @@ fun StarlinkManagerScreen(
                     .fillMaxWidth(0.9f)
                     .wrapContentHeight(),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF0F172A),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                color = Color(0xFF190A28),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
             ) {
                 Column(
                     modifier = Modifier
@@ -798,7 +798,7 @@ fun StarlinkManagerScreen(
                             enabled = starlinkState.linkKitSerialNumberInput.isNotBlank() && !starlinkState.isLoading,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4))
                         ) {
                             if (starlinkState.isLoading) {
                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White)
@@ -900,8 +900,8 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+                    color = Color(0xFF190A28),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp),
@@ -909,7 +909,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF0284C7).copy(alpha = 0.15f),
+                            color = Color(0xFF7A22D4).copy(alpha = 0.15f),
                             modifier = Modifier.size(64.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -940,7 +940,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                         Spacer(modifier = Modifier.height(20.dp))
                         Button(
                             onClick = onOpenLinkKit,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -950,7 +950,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                         }
 
                         Spacer(modifier = Modifier.height(18.dp))
-                        HorizontalDivider(color = Color(0xFF1E293B))
+                        HorizontalDivider(color = Color(0xFF190A28))
                         Spacer(modifier = Modifier.height(14.dp))
 
                         Text(
@@ -976,7 +976,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                 onClick = onQuickConnect,
                                 enabled = quickInput.isNotBlank() && !isLoading,
                                 shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             ) {
                                 Text("Connecter", color = Color(0xFFA66BE0), fontWeight = FontWeight.Bold)
@@ -991,8 +991,8 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+                    color = Color(0xFF190A28),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
                         // Header: Terminal Identity & Status Badge
@@ -1007,7 +1007,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                             ) {
                                 Surface(
                                     shape = CircleShape,
-                                    color = Color(0xFF0284C7).copy(alpha = 0.2f),
+                                    color = Color(0xFF7A22D4).copy(alpha = 0.2f),
                                     modifier = Modifier.size(42.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -1099,7 +1099,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                             Surface(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFF0F172A)
+                                color = Color(0xFF190A28)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Text("Signal Satellite", fontSize = 11.sp, color = Color(0xFF94A3B8))
@@ -1122,7 +1122,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                             Surface(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFF0F172A)
+                                color = Color(0xFF190A28)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Text("Capacité Débit", fontSize = 11.sp, color = Color(0xFF94A3B8))
@@ -1145,7 +1145,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                             Surface(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFF0F172A)
+                                color = Color(0xFF190A28)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Text("Latence Ping", fontSize = 11.sp, color = Color(0xFF94A3B8))
@@ -1171,7 +1171,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp),
-                            color = Color(0xFF0F172A)
+                            color = Color(0xFF190A28)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -1265,7 +1265,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                             .height(48.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF0284C7))
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF7A22D4))
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color(0xFFA66BE0))
@@ -1307,7 +1307,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                 .weight(1f)
                                 .height(46.dp),
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4))
                         ) {
                             Icon(Icons.Default.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
@@ -1356,8 +1356,8 @@ private fun StarlinkPlansTab(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                color = Color(0xFF131D31),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+                color = Color(0xFF190A28),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -1434,7 +1434,7 @@ private fun StarlinkSubCustomersClientTab(
                 }
                 Button(
                     onClick = onOpenAdd,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
@@ -1449,8 +1449,8 @@ private fun StarlinkSubCustomersClientTab(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+                    color = Color(0xFF190A28),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
                 ) {
                     Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Group, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(44.dp))
@@ -1471,8 +1471,8 @@ private fun StarlinkSubCustomersClientTab(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFF131D31),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+                    color = Color(0xFF190A28),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF190A28))
                 ) {
                     Row(
                         modifier = Modifier
@@ -1483,7 +1483,7 @@ private fun StarlinkSubCustomersClientTab(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF0284C7).copy(alpha = 0.2f),
+                            color = Color(0xFF7A22D4).copy(alpha = 0.2f),
                             modifier = Modifier.size(38.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -1539,8 +1539,8 @@ fun StarlinkAddSubCustomerDialog(
                 .fillMaxWidth(0.92f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(20.dp),
-            color = Color(0xFF0F172A),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+            color = Color(0xFF190A28),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
         ) {
             Column(
                 modifier = Modifier
@@ -1637,7 +1637,7 @@ fun StarlinkAddSubCustomerDialog(
                     enabled = name.isNotBlank() && walletId.isNotBlank() && !isLoading,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4))
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White)

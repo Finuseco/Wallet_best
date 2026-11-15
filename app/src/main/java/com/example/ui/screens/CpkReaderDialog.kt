@@ -51,9 +51,9 @@ import com.example.util.CpkCloudSyncManager
 import java.io.File
 
 private val BrandGreen = Color(0xFF00C48C)
-private val DarkBg = Color(0xFF0F172A)
-private val DarkCardBg = Color(0xFF1E293B)
-private val DarkBorder = Color(0xFF334155)
+private val DarkBg = Color(0xFF190A28)
+private val DarkCardBg = Color(0xFF190A28)
+private val DarkBorder = Color(0xFF4A2B62)
 private val CloudGreen = Color(0xFF00E676)
 private val CloudAmber = Color(0xFFF59E0B)
 private val AccentPurple = Color(0xFF8B5CF6)
@@ -243,7 +243,7 @@ fun CpkReaderDialog(
                                 modifier = Modifier.height(34.dp),
                                 contentPadding = PaddingValues(horizontal = 8.dp),
                                 colors = ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = Color(0xFF334155),
+                                    containerColor = Color(0xFF4A2B62),
                                     contentColor = Color.White
                                 ),
                                 shape = RoundedCornerShape(8.dp)
@@ -292,9 +292,9 @@ fun CpkReaderDialog(
                         shape = RoundedCornerShape(10.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF0F172A))
+                        Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF190A28))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Importer .cpk / USB", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                        Text("Importer .cpk / USB", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF190A28))
                     }
 
                     Button(
@@ -370,7 +370,7 @@ fun CpkReaderDialog(
                             contentPadding = PaddingValues(horizontal = 8.dp),
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = UsbBlue,
-                                contentColor = Color(0xFF0F172A)
+                                contentColor = Color(0xFF190A28)
                             ),
                             shape = RoundedCornerShape(6.dp)
                         ) {
@@ -435,7 +435,7 @@ fun CpkReaderDialog(
                                 text = label,
                                 fontSize = 11.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) Color(0xFF0F172A) else Color(0xFFCBD5E1),
+                                color = if (isSelected) Color(0xFF190A28) else Color(0xFFCBD5E1),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                             )
                         }
@@ -888,7 +888,7 @@ private fun CpkIssueModalDialog(
                         ) {
                             Text(
                                 text = curr,
-                                color = if (isSelected) Color.White else Color(0xFF0F172A),
+                                color = if (isSelected) Color.White else Color(0xFF190A28),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
                                 textAlign = TextAlign.Center,
@@ -909,7 +909,7 @@ private fun CpkIssueModalDialog(
                     ) {
                         Text(
                             text = "Sans PIN clé",
-                            color = if (cpk.issueSecurityLevel == "none") Color(0xFF0F172A) else Color(0xFF0F172A),
+                            color = if (cpk.issueSecurityLevel == "none") Color(0xFF190A28) else Color(0xFF190A28),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -925,7 +925,7 @@ private fun CpkIssueModalDialog(
                     ) {
                         Text(
                             text = "Protégée par PIN",
-                            color = if (cpk.issueSecurityLevel == "pin_protected") Color(0xFF0F172A) else Color(0xFF0F172A),
+                            color = if (cpk.issueSecurityLevel == "pin_protected") Color(0xFF190A28) else Color(0xFF190A28),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -1162,7 +1162,7 @@ private fun CpkLinkDriveModalDialog(
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Icon(Icons.Default.VpnKey, contentDescription = null, tint = AccentPurple, modifier = Modifier.size(16.dp))
-                            Text("Signatures Google Cloud Console", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                            Text("Signatures Google Cloud Console", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF190A28))
                         }
                         Text(
                             "À inscrire dans Google Cloud Console > Identifiants > ID Client OAuth 2.0 (Type: Android) :",
@@ -1181,7 +1181,7 @@ private fun CpkLinkDriveModalDialog(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("ID Client Google OAuth 2.0 :", fontSize = 9.sp, color = Color(0xFF7B42AD))
-                                    Text(CpkCloudSyncManager.GOOGLE_CLIENT_ID, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
+                                    Text(CpkCloudSyncManager.GOOGLE_CLIENT_ID, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF190A28))
                                 }
                                 IconButton(
                                     onClick = {
@@ -1206,7 +1206,7 @@ private fun CpkLinkDriveModalDialog(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Nom du Package :", fontSize = 9.sp, color = Color(0xFF7B42AD))
-                                    Text(CpkCloudSyncManager.GOOGLE_OAUTH_PACKAGE_NAME, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
+                                    Text(CpkCloudSyncManager.GOOGLE_OAUTH_PACKAGE_NAME, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF190A28))
                                 }
                                 IconButton(
                                     onClick = {
@@ -1231,7 +1231,7 @@ private fun CpkLinkDriveModalDialog(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Empreinte SHA-1 :", fontSize = 9.sp, color = Color(0xFF7B42AD))
-                                    Text(CpkCloudSyncManager.GOOGLE_OAUTH_SHA1, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
+                                    Text(CpkCloudSyncManager.GOOGLE_OAUTH_SHA1, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = Color(0xFF190A28))
                                 }
                                 IconButton(
                                     onClick = {
@@ -1256,7 +1256,7 @@ private fun CpkLinkDriveModalDialog(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Empreinte SHA-256 :", fontSize = 9.sp, color = Color(0xFF7B42AD))
-                                    Text(CpkCloudSyncManager.GOOGLE_OAUTH_SHA256, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
+                                    Text(CpkCloudSyncManager.GOOGLE_OAUTH_SHA256, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = Color(0xFF190A28))
                                 }
                                 IconButton(
                                     onClick = {
@@ -1288,9 +1288,9 @@ private fun CpkLinkDriveModalDialog(
                         Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF00C48C), modifier = Modifier.size(16.dp))
-                                Text("Compte actuellement lié :", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                Text("Compte actuellement lié :", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF190A28))
                             }
-                            Text(uiState.cpk.connectedDriveEmail ?: "", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A))
+                            Text(uiState.cpk.connectedDriveEmail ?: "", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF190A28))
                             Text("Dernière synchronisation : ${uiState.cpk.lastCloudSyncTime ?: "À l'instant"}", fontSize = 10.sp, color = Color(0xFF7B42AD))
                         }
                     }
@@ -1299,7 +1299,7 @@ private fun CpkLinkDriveModalDialog(
                     Button(
                         onClick = { viewModel.restoreKeysFromCloud(context) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B62))
                     ) {
                         Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))

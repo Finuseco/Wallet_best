@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.ToofanGreen
+import com.example.ui.theme.BrandPurple
 
 @Composable
 fun CustomKeypad(
@@ -115,16 +115,8 @@ private fun RowScope.ToofanKeypadKey(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(if (isPressed && isEnabled) 0.92f else 1.0f, label = "key_scale")
 
-    val bg = if (isDark) {
-        if (isEnabled) Color(0xFF7A22D4) else Color(0xFF7A22D4).copy(alpha = 0.4f)
-    } else {
-        if (isEnabled) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.4f)
-    }
-    val textColor = if (isDark) {
-        if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f)
-    } else {
-        if (isEnabled) Color(0xFF7A22D4) else Color(0xFF7A22D4).copy(alpha = 0.3f)
-    }
+    val bg = BrandPurple.copy(alpha = if (isEnabled) 1f else 0.4f)
+    val textColor = Color.White.copy(alpha = if (isEnabled) 1f else 0.3f)
     val border = if (isDark) {
         if (isEnabled) BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)) else BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
     } else {
@@ -191,12 +183,8 @@ private fun RowScope.BiometricKeypadKey(
         label = "biometric_rotation"
     )
 
-    val tint = if (isEnabled) Color.White else Color(0xFF7B42AD)
-    val bg = if (isDark) {
-        if (isEnabled) Color(0xFF7A22D4) else Color(0xFF7A22D4).copy(alpha = 0.4f)
-    } else {
-        if (isEnabled) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.4f)
-    }
+    val tint = Color.White.copy(alpha = if (isEnabled) 1f else 0.3f)
+    val bg = BrandPurple.copy(alpha = if (isEnabled) 1f else 0.4f)
     val border = if (isEnabled) {
         BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
     } else {
@@ -247,21 +235,13 @@ private fun RowScope.BackspaceKeypadKey(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(if (isPressed && isEnabled) 0.90f else 1.0f, label = "backspace_scale")
 
-    val bg = if (isDark) {
-        if (isEnabled) Color(0xFF7A22D4) else Color(0xFF7A22D4).copy(alpha = 0.4f)
-    } else {
-        if (isEnabled) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.4f)
-    }
+    val bg = BrandPurple.copy(alpha = if (isEnabled) 1f else 0.4f)
     val border = if (isDark) {
         if (isEnabled) BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)) else BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
     } else {
         if (isEnabled) BorderStroke(1.dp, Color(0xFF7A22D4).copy(alpha = 0.25f)) else BorderStroke(1.dp, Color(0xFFE6DCF0).copy(alpha = 0.3f))
     }
-    val tint = if (isDark) {
-        if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f)
-    } else {
-        if (isEnabled) Color(0xFF7A22D4) else Color(0xFF7A22D4).copy(alpha = 0.3f)
-    }
+    val tint = Color.White.copy(alpha = if (isEnabled) 1f else 0.3f)
 
     Surface(
         modifier = Modifier

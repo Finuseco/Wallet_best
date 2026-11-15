@@ -213,7 +213,7 @@ fun DashboardScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
-            containerColor = Color(0xFF190A28),
+            containerColor = Color(0xFF7A22D4),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             FloatingCapsuleBottomBar(
@@ -614,7 +614,7 @@ fun DashboardScreen(
                     Text(
                         "Bientôt disponible sur CashPay All :",
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F172A),
+                        color = Color(0xFF190A28),
                         fontSize = 14.sp
                     )
                     Text(
@@ -628,7 +628,7 @@ fun DashboardScreen(
             confirmButton = {
                 Button(
                     onClick = { showDigitalServicesComingSoonDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     border = BorderStroke(1.2.dp, Color.White),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -1064,7 +1064,7 @@ fun DashboardScreen(
                             showQrDialog = false
                             dashboardViewModel.openPayScan(PayScanMode.AUTO)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F1E38)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -1236,7 +1236,7 @@ fun DashboardScreen(
                                     onClick = { dashboardViewModel.clearPrefilledTransfer() },
                                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
-                                    Text("Changer", fontFamily = MulishFontFamily, fontSize = 11.sp, color = Color(0xFF0066FF))
+                                    Text("Changer", fontFamily = MulishFontFamily, fontSize = 11.sp, color = Color(0xFF7A22D4))
                                 }
                             }
                         }
@@ -1399,10 +1399,10 @@ fun DashboardScreen(
                                             Icon(
                                                 imageVector = Icons.Default.AccountBalanceWallet,
                                                 contentDescription = null,
-                                                tint = if (isWallet) Color.White else Color(0xFF475569),
+                                                tint = if (isWallet) Color.White else Color(0xFF6C527D),
                                                 modifier = Modifier.size(15.dp)
                                             )
-                                            Text("ID Wallet", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (isWallet) Color.White else Color(0xFF475569))
+                                            Text("ID Wallet", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (isWallet) Color.White else Color(0xFF6C527D))
                                         }
                                     }
                                     Box(
@@ -1421,10 +1421,10 @@ fun DashboardScreen(
                                             Icon(
                                                 imageVector = Icons.Default.PhoneAndroid,
                                                 contentDescription = null,
-                                                tint = if (!isWallet) Color.White else Color(0xFF475569),
+                                                tint = if (!isWallet) Color.White else Color(0xFF6C527D),
                                                 modifier = Modifier.size(15.dp)
                                             )
-                                            Text("N° Téléphone", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (!isWallet) Color.White else Color(0xFF475569))
+                                            Text("N° Téléphone", fontFamily = MulishFontFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = if (!isWallet) Color.White else Color(0xFF6C527D))
                                         }
                                     }
                                 }
@@ -1451,7 +1451,7 @@ fun DashboardScreen(
                                         onClick = { dashboardViewModel.searchTransferRecipient() },
                                         enabled = !uiState.isSearchingTransferRecipient && uiState.transferRecipient.isNotBlank(),
                                         shape = RoundedCornerShape(8.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                                         modifier = Modifier.height(52.dp)
                                     ) {
                                         if (uiState.isSearchingTransferRecipient) {
@@ -1971,9 +1971,9 @@ private fun BalanceCardsCarousel(
                                 .background(
                                     Brush.linearGradient(
                                         listOf(
-                                            Color(0xFF0284C7),
-                                            Color(0xFF0369A1),
-                                            Color(0xFF082F49)
+                                            Color(0xFF7A22D4),
+                                            Color(0xFF7A22D4),
+                                            Color(0xFF190A28)
                                         )
                                     )
                                 )
@@ -2094,9 +2094,9 @@ private fun BalanceCardsCarousel(
                                 .background(
                                     Brush.linearGradient(
                                         listOf(
-                                            Color(0xFF6366F1),
-                                            Color(0xFF4338CA),
-                                            Color(0xFF1E1B4B)
+                                            Color(0xFF7A22D4),
+                                            Color(0xFF7A22D4),
+                                            Color(0xFF190A28)
                                         )
                                     )
                                 )
@@ -2208,7 +2208,7 @@ private fun BalanceCardsCarousel(
                             .padding(horizontal = 16.dp)
                             .height(180.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF181B24)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
                         border = BorderStroke(1.2.dp, Color(0xFFF59E0B).copy(alpha = 0.65f)),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
@@ -2268,7 +2268,7 @@ private fun BalanceCardsCarousel(
 
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
-                                        color = Color(0xFF1E293B)
+                                        color = Color(0xFF190A28)
                                     ) {
                                         Text(
                                             text = "Mini Blockchain",
@@ -2362,7 +2362,7 @@ private fun BalanceCardsCarousel(
                             .padding(horizontal = 16.dp)
                             .height(188.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
                         border = BorderStroke(1.2.dp, Color(0xFF26A17B).copy(alpha = 0.75f)),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
@@ -2855,7 +2855,7 @@ private fun ToofanDashboardTab(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
-                        color = Color(0xFF0F172A)
+                        color = Color(0xFF190A28)
                     )
                     Text(
                         text = "Voir tout",
@@ -2911,7 +2911,7 @@ private fun ToofanDashboardTab(
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 11.sp,
-                            color = Color(0xFF0F172A),
+                            color = Color(0xFF190A28),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -2944,7 +2944,7 @@ private fun ToofanDashboardTab(
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 11.sp,
-                            color = Color(0xFF0F172A),
+                            color = Color(0xFF190A28),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -3054,7 +3054,7 @@ private fun ToofanDashboardTab(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
-                        color = Color(0xFF0F172A)
+                        color = Color(0xFF190A28)
                     )
                     Text(
                         text = "Voir tout",
@@ -3096,7 +3096,7 @@ private fun ToofanDashboardTab(
                                         fontFamily = MulishFontFamily,
                                         fontSize = 12.sp,
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (selected) Color.White else Color(0xFF475569)
+                                        color = if (selected) Color.White else Color(0xFF6C527D)
                                     )
                                 }
                             }
@@ -3368,7 +3368,7 @@ private fun TransactionItemRow(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .border(1.5.dp, if (isCredit) SuccessGreen else Color(0xFF3B82F6), CircleShape)
+                                .border(1.5.dp, if (isCredit) SuccessGreen else Color(0xFF7A22D4), CircleShape)
                                 .background(Color(0xFFF1F5F9)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -3388,7 +3388,7 @@ private fun TransactionItemRow(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
-                                    color = if (isCredit) SuccessGreen else Color(0xFF3B82F6)
+                                    color = if (isCredit) SuccessGreen else Color(0xFF7A22D4)
                                 )
                             }
                         }
@@ -3439,7 +3439,7 @@ private fun TransactionItemRow(
                         fontFamily = MulishFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = Color(0xFF0F172A),
+                        color = Color(0xFF190A28),
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
@@ -3619,7 +3619,7 @@ private fun ToofanHistoryTab(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
 
                 ToofanInputField(
@@ -3658,7 +3658,7 @@ private fun ToofanHistoryTab(
                                         fontFamily = MulishFontFamily,
                                         fontSize = 12.sp,
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (selected) Color.White else Color(0xFF475569)
+                                        color = if (selected) Color.White else Color(0xFF6C527D)
                                     )
                                 }
                             }
@@ -4687,8 +4687,8 @@ fun ToofanCardsAndSecurityTab(
                             .fillMaxWidth()
                             .clickable { dashboardViewModel.openCpkReader() },
                         shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
-                        border = BorderStroke(1.dp, Color(0xFF334155))
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
+                        border = BorderStroke(1.dp, Color(0xFF4A2B62))
                     ) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
@@ -4720,7 +4720,7 @@ fun ToofanCardsAndSecurityTab(
                             )
                             Button(
                                 onClick = { dashboardViewModel.openCpkReader() },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                                 border = BorderStroke(1.2.dp, Color.White),
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp)
@@ -5175,7 +5175,7 @@ fun BuyCardDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF0F172A),
+        containerColor = Color(0xFF7A22D4),
         shape = RoundedCornerShape(20.dp),
         title = {
             Text(
@@ -5295,8 +5295,8 @@ fun BuyCardDialog(
 
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFF1E293B),
-                            border = BorderStroke(1.dp, Color(0xFF334155)),
+                            color = Color(0xFF190A28),
+                            border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -5306,7 +5306,7 @@ fun BuyCardDialog(
                                 RecapRow("Marque :", uiState.purchaseBrand.uppercase(), valueColor = Color.White)
                                 RecapRow("Type :", uiState.purchaseType.replaceFirstChar { it.uppercase() }, valueColor = Color.White)
                                 RecapRow("Devise :", uiState.purchaseCurrency, valueColor = Color.White)
-                                HorizontalDivider(color = Color(0xFF334155), thickness = 1.dp)
+                                HorizontalDivider(color = Color(0xFF4A2B62), thickness = 1.dp)
 
                                 if (uiState.isLoadingFee) {
                                     RecapRow("Frais d'achat :", "Calcul en cours...", valueColor = Color(0xFF94A3B8))
@@ -5407,12 +5407,12 @@ fun BrandSelectBox(
         modifier = modifier
             .border(
                 width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) ToofanGreen else Color(0xFF334155),
+                color = if (isSelected) ToofanGreen else Color(0xFF4A2B62),
                 shape = RoundedCornerShape(14.dp)
             )
             .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick),
-        color = if (isSelected) Color(0xFF1E293B) else Color(0xFF0F172A)
+        color = if (isSelected) Color(0xFF190A28) else Color(0xFF190A28)
     ) {
         Column(
             modifier = Modifier.padding(vertical = 14.dp, horizontal = 12.dp),
@@ -5457,12 +5457,12 @@ fun TypeSelectBox(
             .fillMaxWidth()
             .border(
                 width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) ToofanGreen else Color(0xFF334155),
+                color = if (isSelected) ToofanGreen else Color(0xFF4A2B62),
                 shape = RoundedCornerShape(12.dp)
             )
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
-        color = if (isSelected) Color(0xFF1E293B) else Color(0xFF0F172A)
+        color = if (isSelected) Color(0xFF190A28) else Color(0xFF190A28)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -5498,12 +5498,12 @@ fun CurrencySelectPill(
         modifier = modifier
             .border(
                 width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) ToofanGreen else Color(0xFF334155),
+                color = if (isSelected) ToofanGreen else Color(0xFF4A2B62),
                 shape = RoundedCornerShape(12.dp)
             )
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
-        color = if (isSelected) Color(0xFF1E293B) else Color(0xFF0F172A)
+        color = if (isSelected) Color(0xFF190A28) else Color(0xFF190A28)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -5571,7 +5571,7 @@ fun ManageCardDialog(
                 // Mini Visual representation of card brand
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = if (card.brand?.lowercase() == "visa") Color(0xFF1E3A8A) else Color(0xFF311045),
+                    color = if (card.brand?.lowercase() == "visa") Color(0xFF190A28) else Color(0xFF311045),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -6017,7 +6017,7 @@ private fun RecentCorrespondentItem(
             fontFamily = MulishFontFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 11.sp,
-            color = Color(0xFF0F172A),
+            color = Color(0xFF190A28),
             maxLines = 2,
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
@@ -6040,7 +6040,7 @@ fun AddContactDialog(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF0066FF))
+                Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF7A22D4))
                 Text(
                     text = "Ajouter un contact",
                     fontFamily = MulishFontFamily,
@@ -6144,7 +6144,7 @@ fun AddContactDialog(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
-                                    color = Color(0xFF0F172A)
+                                    color = Color(0xFF190A28)
                                 )
                                 Text(
                                     text = "Wallet ID : ${profile.walletId}",
@@ -6246,7 +6246,7 @@ fun ContactsPageDialog(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF070F22)
+        color = Color(0xFF190A28)
     ) {
         Column(
             modifier = Modifier
@@ -6254,16 +6254,16 @@ fun ContactsPageDialog(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF070F22),
-                            Color(0xFF0A1938),
-                            Color(0xFF030814)
+                            Color(0xFF190A28),
+                            Color(0xFF190A28),
+                            Color(0xFF190A28)
                         )
                     )
                 )
         ) {
             // Header Top Bar
             Surface(
-                color = Color(0xFF0F172A),
+                color = Color(0xFF190A28),
                 shadowElevation = 4.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -6344,11 +6344,11 @@ fun ContactsPageDialog(
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = SuccessGreen,
-                        unfocusedBorderColor = Color(0xFF334155),
+                        unfocusedBorderColor = Color(0xFF4A2B62),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF1E293B),
-                        unfocusedContainerColor = Color(0xFF1E293B)
+                        focusedContainerColor = Color(0xFF190A28),
+                        unfocusedContainerColor = Color(0xFF190A28)
                     ),
                     shape = RoundedCornerShape(14.dp)
                 )
@@ -6362,8 +6362,8 @@ fun ContactsPageDialog(
                 if (!hasContactPermission) {
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF0F172A),
-                        border = BorderStroke(1.dp, Color(0xFF334155)),
+                        color = Color(0xFF190A28),
+                        border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -6404,7 +6404,7 @@ fun ContactsPageDialog(
                                     permissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                                 border = BorderStroke(1.2.dp, Color.White),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
@@ -6568,7 +6568,7 @@ private fun ContactItemCard(
 ) {
     Surface(
         shape = RoundedCornerShape(0.dp),
-        color = Color(0xFF0B1228),
+        color = Color(0xFF190A28),
         shadowElevation = 0.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -6590,7 +6590,7 @@ private fun ContactItemCard(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF1E293B))
+                        .background(Color(0xFF190A28))
                         .border(1.5.dp, SuccessGreen, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -6661,7 +6661,7 @@ private fun OtherContactItemCard(
     val context = LocalContext.current
     Surface(
         shape = RoundedCornerShape(0.dp),
-        color = Color(0xFF0B1228),
+        color = Color(0xFF190A28),
         shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -6679,7 +6679,7 @@ private fun OtherContactItemCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFF1E293B),
+                    color = Color(0xFF190A28),
                     modifier = Modifier.size(48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -6712,7 +6712,7 @@ private fun OtherContactItemCard(
             }
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFF3B82F6).copy(alpha = 0.2f),
+                color = Color(0xFF7A22D4).copy(alpha = 0.2f),
                 modifier = Modifier.clickable {
                     val invite = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                         type = "text/plain"
@@ -6723,7 +6723,7 @@ private fun OtherContactItemCard(
             ) {
                 Text(
                     text = "Inviter",
-                    color = Color(0xFF3B82F6),
+                    color = Color(0xFF7A22D4),
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 12.sp,
@@ -6770,9 +6770,9 @@ fun ServicesDialog(
                     Triple("Analytique & Marché BTC", "Graphiques temps réel, BTC & Synthèse financière", Color(0xFFA66BE0)),
                     Triple("Réclamations internationales", "Western Union, MoneyGram, Ria", Color(0xFF00E676)),
                     Triple("Mobile Money", "M-Pesa, Orange Money, Airtel, MTN", Color(0xFFF59E0B)),
-                    Triple("Abonnements TV", "Canal+ RDC, EasyTV, BLUS", Color(0xFF2563EB)),
+                    Triple("Abonnements TV", "Canal+ RDC, EasyTV, BLUS", Color(0xFF7A22D4)),
                     Triple("Factures Publiques", "SNEL (Électricité), REGIDESO (Eau)", SuccessGreen),
-                    Triple("Starlink Manager", "Gestion des équipements Starlink", Color(0xFF1E293B)),
+                    Triple("Starlink Manager", "Gestion des équipements Starlink", Color(0xFF190A28)),
                     Triple("Clés FINUSECO CPK", "Lecteur .cpk, Clés USB & Cloud Google Drive", Color(0xFFA66BE0)),
                     Triple("Services Digitaux", "Netflix, Spotify, Apple Music, PlayStation", Color(0xFF8B5CF6))
                 )
@@ -6806,7 +6806,7 @@ fun ServicesDialog(
                                 }
                             }
                             Column {
-                                Text(name, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF0F172A))
+                                Text(name, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF190A28))
                                 Text(desc, fontSize = 11.sp, color = Color(0xFF7B42AD))
                             }
                         }
@@ -6975,7 +6975,7 @@ fun ActionPlusModalDialog(
                         title = "Historique Agent",
                         subtitle = "Voir mes opérations et commissions",
                         icon = Icons.Default.Receipt,
-                        iconBg = Color(0xFF0066FF),
+                        iconBg = Color(0xFF7A22D4),
                         onClick = onAgentHistory
                     )
                     ActionPlusTile(
@@ -7061,7 +7061,7 @@ fun ActionPlusModalDialog(
                 Spacer(modifier = Modifier.height(10.dp))
             }
         },
-        containerColor = Color(0xFF190A28),
+        containerColor = Color(0xFF7A22D4),
         shape = RoundedCornerShape(24.dp),
         confirmButton = {
             TextButton(onClick = onDismiss, modifier = Modifier.padding(bottom = 8.dp)) {
@@ -7401,7 +7401,7 @@ fun CashPaySettingsModal(
                 item {
                     Button(
                         onClick = onLogout,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                         border = BorderStroke(1.2.dp, Color.White),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -7450,7 +7450,7 @@ fun MiniPublicProfileDialog(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
             }
         },
@@ -7493,7 +7493,7 @@ fun MiniPublicProfileDialog(
                     fontFamily = MulishFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = Color(0xFF0F172A)
+                    color = Color(0xFF190A28)
                 )
 
                 if (!profile?.profession.isNullOrBlank()) {
@@ -7584,7 +7584,7 @@ fun MiniPublicProfileDialog(
                 // Action: Envoyer de l'argent
                 Button(
                     onClick = onSendMoney,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     border = BorderStroke(1.2.dp, Color.White),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth()

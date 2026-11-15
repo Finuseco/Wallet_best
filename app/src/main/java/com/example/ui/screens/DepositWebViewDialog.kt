@@ -73,7 +73,7 @@ fun DepositWebViewDialog(
                 .fillMaxSize()
                 .padding(12.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF7A22D4)),
             elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -81,7 +81,7 @@ fun DepositWebViewDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF0F172A))
+                        .background(Color(0xFF190A28))
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -147,7 +147,7 @@ fun DepositWebViewDialog(
                         progress = { progress },
                         modifier = Modifier.fillMaxWidth().height(3.dp),
                         color = Color(0xFF00E676),
-                        trackColor = Color(0xFF1E293B)
+                        trackColor = Color(0xFF190A28)
                     )
                 }
 
@@ -162,7 +162,7 @@ fun DepositWebViewDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(0xFF0F172A))
+                                .background(Color(0xFF190A28))
                                 .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
@@ -197,7 +197,7 @@ fun DepositWebViewDialog(
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676))
                             ) {
-                                Text("Réessayer", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold)
+                                Text("Réessayer", color = Color(0xFF190A28), fontWeight = FontWeight.Bold)
                             }
                         }
                     } else {
@@ -251,7 +251,7 @@ fun DepositWebViewDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF0F172A))
+                        .background(Color(0xFF190A28))
                         .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center

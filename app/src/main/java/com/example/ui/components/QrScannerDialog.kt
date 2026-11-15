@@ -244,7 +244,7 @@ fun QrScannerDialog(
                             .fillMaxWidth()
                             .padding(vertical = 6.dp),
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF1E293B)
+                        color = Color(0xFF190A28)
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp),
@@ -404,7 +404,7 @@ fun QrScannerDialog(
                     val resultText = scannedResult ?: ""
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF1E293B),
+                        color = Color(0xFF190A28),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -457,7 +457,7 @@ fun QrScannerDialog(
                     // Manual ID / Phone / Wallet fallback
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF131D31),
+                        color = Color(0xFF190A28),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {

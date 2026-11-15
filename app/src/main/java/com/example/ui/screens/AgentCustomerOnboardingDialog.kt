@@ -171,7 +171,7 @@ fun AgentCustomerOnboardingDialog(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 Surface(
-                    color = Color(0xFF0F172A),
+                    color = Color(0xFF190A28),
                     modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 4.dp
                 ) {
@@ -245,7 +245,7 @@ fun AgentCustomerOnboardingDialog(
                                             .clip(RoundedCornerShape(2.dp))
                                             .background(
                                                 if (stepNum <= currentStep) Color(0xFF00E676)
-                                                else Color(0xFF334155)
+                                                else Color(0xFF4A2B62)
                                             )
                                     )
                                 }
@@ -259,7 +259,7 @@ fun AgentCustomerOnboardingDialog(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color(0xFF0F172A))
+                    .background(Color(0xFF190A28))
             ) {
                 if (registerSuccess != null) {
                     // Écran de succès
@@ -341,11 +341,11 @@ fun AgentCustomerOnboardingDialog(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFF0F172A))
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFF190A28))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Réessayer",
-                                color = Color(0xFF0F172A),
+                                color = Color(0xFF190A28),
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = MulishFontFamily
                             )
@@ -424,11 +424,11 @@ fun AgentCustomerOnboardingDialog(
                                                     .clip(RoundedCornerShape(10.dp))
                                                     .border(
                                                         width = if (isSelected) 1.5.dp else 1.dp,
-                                                        color = if (isSelected) Color(0xFF00E676) else Color(0xFF334155),
+                                                        color = if (isSelected) Color(0xFF00E676) else Color(0xFF4A2B62),
                                                         shape = RoundedCornerShape(10.dp)
                                                     )
                                                     .clickable { selectedAccountType = typeKey },
-                                                color = if (isSelected) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                                color = if (isSelected) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF190A28)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
                                                     Text(
@@ -459,9 +459,9 @@ fun AgentCustomerOnboardingDialog(
                                                     .weight(1f)
                                                     .height(40.dp)
                                                     .clip(RoundedCornerShape(10.dp))
-                                                    .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF334155), RoundedCornerShape(10.dp))
+                                                    .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF4A2B62), RoundedCornerShape(10.dp))
                                                     .clickable { gender = code },
-                                                color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                                color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF190A28)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
                                                     Text(label, color = if (isSel) Color(0xFF00E676) else Color.White, fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
@@ -482,9 +482,9 @@ fun AgentCustomerOnboardingDialog(
                                                     .weight(1f)
                                                     .height(40.dp)
                                                     .clip(RoundedCornerShape(10.dp))
-                                                    .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF334155), RoundedCornerShape(10.dp))
+                                                    .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF4A2B62), RoundedCornerShape(10.dp))
                                                     .clickable { maritalStatus = code },
-                                                color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                                color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF190A28)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
                                                     Text(label, color = if (isSel) Color(0xFF00E676) else Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, textAlign = TextAlign.Center)
@@ -548,9 +548,9 @@ fun AgentCustomerOnboardingDialog(
 
                                 // Bannière Pays de l'Agent
                                 Surface(
-                                    color = Color(0xFF1E293B),
+                                    color = Color(0xFF190A28),
                                     shape = RoundedCornerShape(14.dp),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155)),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62)),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Row(
@@ -612,7 +612,7 @@ fun AgentCustomerOnboardingDialog(
                                         },
                                         leadingIcon = {
                                             Surface(
-                                                color = Color(0xFF334155),
+                                                color = Color(0xFF4A2B62),
                                                 shape = RoundedCornerShape(8.dp),
                                                 modifier = Modifier.padding(start = 8.dp, end = 4.dp)
                                             ) {
@@ -672,7 +672,7 @@ fun AgentCustomerOnboardingDialog(
                                         ExposedDropdownMenu(
                                             expanded = provinceMenuExpanded,
                                             onDismissRequest = { provinceMenuExpanded = false },
-                                            modifier = Modifier.background(Color(0xFF1E293B))
+                                            modifier = Modifier.background(Color(0xFF190A28))
                                         ) {
                                             if (provinces.isEmpty()) {
                                                 DropdownMenuItem(
@@ -726,9 +726,9 @@ fun AgentCustomerOnboardingDialog(
                                                 .weight(1f)
                                                 .height(40.dp)
                                                 .clip(RoundedCornerShape(10.dp))
-                                                .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF334155), RoundedCornerShape(10.dp))
+                                                .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF4A2B62), RoundedCornerShape(10.dp))
                                                 .clickable { idType = code },
-                                            color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                            color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF190A28)
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(label, color = if (isSel) Color(0xFF00E676) else Color.White, fontWeight = FontWeight.Bold, fontSize = 11.5.sp)
@@ -770,9 +770,9 @@ fun AgentCustomerOnboardingDialog(
                                                 .weight(1f)
                                                 .height(40.dp)
                                                 .clip(RoundedCornerShape(10.dp))
-                                                .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF334155), RoundedCornerShape(10.dp))
+                                                .border(1.dp, if (isSel) Color(0xFF00E676) else Color(0xFF4A2B62), RoundedCornerShape(10.dp))
                                                 .clickable { repRelation = code },
-                                            color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                            color = if (isSel) Color(0xFF00E676).copy(alpha = 0.15f) else Color(0xFF190A28)
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(label, color = if (isSel) Color(0xFF00E676) else Color.White, fontWeight = FontWeight.Bold, fontSize = 11.5.sp)
@@ -848,9 +848,9 @@ fun AgentCustomerOnboardingDialog(
                                 }
 
                                 Surface(
-                                    color = Color(0xFF1E293B),
+                                    color = Color(0xFF190A28),
                                     shape = RoundedCornerShape(16.dp),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155)),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62)),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Column(
@@ -952,24 +952,24 @@ fun AgentCustomerOnboardingDialog(
                                     ) {
                                         if (isRegistering) {
                                             CircularProgressIndicator(
-                                                color = Color(0xFF0F172A),
+                                                color = Color(0xFF190A28),
                                                 strokeWidth = 2.5.dp,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Text(
                                                 text = "Création...",
-                                                color = Color(0xFF0F172A),
+                                                color = Color(0xFF190A28),
                                                 fontWeight = FontWeight.Bold,
                                                 fontFamily = MulishFontFamily,
                                                 fontSize = 15.sp
                                             )
                                         } else {
-                                            Icon(Icons.Default.PersonAdd, contentDescription = null, tint = Color(0xFF0F172A))
+                                            Icon(Icons.Default.PersonAdd, contentDescription = null, tint = Color(0xFF190A28))
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
                                                 text = "Créer le Compte Client",
-                                                color = Color(0xFF0F172A),
+                                                color = Color(0xFF190A28),
                                                 fontWeight = FontWeight.Bold,
                                                 fontFamily = MulishFontFamily,
                                                 fontSize = 14.5.sp
@@ -1023,13 +1023,13 @@ private fun NavigationButtonBar(
                 .height(48.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF00E676),
-                disabledContainerColor = Color(0xFF1E293B)
+                disabledContainerColor = Color(0xFF190A28)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
                 text = nextLabel,
-                color = if (nextEnabled) Color(0xFF0F172A) else Color(0xFF7B42AD),
+                color = if (nextEnabled) Color(0xFF190A28) else Color(0xFF7B42AD),
                 fontWeight = FontWeight.Bold,
                 fontFamily = MulishFontFamily,
                 fontSize = 14.sp
@@ -1038,7 +1038,7 @@ private fun NavigationButtonBar(
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
-                tint = if (nextEnabled) Color(0xFF0F172A) else Color(0xFF7B42AD),
+                tint = if (nextEnabled) Color(0xFF190A28) else Color(0xFF7B42AD),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -1054,11 +1054,11 @@ private fun CaptureItemCard(
     onAction: () -> Unit
 ) {
     Surface(
-        color = Color(0xFF1E293B),
+        color = Color(0xFF190A28),
         shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (isCaptured) Color(0xFF00E676) else Color(0xFF334155)
+            if (isCaptured) Color(0xFF00E676) else Color(0xFF4A2B62)
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -1075,7 +1075,7 @@ private fun CaptureItemCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Surface(
-                    color = if (isCaptured) Color(0xFF00E676).copy(alpha = 0.2f) else Color(0xFF334155),
+                    color = if (isCaptured) Color(0xFF00E676).copy(alpha = 0.2f) else Color(0xFF4A2B62),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.size(40.dp)
                 ) {
@@ -1106,13 +1106,13 @@ private fun CaptureItemCard(
             }
 
             Surface(
-                color = if (isCaptured) Color(0xFF00E676) else Color(0xFF334155),
+                color = if (isCaptured) Color(0xFF00E676) else Color(0xFF4A2B62),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Text(
                     text = if (isCaptured) "Modifier" else "Capturer",
-                    color = if (isCaptured) Color(0xFF0F172A) else Color.White,
+                    color = if (isCaptured) Color(0xFF190A28) else Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
                     fontFamily = MulishFontFamily,
@@ -1203,11 +1203,11 @@ private fun FormInputField(
 @Composable
 private fun clientTextFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedBorderColor = Color(0xFF00E676),
-    unfocusedBorderColor = Color(0xFF334155),
+    unfocusedBorderColor = Color(0xFF4A2B62),
     focusedTextColor = Color.White,
     unfocusedTextColor = Color.White,
-    focusedContainerColor = Color(0xFF1E293B),
-    unfocusedContainerColor = Color(0xFF1E293B),
+    focusedContainerColor = Color(0xFF190A28),
+    unfocusedContainerColor = Color(0xFF190A28),
     cursorColor = Color(0xFF00E676)
 )
 
@@ -1230,8 +1230,8 @@ fun SignatureCaptureModal(
                 .fillMaxWidth(0.92f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(16.dp),
-            color = Color(0xFF0F172A),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+            color = Color(0xFF190A28),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62))
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
@@ -1343,7 +1343,7 @@ fun SignatureCaptureModal(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Confirmer", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontSize = 13.sp, fontFamily = MulishFontFamily)
+                        Text("Confirmer", color = Color(0xFF190A28), fontWeight = FontWeight.Bold, fontSize = 13.sp, fontFamily = MulishFontFamily)
                     }
                 }
             }
@@ -1408,9 +1408,9 @@ private fun CustomerRegistrationSuccessView(
         )
 
         Surface(
-            color = Color(0xFF1E293B),
+            color = Color(0xFF190A28),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4A2B62)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -1504,7 +1504,7 @@ private fun CustomerRegistrationSuccessView(
         ) {
             Text(
                 text = "Terminer",
-                color = Color(0xFF0F172A),
+                color = Color(0xFF190A28),
                 fontWeight = FontWeight.Bold,
                 fontFamily = MulishFontFamily,
                 fontSize = 15.sp

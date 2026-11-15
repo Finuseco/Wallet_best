@@ -37,8 +37,8 @@ import com.example.ui.theme.MulishFontFamily
 import java.util.Locale
 
 private val UsdtTeal = Color(0xFF26A17B)
-private val UsdtDarkBg = Color(0xFF0F172A)
-private val UsdtSurface = Color(0xFF1E293B)
+private val UsdtDarkBg = Color(0xFF190A28)
+private val UsdtSurface = Color(0xFF190A28)
 
 @Composable
 fun SendUsdtDialog(
@@ -232,7 +232,7 @@ fun SendUsdtDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     color = UsdtSurface,
-                    border = BorderStroke(1.dp, Color(0xFF334155))
+                    border = BorderStroke(1.dp, Color(0xFF4A2B62))
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(
@@ -333,7 +333,7 @@ fun SendUsdtDialog(
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = UsdtTeal,
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedContainerColor = UsdtSurface,
@@ -380,7 +380,7 @@ fun SendUsdtDialog(
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = UsdtTeal,
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedContainerColor = UsdtSurface,
@@ -399,7 +399,7 @@ fun SendUsdtDialog(
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
                                 color = UsdtSurface,
-                                border = BorderStroke(1.dp, Color(0xFF334155)),
+                                border = BorderStroke(1.dp, Color(0xFF4A2B62)),
                                 modifier = Modifier
                                     .weight(1f)
                                     .clickable {
@@ -454,7 +454,7 @@ fun SendUsdtDialog(
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = UsdtTeal,
-                            unfocusedBorderColor = Color(0xFF334155),
+                            unfocusedBorderColor = Color(0xFF4A2B62),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedContainerColor = UsdtSurface,
