@@ -1936,7 +1936,9 @@ class CashPayRepository(
             ensureSessionToken()
             val response = apiService.getLoanOffer(currency)
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+                val body = response.body()!!
+                if (body.success && body.offer?.currency != currency) Result.failure(Exception("La devise de l’offre ne correspond pas au compte sélectionné. Actualisez l’offre."))
+                else Result.success(body)
             } else {
                 val msg = extractErrorMessage(response.errorBody()?.string(), "Impossible de charger l'offre de prêt")
                 Result.failure(Exception(msg))
@@ -4016,7 +4018,7 @@ class CashPayRepository(
 
     suspend fun loanApplicationQuote(currency:String,amount:Double,duration:Int):Result<com.example.data.model.LoanApplicationQuote> = try{
         ensureSessionToken();val response=apiService.loanApplicationQuote(currency,amount,duration);val body=response.body()
-        if(response.isSuccessful&&body?.success==true&&body.quote!=null)Result.success(body.quote) else Result.failure(Exception(body?.error?:extractErrorMessage(response.errorBody()?.string(),"Conditions indisponibles.")))
+        if(response.isSuccessful&&body?.success==true&&body.quote!=null&&body.quote.currency==currency)Result.success(body.quote) else Result.failure(Exception(body?.error?:extractErrorMessage(response.errorBody()?.string(),"Conditions indisponibles ou devise incohérente. Actualisez l’offre.")))
     }catch(e:Exception){Result.failure(e)}
     suspend fun loanPaymentQuote(id:Long,amount:Double?,installment:Long?):Result<com.example.data.model.LoanPaymentQuote> = try{
         ensureSessionToken();val response=apiService.loanPaymentQuote(id,amount,installment);val body=response.body()

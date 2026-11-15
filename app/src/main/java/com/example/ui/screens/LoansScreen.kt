@@ -77,7 +77,7 @@ fun LoansScreen(
                             .height(34.dp)
                             .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
                             .clickable { viewModel.setLoanSelectedTab(index) },
-                        color = if (isSelected) Color(0xFF059669) else Color.Transparent
+                        color = if (isSelected) com.example.ui.theme.BrandPurple else Color.Transparent
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(

@@ -1803,7 +1803,7 @@ main = it.main.copy(
     private var loanReviewVersion=0
     fun closeLoanConfirmation(){loanReviewVersion++;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState()}
     fun reviewLoanRequest(){
-        val state=_uiState.value;val amount=state.loanRequestAmount.toDoubleOrNull()
+        val state=_uiState.value;val amount=com.example.util.parseLoanAmount(state.loanRequestAmount)
         if(amount==null||!amount.isFinite()||amount<=0){updateLoans{copy(loanRequestError="Montant invalide.")};return}
         val version=++loanReviewVersion;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(loading=true)
         updateLoans{copy(loanRequestError=null,loanRepayError=null,repayInstallmentError=null)}
@@ -1812,7 +1812,10 @@ main = it.main.copy(
     fun reviewLoanRepayment(loanId:Long,installmentId:Long?=null){
         val version=++loanReviewVersion;_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(loading=true)
         updateLoans{copy(loanRequestError=null,loanRepayError=null,repayInstallmentError=null)}
-        val amount=if(installmentId==null)_uiState.value.loanRepayAmount.toDoubleOrNull() else null
+        val amount=if(installmentId==null)com.example.util.parseLoanAmount(_uiState.value.loanRepayAmount) else null
+        if (installmentId == null && amount == null) {
+            _loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(error="Saisissez un montant de remboursement valide."); return
+        }
         viewModelScope.launch{repository.loanPaymentQuote(loanId,amount,installmentId).onSuccess{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(payment=it)}.onFailure{if(version==loanReviewVersion)_loanConfirmation.value=com.example.ui.screens.LoanConfirmationState(error=it.message)}}
     }
     fun confirmReviewedLoan(){
@@ -1892,8 +1895,9 @@ main = it.main.copy(
     }
 
     fun setLoanCurrency(currency: String) {
-        if(currency !in listOf("USD","EUR","CDF") || _uiState.value.isRequestingLoan)return
-        updateLoans { copy(loanCurrency=currency,loanOffer=null,loanOfferError=null) }
+        if(currency !in listOf("USD","EUR","CDF") || _uiState.value.isRequestingLoan || currency == _uiState.value.loanCurrency)return
+        closeLoanConfirmation()
+        updateLoans { copy(loanCurrency=currency,loanOffer=null,loanOfferError=null,loanRequestAmount="",loanRequestError=null) }
         fetchLoanOffer()
     }
 
@@ -1962,12 +1966,16 @@ main = it.main.copy(
         if(offer==null || !offer.eligible || state.loanRequestDuration !in offer.durations){
             updateLoans { copy(loanRequestError="Chargez une offre valide et choisissez une durée proposée.") };return
         }
-        val amount = state.loanRequestAmount.toDoubleOrNull() ?: 0.0
+        val amount = com.example.util.parseLoanAmount(state.loanRequestAmount) ?: 0.0
         if (!amount.isFinite() || amount <= 0.0) {
             updateLoans { copy(loanRequestError = "Le montant doit être supérieur à zéro.") }
             return
         }
 
+        if (acceptedTerms == null || acceptedTerms.currency != offer.currency || offer.currency != state.loanCurrency ||
+            acceptedTerms.principal != amount || acceptedTerms.durationMonths != state.loanRequestDuration) {
+            updateLoans { copy(loanRequestError = "Les conditions ont changé. Vérifiez de nouveau le montant et la devise.") }; return
+        }
         updateLoans { copy(isRequestingLoan = true, loanRequestError = null, loanRequestSuccess = false) }
         viewModelScope.launch {
             repository.requestLoan(
@@ -2004,7 +2012,7 @@ main = it.main.copy(
         if(_uiState.value.isRepayingLoan || _uiState.value.isRepayInstallmentLoading)return
         val effectiveUserId = getEffectiveUserId(userId)
         val state = _uiState.value
-        val amount = acceptedPayment?.amount ?: state.loanRepayAmount.toDoubleOrNull() ?: 0.0
+        val amount = acceptedPayment?.amount ?: com.example.util.parseLoanAmount(state.loanRepayAmount) ?: 0.0
         if (!amount.isFinite() || amount <= 0.0) {
             updateLoans { copy(loanRepayError = "Le montant doit être supérieur à zéro.") }
             return

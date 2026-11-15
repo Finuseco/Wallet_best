@@ -50,7 +50,7 @@ data class LoanOfferDto(
     @Json(name = "interestRate") val interestRate: Double? = 0.0,
     @Json(name = "guaranteeRate") val guaranteeRate: Double? = 0.0,
     @Json(name = "balance") val balance: Double = 0.0,
-    @Json(name = "currency") val currency: String = "USD",
+    @Json(name = "currency") val currency: String = "",
     @Json(name = "durations") val durations: List<Int> = emptyList(),
     @Json(name="interestRates") val interestRates: Map<String,Double> = emptyMap()
 )

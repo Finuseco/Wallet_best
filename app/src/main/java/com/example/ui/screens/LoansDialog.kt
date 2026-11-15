@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.components.ToofanButton
 import com.example.ui.components.ToofanInputField
 import com.example.ui.theme.*
+import com.example.util.formatLoanMoney
+import com.example.util.formatLoanPercent
 import com.example.ui.viewmodel.DashboardUiState
 import com.example.ui.viewmodel.DashboardViewModel
 
@@ -39,6 +41,9 @@ fun LoansDialog(
     LoanConfirmationDialog(uiState,viewModel)
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = ToofanMainDark,
+        textContentColor = ToofanBodyText,
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -47,7 +52,7 @@ fun LoansDialog(
                 Icon(
                     imageVector = Icons.Default.MonetizationOn,
                     contentDescription = null,
-                    tint = ToFocusBorderColor,
+                    tint = BrandPurple,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
@@ -82,7 +87,7 @@ fun LoansDialog(
                                 .weight(1f)
                                 .height(34.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSelected) ToofanGreen else Color.Transparent)
+                                .background(if (isSelected) BrandPurple else Color.Transparent)
                                 .clickable { viewModel.setLoanSelectedTab(index) },
                             contentAlignment = Alignment.Center
                         ) {
@@ -123,7 +128,7 @@ fun SubTabLoanOffer(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf("USD","EUR","CDF").forEach { currency ->
-            FilterChip(selected=uiState.loanCurrency==currency,onClick={viewModel.setLoanCurrency(currency)},label={Text(currency)},enabled=!uiState.isRequestingLoan)
+            FilterChip(selected=uiState.loanCurrency==currency,onClick={viewModel.setLoanCurrency(currency)},label={Text(currency)}, colors=FilterChipDefaults.filterChipColors(selectedContainerColor=BrandPurple,selectedLabelColor=Color.White),enabled=!uiState.isRequestingLoan)
         }
     }
     if (uiState.isLoadingLoanOffer) {
@@ -214,16 +219,19 @@ fun SubTabLoanOffer(
                 }
 
                 item {
+                    Text(if (offer.currency == "CDF") "Franc congolais (CDF)" else if (offer.currency == "EUR") "Euro (EUR)" else "Dollar américain (USD)", color = BrandPurple, fontWeight = FontWeight.Bold)
+                }
+                item {
                     // Parameters Display
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = ToofanGrey1.copy(alpha = 0.1f),
+                        color = Color(0xFFF7F3FB),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            RecapRow("Intérêt configuré :", "${offer.interestRates[uiState.loanRequestDuration.toString()] ?: offer.interestRate ?: 0.0}%")
-                            RecapRow("Taux de garantie :", "${(offer.guaranteeRate ?: 0.0) * 100}%")
-                            RecapRow("Solde maximum disponible :", "${String.format("%.2f", offer.balance)} ${offer.currency}")
+                            LoanDetailRow("Intérêt configuré", formatLoanPercent(offer.interestRates[uiState.loanRequestDuration.toString()] ?: offer.interestRate ?: 0.0))
+                            LoanDetailRow("Taux de garantie", formatLoanPercent((offer.guaranteeRate ?: 0.0) * 100))
+                            LoanDetailRow("Solde de votre compte", formatLoanMoney(offer.balance, offer.currency), isBold = true, customColor = BrandPurple)
                         }
                     }
                 }
@@ -231,7 +239,7 @@ fun SubTabLoanOffer(
                 if (offer.eligible) {
                     item {
                         Text(
-                            text = "Montant demandé",
+                            text = "Montant demandé (${offer.currency})",
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
@@ -240,7 +248,7 @@ fun SubTabLoanOffer(
                         ToofanInputField(
                             value = uiState.loanRequestAmount,
                             onValueChange = { viewModel.setLoanRequestAmount(it) },
-                            placeholder = "Saisissez le montant"
+                            placeholder = if (offer.currency == "CDF") "Ex. 50 000 CDF" else "Ex. 50,00 ${offer.currency}"
                         )
                     }
 
@@ -263,12 +271,12 @@ fun SubTabLoanOffer(
                                         .weight(1f)
                                         .border(
                                             width = if (isSelected) 2.dp else 1.dp,
-                                            color = if (isSelected) ToofanGreen else Color.LightGray,
+                                            color = if (isSelected) BrandPurple else Color.LightGray,
                                             shape = RoundedCornerShape(8.dp)
                                         )
                                         .clip(RoundedCornerShape(8.dp))
                                         .clickable { viewModel.setLoanRequestDuration(dur) },
-                                    color = if (isSelected) ToofanGreen.copy(alpha = 0.08f) else Color.White
+                                    color = if (isSelected) BrandPurple.copy(alpha = 0.08f) else Color.White
                                 ) {
                                     Box(modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
                                         Text(
@@ -276,7 +284,7 @@ fun SubTabLoanOffer(
                                             fontFamily = MulishFontFamily,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) ToofanGreen else ToofanMainDark
+                                            color = if (isSelected) BrandPurple else ToofanMainDark
                                         )
                                     }
                                 }
@@ -336,7 +344,7 @@ fun SubTabActiveLoan(
 ) {
     if (uiState.isLoadingActiveLoan) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = ToFocusBorderColor)
+            CircularProgressIndicator(color = BrandPurple)
         }
     } else if (uiState.activeLoanError != null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -377,8 +385,8 @@ fun SubTabActiveLoan(
                     // Loan Card details
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = ToFocusBorderColor.copy(alpha = 0.08f),
-                        border = BorderStroke(1.dp, ToFocusBorderColor.copy(alpha = 0.3f)),
+                        color = BrandPurple.copy(alpha = 0.08f),
+                        border = BorderStroke(1.dp, BrandPurple.copy(alpha = 0.3f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -392,7 +400,7 @@ fun SubTabActiveLoan(
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = ToFocusBorderColor
+                                    color = BrandPurple
                                 )
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
@@ -411,15 +419,15 @@ fun SubTabActiveLoan(
 
                             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
 
-                            RecapRow("Principal :", "${String.format("%.2f", loan.principalAmount ?: loan.amount)} ${loan.currency}")
-                            RecapRow("Total à rembourser :", "${String.format("%.2f", loan.totalRepayment ?: loan.amount)} ${loan.currency}")
-                            RecapRow("Remboursé à ce jour :", "${String.format("%.2f", loan.repaidAmount)} ${loan.currency}")
-                            RecapRow("Reste à payer :", "${String.format("%.2f", loan.remainingBalance)} ${loan.currency}", isBold = true, customColor = ToFocusBorderColor)
+                            LoanDetailRow("Principal :", "${formatLoanMoney(loan.principalAmount ?: loan.amount, loan.currency)}")
+                            LoanDetailRow("Total à rembourser :", "${formatLoanMoney(loan.totalRepayment ?: loan.amount, loan.currency)}")
+                            LoanDetailRow("Remboursé à ce jour :", "${formatLoanMoney(loan.repaidAmount, loan.currency)}")
+                            LoanDetailRow("Reste à payer :", "${formatLoanMoney(loan.remainingBalance, loan.currency)}", isBold = true, customColor = BrandPurple)
 
                             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
 
-                            RecapRow("Date de début :", formatLoanCalendarDate(loan.startDate))
-                            RecapRow("Date de fin :", formatLoanCalendarDate(loan.endDate))
+                            LoanDetailRow("Date de début :", formatLoanCalendarDate(loan.startDate))
+                            LoanDetailRow("Date de fin :", formatLoanCalendarDate(loan.endDate))
                         }
                     }
                 }
@@ -497,7 +505,7 @@ fun SubTabActiveLoan(
                                     }
                                 }
                                 Text(
-                                    text = "- ${String.format("%.2f", rep.amount)} ${loan.currency}",
+                                    text = "- ${formatLoanMoney(rep.amount, loan.currency)}",
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
@@ -535,16 +543,16 @@ fun SubTabActiveLoan(
                             ) {
                                 Column {
                                     Text(
-                                        text = "Échéance #${inst.number} — reste ${String.format("%.2f", inst.remainingAmount)} ${loan.currency}",
+                                        text = "Échéance #${inst.number} — reste ${formatLoanMoney(inst.remainingAmount, loan.currency)}",
                                         fontFamily = MulishFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 11.sp,
                                         color = ToofanMainDark
                                     )
                                     Text(
-                                        text = "Jour de remboursement : ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${inst.paidAmount} ${loan.currency} · pénalités incluses : ${inst.penalty} ${loan.currency}",
+                                        text = "Jour de remboursement : ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${formatLoanMoney(inst.paidAmount, loan.currency)} · pénalités incluses : ${formatLoanMoney(inst.penalty, loan.currency)}",
                                         fontSize = 10.sp,
-                                        color = ToFocusBorderColor
+                                        color = BrandPurple
                                     )
                                 }
 
@@ -650,7 +658,7 @@ fun SubTabLoanHistory(
                     val isSelected = selectedFilter == key
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = if (isSelected) ToofanGreen else ToofanGrey1.copy(alpha = 0.15f),
+                        color = if (isSelected) BrandPurple else ToofanGrey1.copy(alpha = 0.15f),
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(8.dp))
@@ -687,7 +695,7 @@ fun SubTabLoanHistory(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Prêt #${item.id} — ${String.format("%.2f", item.amount)} ${item.currency}",
+                                    text = "Prêt #${item.id} — ${formatLoanMoney(item.amount, item.currency)}",
                                     fontFamily = MulishFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
@@ -699,7 +707,7 @@ fun SubTabLoanHistory(
                                         "approved", "active", "en_cours" -> ToofanGreen.copy(alpha = 0.15f)
                                         "repaid", "remboursé" -> ToofanBlue.copy(alpha = 0.15f)
                                         "rejected", "rejeté" -> Color(0xFFFFECEF)
-                                        else -> ToFocusBorderColor.copy(alpha = 0.15f)
+                                        else -> BrandPurple.copy(alpha = 0.15f)
                                     }
                                 ) {
                                     Text(
@@ -711,17 +719,17 @@ fun SubTabLoanHistory(
                                             "approved", "active", "en_cours" -> ToofanGreen
                                             "repaid", "remboursé" -> ToofanBlue
                                             "rejected", "rejeté" -> Color(0xFFFF4868)
-                                            else -> ToFocusBorderColor
+                                            else -> BrandPurple
                                         },
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
                             }
                             Text(
-                                text = "Restant : ${String.format("%.2f", item.remainingBalance)} ${item.currency} • Déjà remboursé : ${String.format("%.2f", item.repaidAmount)} ${item.currency}",
+                                text = "Restant : ${formatLoanMoney(item.remainingBalance, item.currency)} • Déjà remboursé : ${formatLoanMoney(item.repaidAmount, item.currency)}",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = ToFocusBorderColor
+                                color = BrandPurple
                             )
                             Text(
                                 text = "Début : ${formatLoanCalendarDate(item.startDate)}\nÉchéance : ${formatLoanCalendarDate(item.endDate)}",
@@ -733,5 +741,17 @@ fun SubTabLoanHistory(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun LoanDetailRow(label: String, valText: String, isBold: Boolean = false, customColor: Color = ToofanMainDark) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(label, modifier = Modifier.weight(1f), color = ToofanBodyText, fontSize = 13.sp)
+        Text(valText, modifier = Modifier.weight(1f), color = customColor,
+            fontSize = if (isBold) 17.sp else 14.sp,
+            fontWeight = if (isBold) FontWeight.Bold else FontWeight.SemiBold,
+            textAlign = TextAlign.End)
     }
 }
