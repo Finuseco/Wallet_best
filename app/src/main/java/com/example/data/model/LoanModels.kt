@@ -14,6 +14,8 @@ data class LoanDto(
     @Json(name = "remaining_balance") val remainingBalance: Double,
     @Json(name = "currency") val currency: String = "USD",
     @Json(name = "status") val status: String? = null,
+    @Json(name = "request_date") val requestDate: String? = null,
+    @Json(name = "approval_date") val approvalDate: String? = null,
     @Json(name = "start_date") val startDate: String? = null,
     @Json(name = "end_date") val endDate: String? = null,
     @Json(name = "isFinished") val isFinished: Boolean = false,

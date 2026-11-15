@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.components.ToofanButton
 import com.example.ui.components.ToofanInputField
 import com.example.ui.theme.*
+import com.example.util.formatLoanCalendarDateTime
 import com.example.util.formatLoanMoney
 import com.example.util.formatLoanPercent
 import com.example.ui.viewmodel.DashboardUiState
@@ -426,8 +427,8 @@ fun SubTabActiveLoan(
 
                             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
 
-                            LoanDetailRow("Date de début :", formatLoanCalendarDate(loan.startDate))
-                            LoanDetailRow("Date de fin :", formatLoanCalendarDate(loan.endDate))
+                            LoanDetailRow("Approuvé le", formatLoanCalendarDateTime(loan.approvalDate ?: loan.startDate))
+                            LoanDetailRow("Dernière échéance", formatLoanCalendarDateTime(loan.endDate))
                         }
                     }
                 }
@@ -550,7 +551,7 @@ fun SubTabActiveLoan(
                                         color = ToofanMainDark
                                     )
                                     Text(
-                                        text = "Jour de remboursement : ${formatLoanCalendarDate(inst.dueDate)}\nDéjà payé : ${formatLoanMoney(inst.paidAmount, loan.currency)} · pénalités incluses : ${formatLoanMoney(inst.penalty, loan.currency)}",
+                                        text = "Jour de remboursement : ${formatLoanCalendarDateTime(inst.dueDate)}\nDéjà payé : ${formatLoanMoney(inst.paidAmount, loan.currency)} · pénalités incluses : ${formatLoanMoney(inst.penalty, loan.currency)}",
                                         fontSize = 10.sp,
                                         color = BrandPurple
                                     )
@@ -711,7 +712,7 @@ fun SubTabLoanHistory(
                                     }
                                 ) {
                                     Text(
-                                        text = (item.status ?: "REQUESTED").uppercase(),
+                                        text = when(item.status?.lowercase()) { "pending" -> "En attente d’approbation"; "approved" -> "Approuvé"; "repaid" -> "Remboursé"; "rejected" -> "Rejeté"; else -> (item.status ?: "DEMANDE").uppercase() },
                                         fontFamily = MulishFontFamily,
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Bold,
@@ -732,7 +733,9 @@ fun SubTabLoanHistory(
                                 color = BrandPurple
                             )
                             Text(
-                                text = "Début : ${formatLoanCalendarDate(item.startDate)}\nÉchéance : ${formatLoanCalendarDate(item.endDate)}",
+                                text = if (item.status?.lowercase() in listOf("pending", "rejected", "cancelled"))
+                                    "Demande : ${formatLoanCalendarDateTime(item.requestDate)}\n${if (item.status?.lowercase() == "pending") "Échéancier après approbation" else "Aucun échéancier actif"}"
+                                else "Approbation : ${formatLoanCalendarDateTime(item.approvalDate ?: item.startDate)}\nDernière échéance : ${formatLoanCalendarDateTime(item.endDate)}",
                                 fontSize = 12.sp,
                                 color = ToofanBodyText
                             )
