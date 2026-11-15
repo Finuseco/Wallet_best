@@ -4700,6 +4700,13 @@ fun ToofanCardsAndSecurityTab(
                             CircularProgressIndicator(color = ToofanGreen)
                         }
                     }
+                } else if (uiState.cardsError != null) {
+                    item {
+                        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                            Text("Impossible de charger vos cartes. Réessayez pour consulter les données à jour.", color = ToofanBodyText)
+                            TextButton(onClick = { dashboardViewModel.fetchUserCards() }) { Text("Réessayer") }
+                        }
+                    }
                 } else if (uiState.userCards.isEmpty()) {
                     item {
                         Column(
@@ -4709,29 +4716,10 @@ fun ToofanCardsAndSecurityTab(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            // Sample Vertical Brand Card ("tout droit, pas en paysage")
-                            CashPayCardComponent(
-                                card = com.example.data.model.CardInfoDto(
-                                    id = "preview",
-                                    brand = "visa",
-                                    cardType = "virtuelle",
-                                    currency = "USD",
-                                    last4 = "4820",
-                                    status = "active"
-                                ),
-                                onFreeze = { dashboardViewModel.openBuyCardDialog() },
-                                onUnfreeze = { dashboardViewModel.openBuyCardDialog() },
-                                onManage = { dashboardViewModel.openBuyCardDialog() }
-                            )
-
-                            Text(
-                                text = "Aperçu de votre modèle de carte CashPay Visa / Mastercard",
-                                fontFamily = MulishFontFamily,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 12.sp,
-                                color = ToofanBodyText,
-                                textAlign = TextAlign.Center
-                            )
+                            Icon(Icons.Default.CreditCard, contentDescription = null,
+                                tint = ToofanBodyText, modifier = Modifier.size(40.dp))
+                            Text("Aucune carte associée à votre compte", color = ToofanBodyText,
+                                textAlign = TextAlign.Center, fontFamily = MulishFontFamily)
 
                             ToofanButton(
                                 title = "Commander votre première carte",

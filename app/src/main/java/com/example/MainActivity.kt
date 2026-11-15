@@ -124,7 +124,7 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                         AppStartupState.SPLASH -> {
                             SplashScreen(
                                 onAnimationFinished = {
-                                    val hasSeenOnboarding = prefs.getBoolean("has_seen_onboarding_v4", false)
+                                    val hasSeenOnboarding = prefs.getBoolean("has_seen_onboarding_v5", false)
                                     startupState = if (!hasSeenOnboarding) {
                                         AppStartupState.ONBOARDING
                                     } else {
@@ -136,7 +136,7 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                         AppStartupState.ONBOARDING -> {
                             InstallationGuideScreen(
                                 onFinished = {
-                                    prefs.edit().putBoolean("has_seen_onboarding_v4", true).apply()
+                                    prefs.edit().putBoolean("has_seen_onboarding_v5", true).apply()
                                     startupState = AppStartupState.APP
                                 }
                             )

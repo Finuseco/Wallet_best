@@ -182,14 +182,14 @@ class DashboardViewModel(
 
     // --- CARDS ACTIONS ---
     fun fetchUserCards() {
-        updateCards { copy(isLoadingCards = true, cardsError = null) }
+        updateCards { copy(isLoadingCards = true, cardsError = null, userCards = emptyList()) }
         viewModelScope.launch {
             repository.getUserCards()
                 .onSuccess { cards ->
                     updateCards { copy(isLoadingCards = false, userCards = cards) }
                 }
                 .onFailure { err ->
-                    updateCards { copy(isLoadingCards = false, cardsError = err.message) }
+                    updateCards { copy(isLoadingCards = false, cardsError = err.message, userCards = emptyList()) }
                 }
         }
     }
