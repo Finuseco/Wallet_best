@@ -43,7 +43,8 @@ object PosReceipt {
                 setPixels(pixels,0,w,0,0,w,h)
             }
         }.getOrNull()
-        val qr = code(BarcodeFormat.QR_CODE, 216, 216)
+        val qrSize = if (paperMm == 58) 136 else 176
+        val qr = code(BarcodeFormat.QR_CODE, qrSize, qrSize)
         val barcode = code(BarcodeFormat.CODE_128, usable.toInt(), 76)
         fun layout(canvas: Canvas?): Int {
             var y = 24f
@@ -63,21 +64,56 @@ object PosReceipt {
                 }
             }
             fun line() { y+=12; paint.strokeWidth=1f; canvas?.drawLine(margin,y,width-margin,y,paint);y+=16 }
-            fun row(label:String,value:String) { text(label,18f);text(value.ifBlank{"—"},22f,true);y+=10 }
+            fun block(value: String, x: Float, top: Float, maxWidth: Float,
+                      size: Float, bold: Boolean = false, right: Boolean = false): Float {
+                paint.textSize = size
+                paint.typeface = Typeface.create(Typeface.SANS_SERIF, if (bold) Typeface.BOLD else Typeface.NORMAL)
+                var bottom = top
+                value.replace('\r', ' ').split('\n').forEach { paragraph ->
+                    var rest = paragraph
+                    do {
+                        val fits = paint.breakText(rest, true, maxWidth, null).coerceAtLeast(1).coerceAtMost(rest.length)
+                        val boundary = if (fits < rest.length) rest.lastIndexOf(' ', fits) else -1
+                        val count = if (boundary > 0) boundary else fits
+                        val part = rest.take(count)
+                        canvas?.drawText(part, if (right) x + maxWidth - paint.measureText(part) else x,
+                            bottom + size, paint)
+                        bottom += size * 1.35f
+                        rest = rest.drop(count).trimStart()
+                    } while (rest.isNotEmpty())
+                }
+                return bottom
+            }
+            fun row(label: String, value: String, bold: Boolean = false) {
+                val gap = 14f
+                val labelWidth = usable * .39f
+                val valueX = margin + labelWidth + gap
+                val labelBottom = block(label, margin, y, labelWidth, 17f)
+                val valueBottom = block(value.ifBlank { "—" }, valueX, y,
+                    width - margin - valueX, 19f, bold, right = true)
+                y = maxOf(labelBottom, valueBottom) + 12f
+            }
             val logoWidth = minOf(usable, 250f)
             val logoHeight = logoWidth * logo.height / logo.width
             canvas?.drawBitmap(logo,null,RectF((width-logoWidth)/2,y,(width+logoWidth)/2,y+logoHeight),Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
             y+=logoHeight+18
-            text("BORDEREAU DE TRANSACTION",20f,true,true)
-            text(TransactionTypeMapper.getTypeInfo(tx.type).nameFr,22f,true,true)
-            text(status(tx.status),20f,true,true)
+            text("BORDEREAU CASHPAY",19f,true,true)
+            y += 8
+            barcode?.let { canvas?.drawBitmap(it, margin, y, null); y += it.height + 10 }
+            text(tx.reference, 17f, true, true)
+            line()
+            row("Opération", TransactionTypeMapper.getTypeInfo(tx.type).nameFr, true)
+            row("Statut", status(tx.status), true)
             line()
             val incoming = tx.direction.equals("incoming",true)
             text(money(tx.amount,tx.currency),if(paperMm==58) 26f else 34f,true,true)
             text(if(incoming) "ENTRÉE DE FONDS" else "SORTIE DE FONDS",18f,false,true)
             line()
-            row("Référence",tx.reference)
-            row("Date et heure",tx.date)
+            val date = runCatching {
+                java.time.Instant.parse(tx.date).atZone(java.time.ZoneId.systemDefault())
+                    .format(java.time.format.DateTimeFormatter.ofPattern("EEE dd/MM/yyyy HH:mm", Locale.FRENCH))
+            }.getOrDefault(tx.date)
+            row("Date et heure", date)
             row("Service / libellé",tx.displayName.ifBlank{tx.title})
             val other=tx.otherUserFullName?.takeIf{it.isNotBlank()} ?: tx.recipient
             row(if(incoming) "Expéditeur / source" else "Bénéficiaire / destination",other)
@@ -85,23 +121,23 @@ object PosReceipt {
             tx.receiverWalletId?.takeIf{it.isNotBlank()}?.let{row("Wallet destinataire",it)}
             tx.description?.takeIf{it.isNotBlank()}?.let{row("Détail",it.take(2000))}
             line()
-            row("Montant",money(tx.amount,tx.currency))
+            row("Montant",money(tx.amount,tx.currency),true)
             if(!incoming) row("Frais",money(tx.fee,tx.currency))
             val confirmed = tx.status.lowercase(Locale.ROOT) in setOf("completed","success","successful")
-            row(if(!confirmed) "Total indiqué (non confirmé)" else if(incoming) "Total crédité" else "Total débité",money(total(tx),tx.currency))
+            row(if(!confirmed) "Total indiqué (non confirmé)" else if(incoming) "Total crédité" else "Total débité",money(total(tx),tx.currency),true)
             line()
-            qr?.let { canvas?.drawBitmap(it,((width-it.width)/2).toFloat(),y,null);y+=it.height+10 }
-            text("Référence de transaction",17f,false,true)
-            barcode?.let { y+=12;canvas?.drawBitmap(it,margin,y,null);y+=it.height+12 }
-            text("À rapprocher de votre historique CashPay.",17f,false,true)
-            line()
-            text("CashPay All",24f,true,true)
-            text("Bordereau généré électroniquement",18f,false,true)
-            text("Conservez votre référence de transaction",17f,false,true)
-            text("info@cashpay-all.com",19f,false,true)
-            text("+243 85 386 80 21",19f,false,true)
-            text("www.cashpay-all.com",19f,false,true)
-            if(!confirmed) { y+=10;text("Ce document ne confirme pas un paiement.",17f,true,true) }
+            // One footer container: QR on the left, support details on the right.
+            val footerTop = y
+            qr?.let { canvas?.drawBitmap(it, margin, footerTop, null) }
+            val footerX = if (qr != null) margin + qrSize + 16f else margin
+            val footerWidth = width - margin - footerX
+            var footerY = block("CashPay All", footerX, footerTop, footerWidth, 19f, true) + 5f
+            for (value in listOf("Bordereau électronique", "Conservez votre référence", "info@cashpay-all.com",
+                "+243 85 386 80 21", "www.cashpay-all.com")) {
+                footerY = block(value, footerX, footerY, footerWidth, 15f) + 4f
+            }
+            y = maxOf(footerY, footerTop + (qr?.height ?: 0)) + 10f
+            if(!confirmed) { line(); text("Ce document ne confirme pas un paiement.",17f,true) }
             return (y+28).toInt()
         }
         val height = layout(null)
