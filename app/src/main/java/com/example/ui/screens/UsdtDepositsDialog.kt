@@ -237,7 +237,7 @@ fun UsdtDepositsDialog(
                                             Text(
                                                 text = dt.take(19).replace("T", " "),
                                                 fontSize = 10.sp,
-                                                color = Color(0xFF64748B),
+                                                color = Color(0xFF7B42AD),
                                                 fontFamily = MulishFontFamily
                                             )
                                         }
@@ -254,7 +254,7 @@ fun UsdtDepositsDialog(
                                             Text(
                                                 text = "TX: ${hash.take(10)}...${hash.takeLast(8)}",
                                                 fontSize = 10.sp,
-                                                color = Color(0xFF38BDF8),
+                                                color = Color(0xFFA66BE0),
                                                 fontFamily = MulishFontFamily
                                             )
                                             IconButton(
@@ -267,7 +267,7 @@ fun UsdtDepositsDialog(
                                                 Icon(
                                                     imageVector = Icons.Default.ContentCopy,
                                                     contentDescription = "Copier le hash",
-                                                    tint = Color(0xFF38BDF8),
+                                                    tint = Color(0xFFA66BE0),
                                                     modifier = Modifier.size(14.dp)
                                                 )
                                             }

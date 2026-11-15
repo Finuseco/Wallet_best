@@ -49,7 +49,7 @@ fun FloatingCapsuleBottomBar(
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         color = Color.White,
         shadowElevation = 8.dp,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, Color(0xFFE6DCF0)),
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
@@ -156,7 +156,7 @@ private fun FloatingNavItem(
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (isSelected) Color(0xFF000E38) else Color(0xFF94A3B8),
+            tint = if (isSelected) Color(0xFF190A28) else Color(0xFF94A3B8),
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.height(3.dp))
@@ -165,7 +165,7 @@ private fun FloatingNavItem(
             fontFamily = MulishFontFamily,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             fontSize = 11.sp,
-            color = if (isSelected) Color(0xFF000E38) else Color(0xFF94A3B8)
+            color = if (isSelected) Color(0xFF190A28) else Color(0xFF94A3B8)
         )
     }
 }

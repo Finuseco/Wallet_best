@@ -98,13 +98,13 @@ fun AgentExternalMoMoDialog(
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(Color(0xFFFF6600).copy(alpha = 0.2f), CircleShape),
+                                .background(Color(0xFF7A22D4).copy(alpha = 0.2f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PhoneAndroid,
                                 contentDescription = null,
-                                tint = Color(0xFFFF6600),
+                                tint = Color(0xFF7A22D4),
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -216,10 +216,10 @@ fun AgentExternalMoMoDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) Color(0xFFFF6600).copy(alpha = 0.15f) else Color(0xFF1E293B))
+                                .background(if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B))
                                 .border(
                                     width = if (isSelected) 1.5.dp else 1.dp,
-                                    color = if (isSelected) Color(0xFFFF6600) else Color(0xFF334155),
+                                    color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
                                     shape = RoundedCornerShape(10.dp)
                                 )
                                 .clickable { onOperatorChange(op.code) }
@@ -240,7 +240,7 @@ fun AgentExternalMoMoDialog(
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    tint = Color(0xFFFF6600),
+                                    tint = Color(0xFF7A22D4),
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -262,12 +262,12 @@ fun AgentExternalMoMoDialog(
                 OutlinedTextField(
                     value = uiState.agentExternalMoMoPhone,
                     onValueChange = onPhoneChange,
-                    placeholder = { Text("+243...", color = Color(0xFF64748B), fontFamily = MulishFontFamily) },
+                    placeholder = { Text("+243...", color = Color(0xFF7B42AD), fontFamily = MulishFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFF6600),
+                        focusedBorderColor = Color(0xFF7A22D4),
                         unfocusedBorderColor = Color(0xFF334155),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
@@ -291,11 +291,11 @@ fun AgentExternalMoMoDialog(
                 OutlinedTextField(
                     value = uiState.agentExternalMoMoAmount,
                     onValueChange = onAmountChange,
-                    placeholder = { Text("Ex: 50", color = Color(0xFF64748B), fontFamily = MulishFontFamily) },
+                    placeholder = { Text("Ex: 50", color = Color(0xFF7B42AD), fontFamily = MulishFontFamily) },
                     trailingIcon = {
                         Text(
                             text = "USD",
-                            color = Color(0xFFFF6600),
+                            color = Color(0xFF7A22D4),
                             fontWeight = FontWeight.Bold,
                             fontFamily = MulishFontFamily,
                             modifier = Modifier.padding(end = 12.dp)
@@ -305,7 +305,7 @@ fun AgentExternalMoMoDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFF6600),
+                        focusedBorderColor = Color(0xFF7A22D4),
                         unfocusedBorderColor = Color(0xFF334155),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
@@ -351,8 +351,8 @@ fun AgentExternalMoMoDialog(
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6600),
-                        disabledContainerColor = Color(0xFFFF6600).copy(alpha = 0.5f)
+                        containerColor = Color(0xFF7A22D4),
+                        disabledContainerColor = Color(0xFF7A22D4).copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {

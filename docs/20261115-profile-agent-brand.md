@@ -1,0 +1,7 @@
+# Profile, agent header and subscription price
+
+Brand source: `Finuseco/cashpay-main`, fetched `origin/main` commit `3831815`, `css/style.css` custom properties. Primary #7A22D4, dark #190A28, variants #2A0E42 / #59158D / #A66BE0; soft background #F7F3FB. The previous local showcase checkout was stale. Existing token names remain for compatibility, with current palette values; success/error semantic colors remain distinct.
+
+The profile now starts with the user's API cover (coverPhotoUrl, then coverPhoto), full width behind status bars. Avatar and name sit side by side below the cover, with edit/security/notification actions. Relative and base64 image references use the existing image resolver. No fabricated verified badge is added. The shared dashboard/agent header also uses the API cover when present. Agent dialog opts out of fitted system windows while header controls keep safe insets.
+
+The subscription dialog highlights the selected plan's server quote before PIN entry and scrolls on small screens. Android accepts a confirmed zero quote, matching the backend enterprise exemption. Positive tariffs still come from the existing fee structures; no tariff is invented. The Web activation route accepts nonnegative confirmation, then delegates to subscribeAsAgent, which recalculates the fee, checks eligibility and rejects stale/mismatched confirmation before debit. Fee GET explicitly remains dynamic and successful quotes use private/no-store.

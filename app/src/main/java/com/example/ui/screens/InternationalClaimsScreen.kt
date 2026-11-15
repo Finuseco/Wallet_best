@@ -88,7 +88,7 @@ import java.util.Locale
 private val ClaimsDarkBg = Color(0xFF0F172A)
 private val ClaimsCardBg = Color(0xFF1E293B)
 private val ClaimsPrimary = Color(0xFF00E676)
-private val ClaimsBlue = Color(0xFF38BDF8)
+private val ClaimsBlue = Color(0xFFA66BE0)
 private val ClaimsPurple = Color(0xFFA855F7)
 private val ClaimsYellow = Color(0xFFF59E0B)
 private val ClaimsRed = Color(0xFFEF4444)
@@ -353,7 +353,7 @@ fun InternationalClaimsScreen(
                         Icon(
                             imageVector = Icons.Default.Public,
                             contentDescription = null,
-                            tint = Color(0xFF64748B),
+                            tint = Color(0xFF7B42AD),
                             modifier = Modifier.size(36.dp)
                         )
                     }
@@ -691,7 +691,7 @@ fun NewClaimDialog(
                 // 1. Choix du fournisseur
                 Text(
                     text = "Fournisseur du transfert *",
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MulishFontFamily
@@ -737,7 +737,7 @@ fun NewClaimDialog(
                 // 2. Numéro de référence (Tracking Number / MTCN)
                 Text(
                     text = "Numéro de référence / Code de suivi *",
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MulishFontFamily
@@ -752,7 +752,7 @@ fun NewClaimDialog(
                     placeholder = {
                         Text(
                             text = if (selectedProvider == "western_union") "Ex: 1234567890 (MTCN 10 chiffres)" else "Ex: Numéro de référence",
-                            color = Color(0xFF64748B),
+                            color = Color(0xFF7B42AD),
                             fontSize = 13.sp
                         )
                     },
@@ -776,7 +776,7 @@ fun NewClaimDialog(
                 // 3. Montant attendu & Devise
                 Text(
                     text = "Montant attendu & Devise du transfert *",
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MulishFontFamily
@@ -792,7 +792,7 @@ fun NewClaimDialog(
                             expectedAmount = it.filter { ch -> ch.isDigit() || ch == '.' }
                             localValidationErr = null
                         },
-                        placeholder = { Text("0.00", color = Color(0xFF64748B), fontSize = 13.sp) },
+                        placeholder = { Text("0.00", color = Color(0xFF7B42AD), fontSize = 13.sp) },
                         modifier = Modifier
                             .weight(1.8f)
                             .testTag("claim_amount_input"),
@@ -843,7 +843,7 @@ fun NewClaimDialog(
                 // 4. Pays d'origine
                 Text(
                     text = "Pays d'origine de l'envoi *",
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MulishFontFamily
@@ -918,7 +918,7 @@ fun NewClaimDialog(
                 // 5. Devise de réception souhaitée
                 Text(
                     text = "Devise souhaitée pour la réception des fonds *",
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MulishFontFamily
@@ -1326,7 +1326,7 @@ fun ClaimDetailDialog(
                                 Text("Date de soumission :", color = Color(0xFF94A3B8), fontSize = 12.5.sp, fontFamily = MulishFontFamily)
                                 Text(
                                     text = claim.createdAt.take(10),
-                                    color = Color(0xFFE2E8F0),
+                                    color = Color(0xFFE6DCF0),
                                     fontSize = 12.5.sp,
                                     fontFamily = MulishFontFamily
                                 )

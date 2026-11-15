@@ -57,7 +57,7 @@ private val DarkBorder = Color(0xFF334155)
 private val CloudGreen = Color(0xFF00E676)
 private val CloudAmber = Color(0xFFF59E0B)
 private val AccentPurple = Color(0xFF8B5CF6)
-private val UsbBlue = Color(0xFF38BDF8)
+private val UsbBlue = Color(0xFFA66BE0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -385,7 +385,7 @@ fun CpkReaderDialog(
                 OutlinedTextField(
                     value = cpk.searchQuery,
                     onValueChange = { viewModel.setCpkSearchQuery(it) },
-                    placeholder = { Text("Rechercher par référence, signature, montant...", fontSize = 12.sp, color = Color(0xFF64748B)) },
+                    placeholder = { Text("Rechercher par référence, signature, montant...", fontSize = 12.sp, color = Color(0xFF7B42AD)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(18.dp)) },
                     trailingIcon = {
                         if (cpk.searchQuery.isNotEmpty()) {
@@ -523,11 +523,11 @@ fun CpkReaderDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.Usb, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(48.dp))
+                            Icon(Icons.Default.Usb, contentDescription = null, tint = Color(0xFF7B42AD), modifier = Modifier.size(48.dp))
                             Text("Aucune clé financière CPK trouvée", fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), fontSize = 14.sp)
                             Text(
                                 "Importez un fichier .cpk depuis votre stockage USB ou créez une nouvelle clé sécurisée.",
-                                color = Color(0xFF64748B),
+                                color = Color(0xFF7B42AD),
                                 fontSize = 12.sp,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -619,7 +619,7 @@ private fun CpkKeyCard(
 ) {
     val statusColor = when (key.status.uppercase()) {
         "ACTIVE" -> Color(0xFF00E676)
-        "CLAIMED" -> Color(0xFF38BDF8)
+        "CLAIMED" -> Color(0xFFA66BE0)
         "PARTIALLY_USED" -> Color(0xFFF59E0B)
         "CANCELLED" -> Color(0xFF94A3B8)
         else -> Color(0xFFF59E0B)
@@ -861,7 +861,7 @@ private fun CpkIssueModalDialog(
                 Text(
                     "Immobilisez un montant sous forme de clé signée pour vos paiements hors-ligne, clés USB ou transferts sécurisés.",
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFF7B42AD)
                 )
 
                 // Montant
@@ -1003,17 +1003,17 @@ private fun CpkRecoverModalDialog(
                 Text(
                     "Les fonds de cette clé seront crédités immédiatement sur votre portefeuille CashPay All.",
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFF7B42AD)
                 )
 
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = Color(0xFFF8FAFC),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = BorderStroke(1.dp, Color(0xFFE6DCF0)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(10.dp)) {
-                        Text("Solde récupérable :", fontSize = 11.sp, color = Color(0xFF64748B))
+                        Text("Solde récupérable :", fontSize = 11.sp, color = Color(0xFF7B42AD))
                         Text("${"%,d".format(key.remainingAmount.toLong()).replace(',', ' ')} ${key.currency}", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = BrandGreen)
                     }
                 }
@@ -1083,7 +1083,7 @@ private fun CpkCancelModalDialog(
                 Text(
                     "L'annulation remboursera immédiatement le capital restant (${key.remainingAmount} ${key.currency}) sur votre portefeuille. Cette clé ne sera plus utilisable.",
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFF7B42AD)
                 )
 
                 OutlinedTextField(
@@ -1149,14 +1149,14 @@ private fun CpkLinkDriveModalDialog(
                 Text(
                     "Ce système permet de synchroniser vos clés CPK dans un dossier dédié sur Google Drive (${CpkCloudSyncManager.VAULT_FOLDER_NAME}). En cas de perte ou changement de téléphone, vous retrouvez automatiquement toutes vos clés en reconnectant votre Drive.",
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFF7B42AD)
                 )
 
                 // Package name & SHA-1 / SHA-256 signatures for Google Cloud Console OAuth setup
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = Color(0xFFF8FAFC),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = BorderStroke(1.dp, Color(0xFFE6DCF0)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1167,7 +1167,7 @@ private fun CpkLinkDriveModalDialog(
                         Text(
                             "À inscrire dans Google Cloud Console > Identifiants > ID Client OAuth 2.0 (Type: Android) :",
                             fontSize = 10.sp,
-                            color = Color(0xFF64748B)
+                            color = Color(0xFF7B42AD)
                         )
 
                         // Google Client ID
@@ -1180,7 +1180,7 @@ private fun CpkLinkDriveModalDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("ID Client Google OAuth 2.0 :", fontSize = 9.sp, color = Color(0xFF64748B))
+                                    Text("ID Client Google OAuth 2.0 :", fontSize = 9.sp, color = Color(0xFF7B42AD))
                                     Text(CpkCloudSyncManager.GOOGLE_CLIENT_ID, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
                                 }
                                 IconButton(
@@ -1205,7 +1205,7 @@ private fun CpkLinkDriveModalDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Nom du Package :", fontSize = 9.sp, color = Color(0xFF64748B))
+                                    Text("Nom du Package :", fontSize = 9.sp, color = Color(0xFF7B42AD))
                                     Text(CpkCloudSyncManager.GOOGLE_OAUTH_PACKAGE_NAME, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
                                 }
                                 IconButton(
@@ -1230,7 +1230,7 @@ private fun CpkLinkDriveModalDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Empreinte SHA-1 :", fontSize = 9.sp, color = Color(0xFF64748B))
+                                    Text("Empreinte SHA-1 :", fontSize = 9.sp, color = Color(0xFF7B42AD))
                                     Text(CpkCloudSyncManager.GOOGLE_OAUTH_SHA1, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
                                 }
                                 IconButton(
@@ -1255,7 +1255,7 @@ private fun CpkLinkDriveModalDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Empreinte SHA-256 :", fontSize = 9.sp, color = Color(0xFF64748B))
+                                    Text("Empreinte SHA-256 :", fontSize = 9.sp, color = Color(0xFF7B42AD))
                                     Text(CpkCloudSyncManager.GOOGLE_OAUTH_SHA256, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = Color(0xFF0F172A))
                                 }
                                 IconButton(
@@ -1272,7 +1272,7 @@ private fun CpkLinkDriveModalDialog(
 
                         // Folder Name
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("Dossier Google Drive cible :", fontSize = 10.sp, color = Color(0xFF64748B))
+                            Text("Dossier Google Drive cible :", fontSize = 10.sp, color = Color(0xFF7B42AD))
                             Text(CpkCloudSyncManager.VAULT_FOLDER_NAME, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AccentPurple)
                         }
                     }
@@ -1291,7 +1291,7 @@ private fun CpkLinkDriveModalDialog(
                                 Text("Compte actuellement lié :", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
                             }
                             Text(uiState.cpk.connectedDriveEmail ?: "", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A))
-                            Text("Dernière synchronisation : ${uiState.cpk.lastCloudSyncTime ?: "À l'instant"}", fontSize = 10.sp, color = Color(0xFF64748B))
+                            Text("Dernière synchronisation : ${uiState.cpk.lastCloudSyncTime ?: "À l'instant"}", fontSize = 10.sp, color = Color(0xFF7B42AD))
                         }
                     }
 

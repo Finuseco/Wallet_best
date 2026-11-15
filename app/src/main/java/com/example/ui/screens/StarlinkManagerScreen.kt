@@ -77,7 +77,7 @@ fun StarlinkManagerScreen(
             // TOP BAR COMPACTE EN PLEIN ÉCRAN (Bande haute touchant le réseau/status bar, en BLEU PRIMAIRE SANS BANDE NOIRE)
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFF000E38),
+                color = Color(0xFF190A28),
                 shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
                 shadowElevation = 8.dp
             ) {
@@ -87,8 +87,8 @@ fun StarlinkManagerScreen(
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color(0xFF0A1E5C),
-                                    Color(0xFF000E38)
+                                    Color(0xFF2A0E42),
+                                    Color(0xFF190A28)
                                 )
                             )
                         )
@@ -128,7 +128,7 @@ fun StarlinkManagerScreen(
                                     Icon(
                                         imageVector = Icons.Default.SatelliteAlt,
                                         contentDescription = null,
-                                        tint = Color(0xFF38BDF8),
+                                        tint = Color(0xFFA66BE0),
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -177,7 +177,7 @@ fun StarlinkManagerScreen(
                                 Icon(
                                     imageVector = Icons.Default.AddLink,
                                     contentDescription = "Associer Kit",
-                                    tint = Color(0xFF38BDF8)
+                                    tint = Color(0xFFA66BE0)
                                 )
                             }
                             if (connectedTerminal != null) {
@@ -311,7 +311,7 @@ fun StarlinkManagerScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                color = Color(0xFF000E38),
+                color = Color(0xFF190A28),
                 shadowElevation = 10.dp,
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E2A44))
             ) {
@@ -429,7 +429,7 @@ fun StarlinkManagerScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Forfait : ${plan.name} (${plan.price} ${plan.currency})",
-                        color = Color(0xFF38BDF8),
+                        color = Color(0xFFA66BE0),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -501,7 +501,7 @@ fun StarlinkManagerScreen(
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(Icons.Default.SatelliteAlt, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(38.dp))
+                    Icon(Icons.Default.SatelliteAlt, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(38.dp))
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Associer un Kit Starlink",
@@ -564,7 +564,7 @@ fun StarlinkManagerScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            color = Color(0xFF000E38),
+            color = Color(0xFF190A28),
             shadowElevation = 10.dp,
             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E2A44))
         ) {
@@ -682,7 +682,7 @@ fun StarlinkManagerScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Forfait : ${plan.name} (${plan.price} ${plan.currency})",
-                        color = Color(0xFF38BDF8),
+                        color = Color(0xFFA66BE0),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -754,7 +754,7 @@ fun StarlinkManagerScreen(
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(Icons.Default.SatelliteAlt, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(38.dp))
+                    Icon(Icons.Default.SatelliteAlt, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(38.dp))
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Associer un Kit Starlink",
@@ -845,14 +845,14 @@ private fun ScreenFooterTabItem(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.18f) else Color.Transparent)
+                .background(if (isSelected) Color(0xFFA66BE0).copy(alpha = 0.18f) else Color.Transparent)
                 .padding(horizontal = 14.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                tint = if (isSelected) Color(0xFF38BDF8) else Color(0xFF94A3B8),
+                tint = if (isSelected) Color(0xFFA66BE0) else Color(0xFF94A3B8),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -916,7 +916,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                 Icon(
                                     imageVector = Icons.Default.SatelliteAlt,
                                     contentDescription = null,
-                                    tint = Color(0xFF38BDF8),
+                                    tint = Color(0xFFA66BE0),
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
@@ -956,7 +956,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                         Text(
                             text = "Ou saisir l'identifiant de votre antenne",
                             fontSize = 12.sp,
-                            color = Color(0xFF64748B),
+                            color = Color(0xFF7B42AD),
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -979,7 +979,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             ) {
-                                Text("Connecter", color = Color(0xFF38BDF8), fontWeight = FontWeight.Bold)
+                                Text("Connecter", color = Color(0xFFA66BE0), fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1011,7 +1011,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                     modifier = Modifier.size(42.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Default.Router, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(22.dp))
+                                        Icon(Icons.Default.Router, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(22.dp))
                                     }
                                 }
                                 Column {
@@ -1108,7 +1108,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                         text = liveStatus?.displaySignalQuality ?: "--",
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
-                                        color = Color(0xFF38BDF8)
+                                        color = Color(0xFFA66BE0)
                                     )
                                     Text(
                                         text = if (isLoading) "Mesure..." else "Signal direct",
@@ -1181,7 +1181,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Icon(Icons.Default.CloudQueue, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Default.CloudQueue, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(16.dp))
                                     Text(
                                         text = "Obstruction : ${liveStatus?.formattedObstruction ?: "--"}",
                                         fontSize = 11.sp,
@@ -1191,7 +1191,7 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                                 Text(
                                     text = "Montant : ${liveStatus?.formattedUploadMbps ?: "--"}",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF38BDF8),
+                                    color = Color(0xFFA66BE0),
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
@@ -1268,15 +1268,15 @@ private fun StarlinkRealtimeSignalsAndControlsTab(
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF0284C7))
                     ) {
                         if (isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color(0xFF38BDF8))
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color(0xFFA66BE0))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Mesure des signaux en cours...", color = Color(0xFF38BDF8), fontWeight = FontWeight.Bold)
+                            Text("Mesure des signaux en cours...", color = Color(0xFFA66BE0), fontWeight = FontWeight.Bold)
                         } else {
-                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Mesurer la Capacité & Signaux en Temps Réel",
-                                color = Color(0xFF38BDF8),
+                                color = Color(0xFFA66BE0),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp
                             )
@@ -1367,7 +1367,7 @@ private fun StarlinkPlansTab(
                     ) {
                         Column {
                             Text(text = plan.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                            Text(text = "Débit estimé : ${plan.speed}", fontSize = 11.sp, color = Color(0xFF38BDF8))
+                            Text(text = "Débit estimé : ${plan.speed}", fontSize = 11.sp, color = Color(0xFFA66BE0))
                         }
                         Text(
                             text = "${plan.price.toInt()} ${plan.currency} / mois",
@@ -1453,7 +1453,7 @@ private fun StarlinkSubCustomersClientTab(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
                 ) {
                     Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Group, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(44.dp))
+                        Icon(Icons.Default.Group, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(44.dp))
                         Spacer(modifier = Modifier.height(10.dp))
                         Text("Aucun partage actif", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(4.dp))
@@ -1487,13 +1487,13 @@ private fun StarlinkSubCustomersClientTab(
                             modifier = Modifier.size(38.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(20.dp))
                             }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(text = sub.name, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
                             Text(text = "Wallet: ${sub.walletId} • MAC: ${sub.macAddress}", color = Color(0xFF94A3B8), fontSize = 11.sp)
-                            Text(text = "Expire le : ${sub.expiryDate}", color = Color(0xFF64748B), fontSize = 10.sp)
+                            Text(text = "Expire le : ${sub.expiryDate}", color = Color(0xFF7B42AD), fontSize = 10.sp)
                         }
                         Surface(
                             shape = RoundedCornerShape(8.dp),

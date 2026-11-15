@@ -138,7 +138,7 @@ fun SplashScreen(
                 .scale(glowScale.value * 0.9f)
                 .alpha(glowAlpha.value * 0.35f)
                 .blur(70.dp)
-                .background(Color(0xFF38BDF8), CircleShape)
+                .background(Color(0xFFA66BE0), CircleShape)
         )
 
         // Floating finance & transfer badges
@@ -163,7 +163,7 @@ fun SplashScreen(
             Icon(
                 imageVector = Icons.Default.QrCode,
                 contentDescription = null,
-                tint = Color(0xFF38BDF8),
+                tint = Color(0xFFA66BE0),
                 modifier = Modifier.size(26.dp)
             )
         }

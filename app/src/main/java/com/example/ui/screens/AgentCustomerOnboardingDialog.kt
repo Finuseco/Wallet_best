@@ -501,7 +501,7 @@ fun AgentCustomerOnboardingDialog(
                                         value = birthDateMillis?.let { dateFormatter.format(Date(it)) } ?: "",
                                         onValueChange = {},
                                         readOnly = true,
-                                        placeholder = { Text("Choisir une date", color = Color(0xFF64748B), fontSize = 13.5.sp, fontFamily = MulishFontFamily) },
+                                        placeholder = { Text("Choisir une date", color = Color(0xFF7B42AD), fontSize = 13.5.sp, fontFamily = MulishFontFamily) },
                                         leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null, tint = Color(0xFF00E676)) },
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -605,7 +605,7 @@ fun AgentCustomerOnboardingDialog(
                                         placeholder = {
                                             Text(
                                                 text = "Ex: 833248614",
-                                                color = Color(0xFF64748B),
+                                                color = Color(0xFF7B42AD),
                                                 fontSize = 13.5.sp,
                                                 fontFamily = MulishFontFamily
                                             )
@@ -1029,7 +1029,7 @@ private fun NavigationButtonBar(
         ) {
             Text(
                 text = nextLabel,
-                color = if (nextEnabled) Color(0xFF0F172A) else Color(0xFF64748B),
+                color = if (nextEnabled) Color(0xFF0F172A) else Color(0xFF7B42AD),
                 fontWeight = FontWeight.Bold,
                 fontFamily = MulishFontFamily,
                 fontSize = 14.sp
@@ -1038,7 +1038,7 @@ private fun NavigationButtonBar(
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
-                tint = if (nextEnabled) Color(0xFF0F172A) else Color(0xFF64748B),
+                tint = if (nextEnabled) Color(0xFF0F172A) else Color(0xFF7B42AD),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -1177,7 +1177,7 @@ private fun FormInputField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    color = Color(0xFF64748B),
+                    color = Color(0xFF7B42AD),
                     fontSize = 13.5.sp,
                     fontFamily = MulishFontFamily
                 )

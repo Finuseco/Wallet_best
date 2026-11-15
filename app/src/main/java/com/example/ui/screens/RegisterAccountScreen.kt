@@ -362,7 +362,7 @@ fun RegisterAccountScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000E38)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF190A28)),
                         border = BorderStroke(1.2.dp, Color.White),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -2084,7 +2084,7 @@ fun RegistrationSuccessView(
                     text = "CashPay • Propulsé par FINUSECO SA",
                     fontFamily = MulishFontFamily,
                     fontSize = 11.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFF7B42AD)
                 )
             }
         }

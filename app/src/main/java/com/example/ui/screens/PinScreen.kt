@@ -163,8 +163,8 @@ fun PinScreen(
                                         .background(
                                             Brush.linearGradient(
                                                 listOf(
-                                                    Color(0xFF000E38),
-                                                    Color(0xFF00E5FF)
+                                                    Color(0xFF190A28),
+                                                    Color(0xFFA66BE0)
                                                 )
                                             )
                                         ),
@@ -344,7 +344,7 @@ fun PinScreen(
                             text = "Ce n'est pas votre compte ? Changer de compte",
                             fontFamily = MulishFontFamily,
                             fontSize = 11.sp,
-                            color = Color(0xFF38BDF8),
+                            color = Color(0xFFA66BE0),
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()

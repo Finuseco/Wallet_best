@@ -157,7 +157,7 @@ fun AgentCustomerListDialog(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Rechercher par nom, téléphone, Wallet ID...", color = Color(0xFF64748B), fontSize = 13.sp) },
+                    placeholder = { Text("Rechercher par nom, téléphone, Wallet ID...", color = Color(0xFF7B42AD), fontSize = 13.sp) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF818CF8)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,

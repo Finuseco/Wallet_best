@@ -263,7 +263,7 @@ fun SendUsdtDialog(
                             Text(
                                 text = "Solde blockchain :",
                                 fontSize = 10.sp,
-                                color = Color(0xFF64748B),
+                                color = Color(0xFF7B42AD),
                                 fontFamily = MulishFontFamily
                             )
                             Text(
@@ -297,7 +297,7 @@ fun SendUsdtDialog(
                         onValueChange = { addressInput = it },
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = {
-                            Text("T... (Adresse TRC20)", fontSize = 11.sp, color = Color(0xFF64748B))
+                            Text("T... (Adresse TRC20)", fontSize = 11.sp, color = Color(0xFF7B42AD))
                         },
                         trailingIcon = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -374,7 +374,7 @@ fun SendUsdtDialog(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("0.00", fontSize = 12.sp, color = Color(0xFF64748B)) },
+                        placeholder = { Text("0.00", fontSize = 12.sp, color = Color(0xFF7B42AD)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         shape = RoundedCornerShape(10.dp),
                         singleLine = true,
@@ -437,7 +437,7 @@ fun SendUsdtDialog(
                         value = pinInput,
                         onValueChange = { if (it.length <= 6) pinInput = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("••••", fontSize = 12.sp, color = Color(0xFF64748B)) },
+                        placeholder = { Text("••••", fontSize = 12.sp, color = Color(0xFF7B42AD)) },
                         visualTransformation = if (isPinVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         trailingIcon = {

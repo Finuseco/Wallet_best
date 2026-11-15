@@ -60,14 +60,14 @@ fun WithdrawalDialog(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = if (isExpress) Color(0xFFFF6600).copy(alpha = 0.15f) else ToofanGreen.copy(alpha = 0.15f),
+                    color = if (isExpress) Color(0xFF7A22D4).copy(alpha = 0.15f) else ToofanGreen.copy(alpha = 0.15f),
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = if (isExpress) Icons.Default.PhoneAndroid else Icons.Default.Storefront,
                             contentDescription = null,
-                            tint = if (isExpress) Color(0xFFFF6600) else ToofanGreen,
+                            tint = if (isExpress) Color(0xFF7A22D4) else ToofanGreen,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -107,7 +107,7 @@ fun WithdrawalDialog(
                             text = "Étape ${uiState.withdrawalStep}/4",
                             fontFamily = MulishFontFamily,
                             fontSize = 11.sp,
-                            color = if (isExpress) Color(0xFFFF6600) else ToofanGreen,
+                            color = if (isExpress) Color(0xFF7A22D4) else ToofanGreen,
                             fontWeight = FontWeight.Bold
                         )
                         LinearProgressBar(
@@ -239,7 +239,7 @@ fun StepSelectTypeAndRecipient(
                     .weight(1f)
                     .height(36.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(if (uiState.withdrawalType == "mobile_money") Color(0xFFFF6600) else Color.Transparent)
+                    .background(if (uiState.withdrawalType == "mobile_money") Color(0xFF7A22D4) else Color.Transparent)
                     .clickable { viewModel.setWithdrawalType("mobile_money") },
                 contentAlignment = Alignment.Center
             ) {
@@ -343,7 +343,7 @@ fun StepSelectTypeAndRecipient(
                         Text(
                             text = "Le portefeuille de ${uiState.searchedAgentProfile?.fullName ?: "l'utilisateur"} possède le rôle 'Client'. Un portefeuille client ne peut pas effectuer de retrait agent.",
                             fontSize = 11.sp,
-                            color = Color(0xFFE2E8F0)
+                            color = Color(0xFFE6DCF0)
                         )
 
                         Button(
@@ -433,7 +433,7 @@ fun StepSelectTypeAndRecipient(
 
                     Surface(
                         shape = RoundedCornerShape(6.dp),
-                        color = Color(0xFFFF6600).copy(alpha = 0.18f)
+                        color = Color(0xFF7A22D4).copy(alpha = 0.18f)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -444,12 +444,12 @@ fun StepSelectTypeAndRecipient(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp,
-                                color = Color(0xFFFF6600)
+                                color = Color(0xFF7A22D4)
                             )
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
                                 contentDescription = null,
-                                tint = Color(0xFFFF6600),
+                                tint = Color(0xFF7A22D4),
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -485,12 +485,12 @@ fun StepSelectTypeAndRecipient(
                                     .weight(1f)
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) Color(0xFFFF6600) else Color(0xFF334155),
+                                        color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { viewModel.setWithdrawalOperator(op.code) },
-                                color = if (isSelected) Color(0xFFFF6600).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                                color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
@@ -527,7 +527,7 @@ fun StepSelectTypeAndRecipient(
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
-                                        color = if (isSelected) Color(0xFFFF6600) else Color.White,
+                                        color = if (isSelected) Color(0xFF7A22D4) else Color.White,
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -640,7 +640,7 @@ fun StepEnterAmount(
                 ) {
                     Surface(
                         shape = CircleShape,
-                        color = Color(0xFFFF6600).copy(alpha = 0.18f),
+                        color = Color(0xFF7A22D4).copy(alpha = 0.18f),
                         modifier = Modifier.size(38.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -732,12 +732,12 @@ fun StepEnterAmount(
                         .height(42.dp)
                         .border(
                             width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) Color(0xFFFF6600) else Color(0xFF334155),
+                            color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
                             shape = RoundedCornerShape(10.dp)
                         )
                         .clip(RoundedCornerShape(10.dp))
                         .clickable { viewModel.setWithdrawalCurrency(curr) },
-                    color = if (isSelected) Color(0xFFFF6600).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                    color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
@@ -745,7 +745,7 @@ fun StepEnterAmount(
                             fontFamily = MulishFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
-                            color = if (isSelected) Color(0xFFFF6600) else Color.White
+                            color = if (isSelected) Color(0xFF7A22D4) else Color.White
                         )
                     }
                 }
@@ -767,7 +767,7 @@ fun StepEnterAmount(
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
-                    tint = if (country.isLocalDrc) ToofanGreen else Color(0xFF38BDF8),
+                    tint = if (country.isLocalDrc) ToofanGreen else Color(0xFFA66BE0),
                     modifier = Modifier.size(14.dp)
                 )
                 Text(
@@ -778,7 +778,7 @@ fun StepEnterAmount(
                     },
                     fontFamily = MulishFontFamily,
                     fontSize = 10.sp,
-                    color = if (country.isLocalDrc) ToofanGreen else Color(0xFF38BDF8)
+                    color = if (country.isLocalDrc) ToofanGreen else Color(0xFFA66BE0)
                 )
             }
         }
@@ -836,7 +836,7 @@ fun StepPreviewWithdrawal(
 
                     WithdrawalRecapRow("Montant demandé :", "${String.format("%.2f", p.amount)} ${p.currency}")
                     WithdrawalRecapRow("Frais estimés :", "${String.format("%.2f", p.fee)} ${p.currency}")
-                    WithdrawalRecapRow("Total à débiter :", "${String.format("%.2f", p.total)} ${p.currency}", isBold = true, customColor = if (isExpress) Color(0xFFFF6600) else ToofanGreen)
+                    WithdrawalRecapRow("Total à débiter :", "${String.format("%.2f", p.total)} ${p.currency}", isBold = true, customColor = if (isExpress) Color(0xFF7A22D4) else ToofanGreen)
 
                     HorizontalDivider(color = Color(0xFF334155), thickness = 1.dp)
 
@@ -849,8 +849,8 @@ fun StepPreviewWithdrawal(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(containerColor = if (isExpress) Color(0xFFFF6600).copy(alpha = 0.08f) else ToofanGreen.copy(alpha = 0.08f)),
-                border = BorderStroke(1.dp, if (isExpress) Color(0xFFFF6600).copy(alpha = 0.3f) else ToofanGreen.copy(alpha = 0.3f))
+                colors = CardDefaults.cardColors(containerColor = if (isExpress) Color(0xFF7A22D4).copy(alpha = 0.08f) else ToofanGreen.copy(alpha = 0.08f)),
+                border = BorderStroke(1.dp, if (isExpress) Color(0xFF7A22D4).copy(alpha = 0.3f) else ToofanGreen.copy(alpha = 0.3f))
             ) {
                 Row(
                     modifier = Modifier.padding(10.dp),
@@ -860,7 +860,7 @@ fun StepPreviewWithdrawal(
                     Icon(
                         Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = if (isExpress) Color(0xFFFF6600) else ToofanGreen,
+                        tint = if (isExpress) Color(0xFF7A22D4) else ToofanGreen,
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
@@ -868,7 +868,7 @@ fun StepPreviewWithdrawal(
                         fontFamily = MulishFontFamily,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isExpress) Color(0xFFFF6600) else ToofanGreen
+                        color = if (isExpress) Color(0xFF7A22D4) else ToofanGreen
                     )
                 }
             }
@@ -980,7 +980,7 @@ fun StepWithdrawalSuccess(
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            tint = if (isExpress) Color(0xFFFF6600) else ToFocusBorderColor,
+            tint = if (isExpress) Color(0xFF7A22D4) else ToFocusBorderColor,
             modifier = Modifier.size(60.dp)
         )
 
@@ -1023,7 +1023,7 @@ fun StepWithdrawalSuccess(
                 } else {
                     WithdrawalRecapRow("Point de retrait :", uiState.searchedAgentProfile?.fullName ?: "")
                 }
-                WithdrawalRecapRow("Statut :", "SUCCÈS", isBold = true, customColor = if (isExpress) Color(0xFFFF6600) else ToofanGreen)
+                WithdrawalRecapRow("Statut :", "SUCCÈS", isBold = true, customColor = if (isExpress) Color(0xFF7A22D4) else ToofanGreen)
             }
         }
     }
@@ -1084,7 +1084,7 @@ fun CountrySelectionDialog(
                         Icon(
                             imageVector = Icons.Default.Public,
                             contentDescription = null,
-                            tint = Color(0xFFFF6600),
+                            tint = Color(0xFF7A22D4),
                             modifier = Modifier.size(22.dp)
                         )
                         Text(
@@ -1109,11 +1109,11 @@ fun CountrySelectionDialog(
                             text = "Rechercher pays ou indicatif (+243, +225...)",
                             fontFamily = MulishFontFamily,
                             fontSize = 12.sp,
-                            color = Color(0xFF64748B)
+                            color = Color(0xFF7B42AD)
                         )
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF64748B))
+                        Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF7B42AD))
                     },
                     trailingIcon = {
                         if (searchQuery.isNotBlank()) {
@@ -1126,7 +1126,7 @@ fun CountrySelectionDialog(
                     shape = RoundedCornerShape(10.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFF6600),
+                        focusedBorderColor = Color(0xFF7A22D4),
                         unfocusedBorderColor = Color(0xFF334155),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
@@ -1155,11 +1155,11 @@ fun CountrySelectionDialog(
                                 .clip(RoundedCornerShape(8.dp))
                                 .border(
                                     width = if (isSelected) 1.5.dp else 1.dp,
-                                    color = if (isSelected) Color(0xFFFF6600) else Color(0xFF334155),
+                                    color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155),
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 .clickable { onCountrySelected(country) },
-                            color = if (isSelected) Color(0xFFFF6600).copy(alpha = 0.15f) else Color(0xFF1E293B)
+                            color = if (isSelected) Color(0xFF7A22D4).copy(alpha = 0.15f) else Color(0xFF1E293B)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -1196,7 +1196,7 @@ fun CountrySelectionDialog(
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = null,
-                                        tint = Color(0xFFFF6600),
+                                        tint = Color(0xFF7A22D4),
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -1228,7 +1228,7 @@ private fun LinearProgressBar(
                 .fillMaxHeight()
                 .fillMaxWidth(progress)
                 .clip(RoundedCornerShape(3.dp))
-                .background(if (isOrange) Color(0xFFFF6600) else ToofanGreen)
+                .background(if (isOrange) Color(0xFF7A22D4) else ToofanGreen)
         )
     }
 }

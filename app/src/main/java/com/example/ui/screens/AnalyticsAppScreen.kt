@@ -54,23 +54,23 @@ import java.util.*
 import kotlin.math.max
 
 // --- PALETTE OFFICIELLE CASHPAY ALL (Bleu Primaire & Neumorphisme Sombre Épuré) ---
-private val PrimaryNavy = Color(0xFF000E38)
-private val PrimaryNavyLight = Color(0xFF0A1E5C)
+private val PrimaryNavy = Color(0xFF190A28)
+private val PrimaryNavyLight = Color(0xFF2A0E42)
 private val PrimarySurface = Color(0xFF14203D)
 private val NeumorphBg = Color(0xFF0D131F)
 private val NeumorphSurface = Color(0xFF161F33)
 private val NeumorphSurfaceElevated = Color(0xFF1E2A44)
 private val NeumorphBorderLight = Color(0xFF283857)
 private val NeumorphBorderSubtle = Color(0xFF1D283E)
-private val NeumorphCyan = Color(0xFF00E5FF)
-private val NeumorphBlue = Color(0xFF38BDF8)
+private val NeumorphCyan = Color(0xFFA66BE0)
+private val NeumorphBlue = Color(0xFFA66BE0)
 private val NeumorphTeal = Color(0xFF1DE9B6)
 private val NeumorphGreen = Color(0xFF10B981)
 private val NeumorphRed = Color(0xFFFF4868)
 private val NeumorphAmber = Color(0xFFF59E0B)
 private val NeumorphTextPrimary = Color.White
 private val NeumorphTextSecondary = Color(0xFF94A3B8)
-private val NeumorphTextTertiary = Color(0xFF64748B)
+private val NeumorphTextTertiary = Color(0xFF7B42AD)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

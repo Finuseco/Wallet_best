@@ -326,7 +326,7 @@ fun DepositDialog(
                         OutlinedTextField(
                             value = uiState.depositPhoneNumber,
                             onValueChange = onPhoneChange,
-                            placeholder = { Text("+243... ou 081...", color = Color(0xFF64748B), fontFamily = MulishFontFamily) },
+                            placeholder = { Text("+243... ou 081...", color = Color(0xFF7B42AD), fontFamily = MulishFontFamily) },
                             leadingIcon = {
                                 Icon(Icons.Default.PhoneAndroid, contentDescription = null, tint = Color(0xFF00E676))
                             },
@@ -432,7 +432,7 @@ fun DepositDialog(
                 OutlinedTextField(
                     value = uiState.depositAmount,
                     onValueChange = onAmountChange,
-                    placeholder = { Text("Ex: 50", color = Color(0xFF64748B), fontFamily = MulishFontFamily) },
+                    placeholder = { Text("Ex: 50", color = Color(0xFF7B42AD), fontFamily = MulishFontFamily) },
                     trailingIcon = {
                         Text(
                             text = "USD",

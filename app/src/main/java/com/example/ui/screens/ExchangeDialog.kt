@@ -443,10 +443,10 @@ fun ExchangeDialog(
                                         .weight(1f)
                                         .height(34.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(if (isSelected) Color(0xFF38BDF8) else Color(0xFF0F172A))
+                                        .background(if (isSelected) Color(0xFFA66BE0) else Color(0xFF0F172A))
                                         .border(
                                             1.dp,
-                                            if (isSelected) Color(0xFF38BDF8) else Color(0xFF334155),
+                                            if (isSelected) Color(0xFFA66BE0) else Color(0xFF334155),
                                             RoundedCornerShape(8.dp)
                                         )
                                         .clickable { onToCurrencyChange(curr) },
@@ -508,7 +508,7 @@ fun ExchangeDialog(
                 OutlinedTextField(
                     value = amount,
                     onValueChange = onAmountChange,
-                    placeholder = { Text("Ex: 50", color = Color(0xFF64748B), fontFamily = MulishFontFamily, fontSize = 12.sp) },
+                    placeholder = { Text("Ex: 50", color = Color(0xFF7B42AD), fontFamily = MulishFontFamily, fontSize = 12.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -578,7 +578,7 @@ fun ExchangeDialog(
                                 text = if (liveRate != null && parsedAmount > 0.0) "${formatAmount(estimatedToAmount, toCurrency)} $toCurrency" else "0.00 $toCurrency",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFF38BDF8),
+                                color = Color(0xFFA66BE0),
                                 fontFamily = MulishFontFamily
                             )
                         }
@@ -601,7 +601,7 @@ fun ExchangeDialog(
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 6 && it.all { ch -> ch.isDigit() }) onPinChange(it) },
-                    placeholder = { Text("••••", color = Color(0xFF64748B), fontFamily = MulishFontFamily) },
+                    placeholder = { Text("••••", color = Color(0xFF7B42AD), fontFamily = MulishFontFamily) },
                     leadingIcon = {
                         Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF00E676), modifier = Modifier.size(18.dp))
                     },

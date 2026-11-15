@@ -202,7 +202,7 @@ fun CashPayCameraCaptureDialog(
                                         modifier = Modifier
                                             .size(width = 240.dp, height = 300.dp)
                                             .clip(CircleShape)
-                                            .border(3.dp, Color(0xFFFF6600), CircleShape)
+                                            .border(3.dp, Color(0xFF7A22D4), CircleShape)
                                             .background(Color.Transparent),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -217,9 +217,9 @@ fun CashPayCameraCaptureDialog(
                                     Spacer(modifier = Modifier.height(20.dp))
 
                                     Surface(
-                                        color = Color(0xFF000E38).copy(alpha = 0.85f),
+                                        color = Color(0xFF190A28).copy(alpha = 0.85f),
                                         shape = RoundedCornerShape(16.dp),
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF6600))
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF7A22D4))
                                     ) {
                                         Text(
                                             text = "Positionnez votre visage au centre du cercle",
@@ -246,7 +246,7 @@ fun CashPayCameraCaptureDialog(
                                             .fillMaxWidth()
                                             .height(220.dp)
                                             .clip(RoundedCornerShape(16.dp))
-                                            .border(3.dp, Color(0xFFFF6600), RoundedCornerShape(16.dp))
+                                            .border(3.dp, Color(0xFF7A22D4), RoundedCornerShape(16.dp))
                                             .background(Color.Transparent),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -264,9 +264,9 @@ fun CashPayCameraCaptureDialog(
                                     Spacer(modifier = Modifier.height(20.dp))
 
                                     Surface(
-                                        color = Color(0xFF000E38).copy(alpha = 0.85f),
+                                        color = Color(0xFF190A28).copy(alpha = 0.85f),
                                         shape = RoundedCornerShape(16.dp),
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF6600))
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF7A22D4))
                                     ) {
                                         Text(
                                             text = "Document détecté • Maintenez l'appareil stable",
@@ -318,7 +318,7 @@ fun CashPayCameraCaptureDialog(
                                         else -> Icons.Default.FlashAuto
                                     },
                                     contentDescription = "Flash",
-                                    tint = if (flashMode == ImageCapture.FLASH_MODE_ON) Color(0xFFFF6600) else Color.White
+                                    tint = if (flashMode == ImageCapture.FLASH_MODE_ON) Color(0xFF7A22D4) else Color.White
                                 )
                             }
 
@@ -347,7 +347,7 @@ fun CashPayCameraCaptureDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         if (isCapturing) {
-                            CircularProgressIndicator(color = Color(0xFFFF6600))
+                            CircularProgressIndicator(color = Color(0xFF7A22D4))
                         } else {
                             IconButton(
                                 onClick = {
@@ -388,12 +388,12 @@ fun CashPayCameraCaptureDialog(
                                 modifier = Modifier
                                     .size(76.dp)
                                     .background(Color.White, CircleShape)
-                                    .border(4.dp, Color(0xFFFF6600), CircleShape)
+                                    .border(4.dp, Color(0xFF7A22D4), CircleShape)
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .size(60.dp)
-                                        .background(Color(0xFFFF6600), CircleShape)
+                                        .background(Color(0xFF7A22D4), CircleShape)
                                 )
                             }
                         }
@@ -410,7 +410,7 @@ fun CashPayCameraCaptureDialog(
                         Icon(
                             imageVector = Icons.Default.CameraAlt,
                             contentDescription = null,
-                            tint = Color(0xFFFF6600),
+                            tint = Color(0xFF7A22D4),
                             modifier = Modifier.size(64.dp)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -432,7 +432,7 @@ fun CashPayCameraCaptureDialog(
                         Spacer(modifier = Modifier.height(20.dp))
                         Button(
                             onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4))
                         ) {
                             Text("Autoriser la caméra", color = Color.White, fontWeight = FontWeight.Bold)
                         }
@@ -444,7 +444,7 @@ fun CashPayCameraCaptureDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF000E38))
+                        .background(Color(0xFF190A28))
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween
@@ -488,7 +488,7 @@ fun CashPayCameraCaptureDialog(
 
                             // Quality check badge
                             Surface(
-                                color = Color(0xFF000E38).copy(alpha = 0.85f),
+                                color = Color(0xFF190A28).copy(alpha = 0.85f),
                                 shape = RoundedCornerShape(10.dp),
                                 border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00C853)),
                                 modifier = Modifier
@@ -553,7 +553,7 @@ fun CashPayCameraCaptureDialog(
                                 val finalDataUrl = "data:image/jpeg;base64,$base64String"
                                 onImageCaptured(finalDataUrl)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .weight(1f)

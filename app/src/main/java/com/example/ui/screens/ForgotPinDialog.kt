@@ -101,7 +101,7 @@ fun ForgotPinDialog(
                         Surface(
                             shape = RoundedCornerShape(20.dp),
                             color = if (active) ToofanGreen else if (completed) ToofanGreen.copy(alpha = 0.2f) else Color(0xFFF1F5F9),
-                            border = BorderStroke(1.dp, if (active || completed) ToofanGreen else Color(0xFFE2E8F0)),
+                            border = BorderStroke(1.dp, if (active || completed) ToofanGreen else Color(0xFFE6DCF0)),
                             modifier = Modifier.padding(2.dp)
                         ) {
                             Text(
@@ -109,7 +109,7 @@ fun ForgotPinDialog(
                                 fontFamily = MulishFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 10.sp,
-                                color = if (active) Color.White else if (completed) ToofanGreen else Color(0xFF64748B),
+                                color = if (active) Color.White else if (completed) ToofanGreen else Color(0xFF7B42AD),
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
@@ -211,7 +211,7 @@ fun ForgotPinDialog(
                                             .clip(RoundedCornerShape(10.dp))
                                             .clickable { onChannelChange(chKey) },
                                         color = if (isSel) ToofanGreen.copy(alpha = 0.12f) else Color(0xFFF8FAFC),
-                                        border = BorderStroke(1.dp, if (isSel) ToofanGreen else Color(0xFFE2E8F0))
+                                        border = BorderStroke(1.dp, if (isSel) ToofanGreen else Color(0xFFE6DCF0))
                                     ) {
                                         Box(
                                             modifier = Modifier.padding(vertical = 10.dp),
@@ -308,7 +308,7 @@ fun ForgotPinDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Fermer", fontFamily = MulishFontFamily, color = Color(0xFF64748B))
+                Text("Fermer", fontFamily = MulishFontFamily, color = Color(0xFF7B42AD))
             }
         }
     )

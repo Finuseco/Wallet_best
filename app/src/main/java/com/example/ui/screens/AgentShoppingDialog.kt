@@ -204,7 +204,7 @@ fun AgentShoppingDialog(
                                         .size(42.dp)
                                         .background(
                                             Brush.linearGradient(
-                                                listOf(Color(0xFFFF6600), Color(0xFFFF9900))
+                                                listOf(Color(0xFF7A22D4), Color(0xFFFF9900))
                                             ),
                                             CircleShape
                                         ),
@@ -306,11 +306,11 @@ fun AgentShoppingDialog(
                         TabRow(
                             selectedTabIndex = uiState.shoppingActiveTab,
                             containerColor = Color.Transparent,
-                            contentColor = Color(0xFFFF6600),
+                            contentColor = Color(0xFF7A22D4),
                             indicator = { tabPositions ->
                                 TabRowDefaults.Indicator(
                                     modifier = Modifier.tabIndicatorOffset(tabPositions[uiState.shoppingActiveTab]),
-                                    color = Color(0xFFFF6600),
+                                    color = Color(0xFF7A22D4),
                                     height = 3.dp
                                 )
                             },
@@ -324,7 +324,7 @@ fun AgentShoppingDialog(
                                         Icon(
                                             imageVector = item.second,
                                             contentDescription = null,
-                                            tint = if (uiState.shoppingActiveTab == index) Color(0xFFFF6600) else Color(0xFF94A3B8),
+                                            tint = if (uiState.shoppingActiveTab == index) Color(0xFF7A22D4) else Color(0xFF94A3B8),
                                             modifier = Modifier.size(17.dp)
                                         )
                                     },
@@ -336,7 +336,7 @@ fun AgentShoppingDialog(
                                             fontSize = 11.5.sp,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
-                                            color = if (uiState.shoppingActiveTab == index) Color(0xFFFF6600) else Color(0xFF94A3B8)
+                                            color = if (uiState.shoppingActiveTab == index) Color(0xFF7A22D4) else Color(0xFF94A3B8)
                                         )
                                     }
                                 )
@@ -354,7 +354,7 @@ fun AgentShoppingDialog(
             ) {
                 if (uiState.isLoadingShoppingBoutiques && uiState.shoppingBoutiques.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFFF6600))
+                        CircularProgressIndicator(color = Color(0xFF7A22D4))
                     }
                 } else if (uiState.shoppingBoutiquesError != null && uiState.shoppingBoutiques.isEmpty()) {
                     Column(modifier = Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -458,7 +458,7 @@ fun AgentShoppingDialog(
                     Icon(
                         if (boutiqueToEdit != null) Icons.Default.Edit else Icons.Default.AddBusiness,
                         contentDescription = null,
-                        tint = Color(0xFFFF6600)
+                        tint = Color(0xFF7A22D4)
                     )
                     Text(
                         text = if (boutiqueToEdit != null) "Modifier la Boutique" else "Créer une Boutique",
@@ -487,11 +487,11 @@ fun AgentShoppingDialog(
                         value = boutiqueNameInput,
                         onValueChange = { boutiqueNameInput = it },
                         label = { Text("Nom de la boutique *", color = Color(0xFF94A3B8)) },
-                        placeholder = { Text("Ex : Mode Élegance Kinshasa", color = Color(0xFF64748B)) },
+                        placeholder = { Text("Ex : Mode Élegance Kinshasa", color = Color(0xFF7B42AD)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFFF6600),
+                            focusedBorderColor = Color(0xFF7A22D4),
                             unfocusedBorderColor = Color(0xFF334155),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
@@ -505,11 +505,11 @@ fun AgentShoppingDialog(
                         value = boutiqueAddressInput,
                         onValueChange = { boutiqueAddressInput = it },
                         label = { Text("Adresse physique", color = Color(0xFF94A3B8)) },
-                        placeholder = { Text("Ex : Av. Kasa-Vubu 12, Kinshasa", color = Color(0xFF64748B)) },
+                        placeholder = { Text("Ex : Av. Kasa-Vubu 12, Kinshasa", color = Color(0xFF7B42AD)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFFF6600),
+                            focusedBorderColor = Color(0xFF7A22D4),
                             unfocusedBorderColor = Color(0xFF334155),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
@@ -523,7 +523,7 @@ fun AgentShoppingDialog(
                         value = boutiqueWhatsappInput,
                         onValueChange = { boutiqueWhatsappInput = it },
                         label = { Text("Numéro WhatsApp Public", color = Color(0xFF94A3B8)) },
-                        placeholder = { Text("Ex : +243812345678", color = Color(0xFF64748B)) },
+                        placeholder = { Text("Ex : +243812345678", color = Color(0xFF7B42AD)) },
                         leadingIcon = {
                             Icon(Icons.Default.Whatsapp, contentDescription = null, tint = Color(0xFF25D366))
                         },
@@ -531,7 +531,7 @@ fun AgentShoppingDialog(
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFFF6600),
+                            focusedBorderColor = Color(0xFF7A22D4),
                             unfocusedBorderColor = Color(0xFF334155),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
@@ -568,7 +568,7 @@ fun AgentShoppingDialog(
                         }
                         showBoutiqueModal = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
@@ -624,7 +624,7 @@ fun AgentShoppingDialog(
                             
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("ID Produit :", color = Color(0xFF94A3B8), fontSize = 12.sp)
-                                Text(refInfo?.productId ?: p.id, color = Color(0xFF38BDF8), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Text(refInfo?.productId ?: p.id, color = Color(0xFFA66BE0), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                             }
                             
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -757,7 +757,7 @@ private fun BoutiquesTabContent(
 
                 Button(
                     onClick = onCreateClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                 ) {
@@ -784,10 +784,10 @@ private fun BoutiquesTabContent(
                         Box(
                             modifier = Modifier
                                 .size(60.dp)
-                                .background(Color(0xFFFF6600).copy(alpha = 0.15f), CircleShape),
+                                .background(Color(0xFF7A22D4).copy(alpha = 0.15f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFFFF6600), modifier = Modifier.size(32.dp))
+                            Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(32.dp))
                         }
                         Text(
                             text = "Aucune boutique créée",
@@ -806,7 +806,7 @@ private fun BoutiquesTabContent(
                         Spacer(modifier = Modifier.height(6.dp))
                         Button(
                             onClick = onCreateClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(Icons.Default.AddBusiness, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -841,7 +841,7 @@ private fun BoutiquesTabContent(
                                         .background(Color(0xFF0F172A), RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFFFF6600), modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(20.dp))
                                 }
                                 Column {
                                     Text(
@@ -854,7 +854,7 @@ private fun BoutiquesTabContent(
                                     Text(
                                         text = "ID: ${b.id}",
                                         fontSize = 11.sp,
-                                        color = Color(0xFF64748B),
+                                        color = Color(0xFF7B42AD),
                                         fontFamily = MulishFontFamily
                                     )
                                 }
@@ -883,7 +883,7 @@ private fun BoutiquesTabContent(
                                     Icon(
                                         Icons.Default.Place,
                                         contentDescription = null,
-                                        tint = Color(0xFFFF6600),
+                                        tint = Color(0xFF7A22D4),
                                         modifier = Modifier.size(14.dp)
                                     )
                                     Text(
@@ -925,9 +925,9 @@ private fun BoutiquesTabContent(
                                 onClick = { onViewProducts(b) },
                                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
                             ) {
-                                Icon(Icons.Default.ShoppingBag, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color(0xFF38BDF8))
+                                Icon(Icons.Default.ShoppingBag, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color(0xFFA66BE0))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Voir les produits", color = Color(0xFF38BDF8), fontSize = 12.sp)
+                                Text("Voir les produits", color = Color(0xFFA66BE0), fontSize = 12.sp)
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -995,7 +995,7 @@ private fun ProductsTabContent(
 
                 Button(
                     onClick = onPublishNewClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                 ) {
@@ -1047,10 +1047,10 @@ private fun ProductsTabContent(
                         Box(
                             modifier = Modifier
                                 .size(60.dp)
-                                .background(Color(0xFF38BDF8).copy(alpha = 0.15f), CircleShape),
+                                .background(Color(0xFFA66BE0).copy(alpha = 0.15f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(32.dp))
+                            Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFFA66BE0), modifier = Modifier.size(32.dp))
                         }
                         Text(
                             text = "Aucun produit trouvé",
@@ -1069,7 +1069,7 @@ private fun ProductsTabContent(
                         Spacer(modifier = Modifier.height(6.dp))
                         Button(
                             onClick = onPublishNewClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -1101,9 +1101,9 @@ private fun FilterChipShopping(
 ) {
     Surface(
         onClick = onClick,
-        color = if (isSelected) Color(0xFFFF6600) else Color(0xFF1E293B),
+        color = if (isSelected) Color(0xFF7A22D4) else Color(0xFF1E293B),
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, if (isSelected) Color(0xFFFF6600) else Color(0xFF334155))
+        border = BorderStroke(1.dp, if (isSelected) Color(0xFF7A22D4) else Color(0xFF334155))
     ) {
         Text(
             text = label,
@@ -1157,7 +1157,7 @@ private fun ProductAgentCard(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(32.dp))
+                        Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF7B42AD), modifier = Modifier.size(32.dp))
                     }
                 }
 
@@ -1185,7 +1185,7 @@ private fun ProductAgentCard(
                                 Text("Public", fontSize = 10.5.sp, color = Color(0xFF34D399), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                             }
                         } else {
-                            Surface(color = Color(0xFF64748B).copy(alpha = 0.2f), shape = RoundedCornerShape(4.dp)) {
+                            Surface(color = Color(0xFF7B42AD).copy(alpha = 0.2f), shape = RoundedCornerShape(4.dp)) {
                                 Text("Privé", fontSize = 10.5.sp, color = Color(0xFF94A3B8), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                             }
                         }
@@ -1226,7 +1226,7 @@ private fun ProductAgentCard(
                             text = "Stock : ${product.stock}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (product.stock > 0) Color(0xFF38BDF8) else Color(0xFFEF4444)
+                            color = if (product.stock > 0) Color(0xFFA66BE0) else Color(0xFFEF4444)
                         )
                     }
                 }
@@ -1304,7 +1304,7 @@ private fun ProductAgentCard(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     IconButton(onClick = onViewReference, modifier = Modifier.size(30.dp)) {
-                        Icon(Icons.Default.QrCode, contentDescription = "Référence", tint = Color(0xFF38BDF8), modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.QrCode, contentDescription = "Référence", tint = Color(0xFFA66BE0), modifier = Modifier.size(16.dp))
                     }
                     IconButton(onClick = onEdit, modifier = Modifier.size(30.dp)) {
                         Icon(Icons.Default.Edit, contentDescription = "Modifier", tint = Color(0xFFFF9900), modifier = Modifier.size(16.dp))
@@ -1457,7 +1457,7 @@ private fun PublishProductTabContent(
                         }
                         Button(
                             onClick = onCreateBoutiqueClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("Créer une boutique", fontSize = 12.sp)
@@ -1474,14 +1474,14 @@ private fun PublishProductTabContent(
                                 readOnly = true,
                                 label = { Text("Sélectionnez la boutique") },
                                 leadingIcon = {
-                                    Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFFFF6600), modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(18.dp))
                                 },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = boutiqueDropdownExpanded) },
                                 modifier = Modifier.menuAnchor().fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White,
-                                    focusedBorderColor = Color(0xFFFF6600),
+                                    focusedBorderColor = Color(0xFF7A22D4),
                                     unfocusedBorderColor = Color(0xFF334155),
                                     focusedContainerColor = Color(0xFF0F172A),
                                     unfocusedContainerColor = Color(0xFF0F172A)
@@ -1496,7 +1496,7 @@ private fun PublishProductTabContent(
                                 boutiques.forEach { b ->
                                     DropdownMenuItem(
                                         leadingIcon = {
-                                            Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFFFF6600), modifier = Modifier.size(16.dp))
+                                            Icon(Icons.Default.Store, contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(16.dp))
                                         },
                                         text = { Text(b.name, color = Color.White) },
                                         onClick = {
@@ -1532,7 +1532,7 @@ private fun PublishProductTabContent(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color(0xFFFF6600),
+                            focusedBorderColor = Color(0xFF7A22D4),
                             unfocusedBorderColor = Color(0xFF334155),
                             focusedContainerColor = Color(0xFF0F172A),
                             unfocusedContainerColor = Color(0xFF0F172A)
@@ -1550,7 +1550,7 @@ private fun PublishProductTabContent(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color(0xFFFF6600),
+                            focusedBorderColor = Color(0xFF7A22D4),
                             unfocusedBorderColor = Color(0xFF334155),
                             focusedContainerColor = Color(0xFF0F172A),
                             unfocusedContainerColor = Color(0xFF0F172A)
@@ -1570,14 +1570,14 @@ private fun PublishProductTabContent(
                             readOnly = true,
                             label = { Text("Catégorie *") },
                             leadingIcon = {
-                                Icon(getCategoryIcon(selectedCat.id), contentDescription = null, tint = Color(0xFFFF6600), modifier = Modifier.size(18.dp))
+                                Icon(getCategoryIcon(selectedCat.id), contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(18.dp))
                             },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1592,7 +1592,7 @@ private fun PublishProductTabContent(
                             SHOPPING_CATEGORIES.forEach { cat ->
                                 DropdownMenuItem(
                                     leadingIcon = {
-                                        Icon(getCategoryIcon(cat.id), contentDescription = null, tint = Color(0xFFFF6600), modifier = Modifier.size(18.dp))
+                                        Icon(getCategoryIcon(cat.id), contentDescription = null, tint = Color(0xFF7A22D4), modifier = Modifier.size(18.dp))
                                     },
                                     text = { Text(cat.nameFr, color = Color.White) },
                                     onClick = {
@@ -1617,7 +1617,7 @@ private fun PublishProductTabContent(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color(0xFFFF6600),
+                            focusedBorderColor = Color(0xFF7A22D4),
                             unfocusedBorderColor = Color(0xFF334155),
                             focusedContainerColor = Color(0xFF0F172A),
                             unfocusedContainerColor = Color(0xFF0F172A)
@@ -1649,7 +1649,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1714,7 +1714,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1732,7 +1732,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1771,7 +1771,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1787,7 +1787,7 @@ private fun PublishProductTabContent(
                                 }
                             },
                             enabled = imageUrlInput.isNotBlank() && imagesList.size < 5,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("Ajouter")
@@ -1802,7 +1802,7 @@ private fun PublishProductTabContent(
                             },
                             contentPadding = PaddingValues(0.dp)
                         ) {
-                            Text("+ Image Démo", color = Color(0xFF38BDF8), fontSize = 11.5.sp)
+                            Text("+ Image Démo", color = Color(0xFFA66BE0), fontSize = 11.5.sp)
                         }
                     }
 
@@ -1859,7 +1859,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1877,7 +1877,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1942,7 +1942,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1960,7 +1960,7 @@ private fun PublishProductTabContent(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFFF6600),
+                                focusedBorderColor = Color(0xFF7A22D4),
                                 unfocusedBorderColor = Color(0xFF334155),
                                 focusedContainerColor = Color(0xFF0F172A),
                                 unfocusedContainerColor = Color(0xFF0F172A)
@@ -1976,7 +1976,7 @@ private fun PublishProductTabContent(
                                     newShipProvince = ""
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF38BDF8)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA66BE0)),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("+", fontWeight = FontWeight.Bold)
@@ -1999,7 +1999,7 @@ private fun PublishProductTabContent(
                                 Icon(
                                     imageVector = Icons.Default.LocalShipping,
                                     contentDescription = null,
-                                    tint = Color(0xFF38BDF8),
+                                    tint = Color(0xFFA66BE0),
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Text("${s.province} (${s.country}) : ${s.rate} $", color = Color.White, fontSize = 12.sp)
@@ -2116,7 +2116,7 @@ private fun PublishProductTabContent(
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color(0xFF00E676),
                             checkedTrackColor = Color(0xFF00E676).copy(alpha = 0.3f),
-                            uncheckedThumbColor = Color(0xFF64748B),
+                            uncheckedThumbColor = Color(0xFF7B42AD),
                             uncheckedTrackColor = Color(0xFF334155)
                         )
                     )
@@ -2185,7 +2185,7 @@ private fun PublishProductTabContent(
                 },
                 enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6600)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7A22D4)),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (isLoading) {
@@ -2248,7 +2248,7 @@ private fun PublicCatalogTabContent(
                         }
 
                         IconButton(onClick = { onRefreshCatalog(selectedStoreId) }) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFF38BDF8))
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color(0xFFA66BE0))
                         }
                     }
 
@@ -2285,7 +2285,7 @@ private fun PublicCatalogTabContent(
         if (isLoading) {
             item {
                 Box(modifier = Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color(0xFFFF6600))
+                    CircularProgressIndicator(color = Color(0xFF7A22D4))
                 }
             }
         } else if (publicCatalog == null || publicCatalog.products.isEmpty()) {
@@ -2300,7 +2300,7 @@ private fun PublicCatalogTabContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(32.dp))
+                        Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF7B42AD), modifier = Modifier.size(32.dp))
                         Text("Aucun article public dans cette sélection", color = Color(0xFF94A3B8), fontSize = 13.sp)
                     }
                 }
@@ -2328,7 +2328,7 @@ private fun PublicCatalogTabContent(
                             if (!img.isNullOrBlank()) {
                                 AsyncImage(model = img, contentDescription = null, modifier = Modifier.fillMaxSize())
                             } else {
-                                Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF64748B))
+                                Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color(0xFF7B42AD))
                             }
                         }
 
@@ -2341,7 +2341,7 @@ private fun PublicCatalogTabContent(
                         p.seller?.let { sel ->
                             sel.walletId?.let { wid ->
                                 Surface(color = Color(0xFF0F172A), shape = RoundedCornerShape(6.dp)) {
-                                    Text(wid.take(8) + "...", color = Color(0xFF38BDF8), fontSize = 11.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp))
+                                    Text(wid.take(8) + "...", color = Color(0xFFA66BE0), fontSize = 11.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp))
                                 }
                             }
                         }

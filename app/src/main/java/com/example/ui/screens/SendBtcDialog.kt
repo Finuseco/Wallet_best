@@ -289,7 +289,7 @@ fun SendBtcDialog(
                     text = "Adresse de destination",
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -298,7 +298,7 @@ fun SendBtcDialog(
                     onValueChange = {
                         addressInput = it.trim().removePrefix("bitcoin:").substringBefore("?")
                     },
-                    placeholder = { Text("bc1q... ou 1...", color = Color(0xFF64748B), fontSize = 12.sp) },
+                    placeholder = { Text("bc1q... ou 1...", color = Color(0xFF7B42AD), fontSize = 12.sp) },
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -331,7 +331,7 @@ fun SendBtcDialog(
                                 Icon(
                                     imageVector = Icons.Default.QrCodeScanner,
                                     contentDescription = "Scanner",
-                                    tint = Color(0xFF00E5FF),
+                                    tint = Color(0xFFA66BE0),
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -401,7 +401,7 @@ fun SendBtcDialog(
                             } else ""
                         },
                         label = { Text("Montant USD ($)", color = Color(0xFF94A3B8), fontSize = 11.5.sp) },
-                        placeholder = { Text("Ex: 25", color = Color(0xFF64748B), fontSize = 12.sp) },
+                        placeholder = { Text("Ex: 25", color = Color(0xFF7B42AD), fontSize = 12.sp) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
@@ -428,7 +428,7 @@ fun SendBtcDialog(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "≈ $btcAmountInput BTC",
-                            color = Color(0xFF38BDF8),
+                            color = Color(0xFFA66BE0),
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.fillMaxWidth()
@@ -446,7 +446,7 @@ fun SendBtcDialog(
                             } else ""
                         },
                         label = { Text("Montant BTC (₿)", color = Color(0xFF94A3B8), fontSize = 11.5.sp) },
-                        placeholder = { Text("Ex: 0.0005", color = Color(0xFF64748B), fontSize = 12.sp) },
+                        placeholder = { Text("Ex: 0.0005", color = Color(0xFF7B42AD), fontSize = 12.sp) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
@@ -472,7 +472,7 @@ fun SendBtcDialog(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "≈ $ $usdAmountInput USD",
-                            color = Color(0xFF38BDF8),
+                            color = Color(0xFFA66BE0),
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.fillMaxWidth()
@@ -487,7 +487,7 @@ fun SendBtcDialog(
                     text = "Code PIN (4 chiffres)",
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFE2E8F0),
+                    color = Color(0xFFE6DCF0),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -496,7 +496,7 @@ fun SendBtcDialog(
                     onValueChange = {
                         pinInput = it.filter { ch -> ch.isDigit() }.take(4)
                     },
-                    placeholder = { Text("••••", color = Color(0xFF64748B)) },
+                    placeholder = { Text("••••", color = Color(0xFF7B42AD)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     visualTransformation = if (isPinVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     shape = RoundedCornerShape(12.dp),

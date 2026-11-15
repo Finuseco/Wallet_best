@@ -3,6 +3,7 @@ package com.example.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,7 +77,7 @@ fun ActivateAgentDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .wrapContentHeight().verticalScroll(androidx.compose.foundation.rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 // Success Popup View
@@ -144,7 +145,7 @@ fun ActivateAgentDialog(
 
                     // Plan Selection Cards
                     val plans = listOf(
-                        Triple("promo", "Offre Promotionnelle", "★ Formule Réduite (Avantages Agent Inclus)"),
+                        Triple("promo", "Offre Promotionnelle", "Formule Réduite (Avantages Agent Inclus)"),
                         Triple("normal", "Offre Normale", "Formule Standard Complète")
                     )
 
@@ -156,7 +157,7 @@ fun ActivateAgentDialog(
                                 .clip(RoundedCornerShape(12.dp))
                                 .clickable(enabled=!isLoading) { onPlanChange(pKey) },
                             color = if (isSel) ToofanGreen.copy(alpha = 0.08f) else Color(0xFFF8FAFC),
-                            border = BorderStroke(if (isSel) 2.dp else 1.dp, if (isSel) ToofanGreen else Color(0xFFE2E8F0))
+                            border = BorderStroke(if (isSel) 2.dp else 1.dp, if (isSel) ToofanGreen else Color(0xFFE6DCF0))
                         ) {
                             Row(
                                 modifier = Modifier.padding(12.dp),
@@ -180,14 +181,23 @@ fun ActivateAgentDialog(
                                         text = pDesc,
                                         fontFamily = MulishFontFamily,
                                         fontSize = 11.sp,
-                                        color = Color(0xFF64748B)
+                                        color = Color(0xFF7B42AD)
                                     )
                                 }
                             }
                         }
                     }
 
-                    Text(if(feeLoading) "Chargement du tarif…" else if(fee!=null) "Abonnement 30 jours : ${String.format(java.util.Locale.US, "%.2f",fee)} USD — montant débité" else "Tarif indisponible")
+                    Surface(color = BrandBlue.copy(alpha = .1f), shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("Tarif de la formule sélectionnée", color = ToofanMainDark, fontWeight = FontWeight.Bold)
+                            Text(if (feeLoading) "Chargement du tarif…" else if (fee != null)
+                                "${String.format(java.util.Locale.FRANCE, "%.2f", fee)} USD / 30 jours" else "Tarif indisponible",
+                                color = BrandBlue, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            Text("Montant communiqué par CashPay, débité après votre confirmation.", fontSize = 12.sp)
+                        }
+                    }
                     if(fee==null && !feeLoading) TextButton(onClick=onRetryFee){Text("Actualiser le tarif")}
                     // PIN Input
                     Text(
@@ -221,7 +231,7 @@ fun ActivateAgentDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Fermer", fontFamily = MulishFontFamily, color = Color(0xFF64748B))
+                Text("Fermer", fontFamily = MulishFontFamily, color = Color(0xFF7B42AD))
             }
         }
     )

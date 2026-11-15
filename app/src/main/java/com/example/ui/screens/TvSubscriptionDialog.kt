@@ -186,7 +186,7 @@ fun TvSubscriptionDialog(
                                 text = "1. Choisissez votre fournisseur TV :",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFFE2E8F0)
+                                color = Color(0xFFE6DCF0)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
@@ -236,7 +236,7 @@ fun TvSubscriptionDialog(
                                     text = "2. Sélectionnez un forfait (${currentProviderInfo.name}) :",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFFE2E8F0)
+                                    color = Color(0xFFE6DCF0)
                                 )
                                 if (tv.isLoadingPackages) {
                                     CircularProgressIndicator(
@@ -333,7 +333,7 @@ fun TvSubscriptionDialog(
                                 text = "3. ${currentProviderInfo.smartcardLabel} :",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFFE2E8F0)
+                                color = Color(0xFFE6DCF0)
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             OutlinedTextField(
@@ -341,7 +341,7 @@ fun TvSubscriptionDialog(
                                 onValueChange = { viewModel.setTvSmartcardNumber(it) },
                                 modifier = Modifier.fillMaxWidth(),
                                 placeholder = {
-                                    Text(currentProviderInfo.smartcardPlaceholder, color = Color(0xFF64748B), fontSize = 12.sp)
+                                    Text(currentProviderInfo.smartcardPlaceholder, color = Color(0xFF7B42AD), fontSize = 12.sp)
                                 },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -363,7 +363,7 @@ fun TvSubscriptionDialog(
                                 text = "4. Portefeuille de débit :",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFFE2E8F0)
+                                color = Color(0xFFE6DCF0)
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
@@ -492,14 +492,14 @@ fun TvSubscriptionDialog(
                                 text = "5. Code PIN CashPay (Validation) :",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFFE2E8F0)
+                                color = Color(0xFFE6DCF0)
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             OutlinedTextField(
                                 value = tv.pin,
                                 onValueChange = { viewModel.setTvPin(it) },
                                 modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text("Code PIN secret à 4 chiffres", color = Color(0xFF64748B), fontSize = 12.sp) },
+                                placeholder = { Text("Code PIN secret à 4 chiffres", color = Color(0xFF7B42AD), fontSize = 12.sp) },
                                 singleLine = true,
                                 visualTransformation = PasswordVisualTransformation(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -613,7 +613,7 @@ fun TvSubscriptionDialog(
                             Text(
                                 text = "Paiement direct sécurisé. Le montant de votre bouquet sera débité après validation.",
                                 fontSize = 11.sp,
-                                color = Color(0xFF64748B),
+                                color = Color(0xFF7B42AD),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -629,11 +629,11 @@ fun TvSubscriptionDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Outlined.History, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(48.dp))
+                                Icon(Icons.Outlined.History, contentDescription = null, tint = Color(0xFF7B42AD), modifier = Modifier.size(48.dp))
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text("Aucun abonnement TV récent", color = Color(0xFF94A3B8), fontSize = 14.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text("Vos réabonnements TV apparaîtront ici avec leur statut.", color = Color(0xFF64748B), fontSize = 12.sp)
+                                Text("Vos réabonnements TV apparaîtront ici avec leur statut.", color = Color(0xFF7B42AD), fontSize = 12.sp)
                             }
                         }
                     } else {
@@ -699,14 +699,14 @@ fun TvSubscriptionDialog(
                                             Text(
                                                 text = "Débit : ${"%.2f".format(debAmt)} $debCur",
                                                 fontSize = 12.sp,
-                                                color = Color(0xFFE2E8F0),
+                                                color = Color(0xFFE6DCF0),
                                                 fontWeight = FontWeight.SemiBold
                                             )
                                             if (!sub.reference.isNullOrBlank()) {
                                                 Text(
                                                     text = "Réf: ${sub.reference}",
                                                     fontSize = 11.sp,
-                                                    color = Color(0xFF64748B)
+                                                    color = Color(0xFF7B42AD)
                                                 )
                                             }
                                         }

@@ -370,7 +370,7 @@ fun ReferralDialog(
                                     ) {
                                         Column {
                                             Text("Code de parrainage", fontSize = 10.sp, color = Color(0xFF94A3B8))
-                                            Text(refCode, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, color = Color(0xFF38BDF8))
+                                            Text(refCode, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, color = Color(0xFFA66BE0))
                                         }
 
                                         IconButton(
@@ -467,7 +467,7 @@ fun ReferralDialog(
                                         title = "Filleuls inscrits",
                                         value = "${stats?.totalReferrals ?: 0}",
                                         subtitle = "${stats?.pendingCount ?: 0} en attente",
-                                        accentColor = Color(0xFF38BDF8),
+                                        accentColor = Color(0xFFA66BE0),
                                         modifier = Modifier.weight(1f)
                                     )
                                     ReferralStatCard(
@@ -540,7 +540,7 @@ fun ReferralDialog(
                                         Icon(
                                             imageVector = Icons.Default.GroupAdd,
                                             contentDescription = null,
-                                            tint = Color(0xFF64748B),
+                                            tint = Color(0xFF7B42AD),
                                             modifier = Modifier.size(40.dp)
                                         )
                                         Text(
@@ -628,7 +628,7 @@ private fun ReferralStatCard(
         ) {
             Text(title, fontSize = 11.sp, color = Color(0xFF94A3B8), fontFamily = MulishFontFamily)
             Text(value, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = accentColor, fontFamily = MulishFontFamily)
-            Text(subtitle, fontSize = 10.sp, color = Color(0xFF64748B), fontFamily = MulishFontFamily)
+            Text(subtitle, fontSize = 10.sp, color = Color(0xFF7B42AD), fontFamily = MulishFontFamily)
         }
     }
 }
@@ -664,10 +664,10 @@ private fun ReferralItemRow(
                     modifier = Modifier
                         .size(38.dp)
                         .background(Color(0xFF0F172A), CircleShape)
-                        .border(1.dp, Color(0xFF38BDF8), CircleShape),
+                        .border(1.dp, Color(0xFFA66BE0), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(initial, color = Color(0xFF38BDF8), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(initial, color = Color(0xFFA66BE0), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -692,7 +692,7 @@ private fun ReferralItemRow(
                         val isActive = item.status.equals("Active", ignoreCase = true)
                         Surface(
                             shape = RoundedCornerShape(4.dp),
-                            color = if (isActive) ToofanGreen.copy(alpha = 0.15f) else Color(0xFF64748B).copy(alpha = 0.2f)
+                            color = if (isActive) ToofanGreen.copy(alpha = 0.15f) else Color(0xFF7B42AD).copy(alpha = 0.2f)
                         ) {
                             Text(
                                 text = if (isActive) "Actif" else item.status,

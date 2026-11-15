@@ -100,7 +100,7 @@ fun PublicInvoicesDialog(
                             Icon(
                                 imageVector = Icons.Outlined.ReceiptLong,
                                 contentDescription = null,
-                                tint = Color(0xFF38BDF8),
+                                tint = Color(0xFFA66BE0),
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -264,7 +264,7 @@ fun PublicInvoicesDialog(
                                             text = "Paramètres de recherche de l'abonnement :",
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = Color(0xFFE2E8F0)
+                                            color = Color(0xFFE6DCF0)
                                         )
 
                                         // Province selector
@@ -299,7 +299,7 @@ fun PublicInvoicesDialog(
                                                             Text(
                                                                 text = currentProvinceObj.description,
                                                                 fontSize = 11.sp,
-                                                                color = Color(0xFF64748B)
+                                                                color = Color(0xFF7B42AD)
                                                             )
                                                         }
                                                         Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.White)
@@ -340,7 +340,7 @@ fun PublicInvoicesDialog(
                                             OutlinedTextField(
                                                 value = regideso.abonnementId,
                                                 onValueChange = { viewModel.setRegidesoAbonnementId(it) },
-                                                placeholder = { Text("Ex: 83262", color = Color(0xFF64748B), fontSize = 12.sp) },
+                                                placeholder = { Text("Ex: 83262", color = Color(0xFF7B42AD), fontSize = 12.sp) },
                                                 modifier = Modifier.fillMaxWidth(),
                                                 singleLine = true,
                                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -411,7 +411,7 @@ fun PublicInvoicesDialog(
                                         text = "Factures trouvées (${regideso.factures.size}) :",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFE2E8F0)
+                                        color = Color(0xFFE6DCF0)
                                     )
                                 }
 

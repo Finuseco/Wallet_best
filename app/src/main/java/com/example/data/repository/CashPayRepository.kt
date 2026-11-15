@@ -527,7 +527,7 @@ class CashPayRepository(
 
     suspend fun agentSubscriptionFee(plan:String): Result<com.example.data.model.AgentFeeResponse> = try {
         ensureSessionToken(); val response=apiService.agentSubscriptionFee(plan); val body=response.body()
-        if(response.isSuccessful && body?.success==true && body.fee?.isFinite()==true && body.fee>0) Result.success(body) else Result.failure(Exception(body?.error ?: extractErrorMessage(response.errorBody()?.string(), "Tarif indisponible")))
+        if(response.isSuccessful && body?.success==true && body.fee?.isFinite()==true && body.fee>=0) Result.success(body) else Result.failure(Exception(body?.error ?: extractErrorMessage(response.errorBody()?.string(), "Tarif indisponible")))
     } catch(e:Exception) { Result.failure(e) }
 
     suspend fun updateProfile(phone: String, pin: String, updates: Map<String, String>): Result<MeResponse> {
